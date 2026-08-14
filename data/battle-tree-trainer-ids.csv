@@ -1,211 +1,211 @@
-trainer_id,english_name,roster_category,trainer_class_tr_type,constructor_or_id_class,internal_category_code_tr_type,ivs_hp_atk_def_spa_spd_spe
-0,"Florian",Regular Battle Tree trainer,"Youngster","Normal trainer path; ID 0–49",2,19/19/19/19/19/19
-1,"Robin",Regular Battle Tree trainer,"Youngster","Normal trainer path; ID 0–49",2,19/19/19/19/19/19
-2,"Max",Regular Battle Tree trainer,"Youngster","Normal trainer path; ID 0–49",2,19/19/19/19/19/19
-3,"Bert",Regular Battle Tree trainer,"Youngster","Normal trainer path; ID 0–49",2,19/19/19/19/19/19
-4,"Sophia",Regular Battle Tree trainer,"Lass","Normal trainer path; ID 0–49",3,19/19/19/19/19/19
-5,"Shanta",Regular Battle Tree trainer,"Lass","Normal trainer path; ID 0–49",3,19/19/19/19/19/19
-6,"Rachel",Regular Battle Tree trainer,"Lass","Normal trainer path; ID 0–49",3,19/19/19/19/19/19
-7,"Chan",Regular Battle Tree trainer,"Lass","Normal trainer path; ID 0–49",3,19/19/19/19/19/19
-8,"Ferdinand",Regular Battle Tree trainer,"Preschooler","Normal trainer path; ID 0–49",7,19/19/19/19/19/19
-9,"Rico",Regular Battle Tree trainer,"Preschooler","Normal trainer path; ID 0–49",7,19/19/19/19/19/19
-10,"Rocky",Regular Battle Tree trainer,"Preschooler","Normal trainer path; ID 0–49",7,19/19/19/19/19/19
-11,"Jasper",Regular Battle Tree trainer,"Preschooler","Normal trainer path; ID 0–49",7,19/19/19/19/19/19
-12,"Kendra",Regular Battle Tree trainer,"Preschooler","Normal trainer path; ID 0–49",6,19/19/19/19/19/19
-13,"Mercy",Regular Battle Tree trainer,"Preschooler","Normal trainer path; ID 0–49",6,19/19/19/19/19/19
-14,"Helen",Regular Battle Tree trainer,"Preschooler","Normal trainer path; ID 0–49",6,19/19/19/19/19/19
-15,"Gladys",Regular Battle Tree trainer,"Preschooler","Normal trainer path; ID 0–49",6,19/19/19/19/19/19
-16,"Darla",Regular Battle Tree trainer,"Backpacker","Normal trainer path; ID 0–49",13,19/19/19/19/19/19
-17,"Tammy",Regular Battle Tree trainer,"Backpacker","Normal trainer path; ID 0–49",13,19/19/19/19/19/19
-18,"Reese",Regular Battle Tree trainer,"Backpacker","Normal trainer path; ID 0–49",13,19/19/19/19/19/19
-19,"Kayla",Regular Battle Tree trainer,"Backpacker","Normal trainer path; ID 0–49",13,19/19/19/19/19/19
-20,"Cleavant",Regular Battle Tree trainer,"Hiker","Normal trainer path; ID 0–49",24,19/19/19/19/19/19
-21,"Buster",Regular Battle Tree trainer,"Hiker","Normal trainer path; ID 0–49",24,19/19/19/19/19/19
-22,"Arlo",Regular Battle Tree trainer,"Hiker","Normal trainer path; ID 0–49",24,19/19/19/19/19/19
-23,"Levine",Regular Battle Tree trainer,"Hiker","Normal trainer path; ID 0–49",24,19/19/19/19/19/19
-24,"Percy",Regular Battle Tree trainer,"Office Worker","Normal trainer path; ID 0–49",36,19/19/19/19/19/19
-25,"Conley",Regular Battle Tree trainer,"Office Worker","Normal trainer path; ID 0–49",36,19/19/19/19/19/19
-26,"Emery",Regular Battle Tree trainer,"Office Worker","Normal trainer path; ID 0–49",36,19/19/19/19/19/19
-27,"Winnie",Regular Battle Tree trainer,"Office Worker","Normal trainer path; ID 0–49",32,19/19/19/19/19/19
-28,"Prudence",Regular Battle Tree trainer,"Office Worker","Normal trainer path; ID 0–49",32,19/19/19/19/19/19
-29,"Dominica",Regular Battle Tree trainer,"Office Worker","Normal trainer path; ID 0–49",32,19/19/19/19/19/19
-30,"Kass",Regular Battle Tree trainer,"Punk Guy","Normal trainer path; ID 0–49",12,19/19/19/19/19/19
-31,"Scoop",Regular Battle Tree trainer,"Punk Guy","Normal trainer path; ID 0–49",12,19/19/19/19/19/19
-32,"Dylan",Regular Battle Tree trainer,"Punk Guy","Normal trainer path; ID 0–49",12,19/19/19/19/19/19
-33,"Evander",Regular Battle Tree trainer,"Punk Guy","Normal trainer path; ID 0–49",12,19/19/19/19/19/19
-34,"Myrna",Regular Battle Tree trainer,"Punk Girl","Normal trainer path; ID 0–49",14,19/19/19/19/19/19
-35,"Eva",Regular Battle Tree trainer,"Punk Girl","Normal trainer path; ID 0–49",14,19/19/19/19/19/19
-36,"Agrata",Regular Battle Tree trainer,"Punk Girl","Normal trainer path; ID 0–49",14,19/19/19/19/19/19
-37,"Abby",Regular Battle Tree trainer,"Punk Girl","Normal trainer path; ID 0–49",14,19/19/19/19/19/19
-38,"Parker",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; ID 0–49",33,19/19/19/19/19/19
-39,"Isaac",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; ID 0–49",33,19/19/19/19/19/19
-40,"Ayden",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; ID 0–49",33,19/19/19/19/19/19
-41,"Alwyn",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; ID 0–49",34,19/19/19/19/19/19
-42,"Mardea",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; ID 0–49",34,19/19/19/19/19/19
-43,"Gabriella",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; ID 0–49",34,19/19/19/19/19/19
-44,"Ryder",Regular Battle Tree trainer,"Rising Star","Normal trainer path; ID 0–49",21,19/19/19/19/19/19
-45,"Christopher",Regular Battle Tree trainer,"Rising Star","Normal trainer path; ID 0–49",21,19/19/19/19/19/19
-46,"Sorley",Regular Battle Tree trainer,"Rising Star","Normal trainer path; ID 0–49",21,19/19/19/19/19/19
-47,"Beatrice",Regular Battle Tree trainer,"Rising Star","Normal trainer path; ID 0–49",20,19/19/19/19/19/19
-48,"Brandi",Regular Battle Tree trainer,"Rising Star","Normal trainer path; ID 0–49",20,19/19/19/19/19/19
-49,"Marsha",Regular Battle Tree trainer,"Rising Star","Normal trainer path; ID 0–49",20,19/19/19/19/19/19
-50,"Cooper",Regular Battle Tree trainer,"Sightseer","Normal trainer path; ID 50–69",16,23/23/23/23/23/23
-51,"Darien",Regular Battle Tree trainer,"Sightseer","Normal trainer path; ID 50–69",16,23/23/23/23/23/23
-52,"Hart",Regular Battle Tree trainer,"Sightseer","Normal trainer path; ID 50–69",16,23/23/23/23/23/23
-53,"Kaula",Regular Battle Tree trainer,"Sightseer","Normal trainer path; ID 50–69",15,23/23/23/23/23/23
-54,"Charlene",Regular Battle Tree trainer,"Sightseer","Normal trainer path; ID 50–69",15,23/23/23/23/23/23
-55,"Odessa",Regular Battle Tree trainer,"Sightseer","Normal trainer path; ID 50–69",15,23/23/23/23/23/23
-56,"Jairo",Regular Battle Tree trainer,"Janitor","Normal trainer path; ID 50–69",57,23/23/23/23/23/23
-57,"Xaden",Regular Battle Tree trainer,"Janitor","Normal trainer path; ID 50–69",57,23/23/23/23/23/23
-58,"Giles",Regular Battle Tree trainer,"Janitor","Normal trainer path; ID 50–69",57,23/23/23/23/23/23
-59,"Skip",Regular Battle Tree trainer,"Worker","Normal trainer path; ID 50–69",58,23/23/23/23/23/23
-60,"JT",Regular Battle Tree trainer,"Worker","Normal trainer path; ID 50–69",58,23/23/23/23/23/23
-61,"Benjamin",Regular Battle Tree trainer,"Worker","Normal trainer path; ID 50–69",58,23/23/23/23/23/23
-62,"Henry",Regular Battle Tree trainer,"Gentleman","Normal trainer path; ID 50–69",23,23/23/23/23/23/23
-63,"Ikram",Regular Battle Tree trainer,"Gentleman","Normal trainer path; ID 50–69",23,23/23/23/23/23/23
-64,"Jerry",Regular Battle Tree trainer,"Gentleman","Normal trainer path; ID 50–69",23,23/23/23/23/23/23
-65,"Cheryl",Regular Battle Tree trainer,"Madame","Normal trainer path; ID 50–69",22,23/23/23/23/23/23
-66,"Christy",Regular Battle Tree trainer,"Madame","Normal trainer path; ID 50–69",22,23/23/23/23/23/23
-67,"Verna",Regular Battle Tree trainer,"Madame","Normal trainer path; ID 50–69",22,23/23/23/23/23/23
-68,"Duncan",Regular Battle Tree trainer,"Collector","Normal trainer path; ID 50–69",25,23/23/23/23/23/23
-69,"Nobunaga",Regular Battle Tree trainer,"Collector","Normal trainer path; ID 50–69",25,23/23/23/23/23/23
-70,"Arnon",Regular Battle Tree trainer,"Golfer","Normal trainer path; ID 70–89",60,27/27/27/27/27/27
-71,"Alim",Regular Battle Tree trainer,"Golfer","Normal trainer path; ID 70–89",60,27/27/27/27/27/27
-72,"Zeno",Regular Battle Tree trainer,"Golfer","Normal trainer path; ID 70–89",60,27/27/27/27/27/27
-73,"Anisa",Regular Battle Tree trainer,"Golfer","Normal trainer path; ID 70–89",61,27/27/27/27/27/27
-74,"Calliope",Regular Battle Tree trainer,"Golfer","Normal trainer path; ID 70–89",61,27/27/27/27/27/27
-75,"Christina",Regular Battle Tree trainer,"Golfer","Normal trainer path; ID 70–89",61,27/27/27/27/27/27
-76,"Nedry",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; ID 70–89",26,27/27/27/27/27/27
-77,"Sheridan",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; ID 70–89",26,27/27/27/27/27/27
-78,"Kiernan",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; ID 70–89",26,27/27/27/27/27/27
-79,"Dara",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; ID 70–89",27,27/27/27/27/27/27
-80,"Rada",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; ID 70–89",27,27/27/27/27/27/27
-81,"Gertrude",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; ID 70–89",27,27/27/27/27/27/27
-82,"Dyson",Regular Battle Tree trainer,"Bellhop","Normal trainer path; ID 70–89",55,27/27/27/27/27/27
-83,"Chip",Regular Battle Tree trainer,"Bellhop","Normal trainer path; ID 70–89",55,27/27/27/27/27/27
-84,"Zero",Regular Battle Tree trainer,"Bellhop","Normal trainer path; ID 70–89",55,27/27/27/27/27/27
-85,"Julien",Regular Battle Tree trainer,"Cook","Normal trainer path; ID 70–89",54,27/27/27/27/27/27
-86,"Sly",Regular Battle Tree trainer,"Cook","Normal trainer path; ID 70–89",54,27/27/27/27/27/27
-87,"Noah",Regular Battle Tree trainer,"Cook","Normal trainer path; ID 70–89",54,27/27/27/27/27/27
-88,"Brantley",Regular Battle Tree trainer,"Firefighter","Normal trainer path; ID 70–89",56,27/27/27/27/27/27
-89,"Camber",Regular Battle Tree trainer,"Firefighter","Normal trainer path; ID 70–89",56,27/27/27/27/27/27
-90,"Rendor",Regular Battle Tree trainer,"Police Officer","Normal trainer path; special ID (90+)",52,31/31/31/31/31/31
-91,"Lou",Regular Battle Tree trainer,"Police Officer","Normal trainer path; special ID (90+)",52,31/31/31/31/31/31
-92,"Benji",Regular Battle Tree trainer,"Police Officer","Normal trainer path; special ID (90+)",52,31/31/31/31/31/31
-93,"Cal",Regular Battle Tree trainer,"Scientist","Normal trainer path; special ID (90+)",11,31/31/31/31/31/31
-94,"Tivon",Regular Battle Tree trainer,"Scientist","Normal trainer path; special ID (90+)",11,31/31/31/31/31/31
-95,"Robyn",Regular Battle Tree trainer,"Scientist","Normal trainer path; special ID (90+)",11,31/31/31/31/31/31
-96,"Chucky",Regular Battle Tree trainer,"Black Belt","Normal trainer path; special ID (90+)",10,31/31/31/31/31/31
-97,"Iniko",Regular Battle Tree trainer,"Black Belt","Normal trainer path; special ID (90+)",10,31/31/31/31/31/31
-98,"Arnold",Regular Battle Tree trainer,"Black Belt","Normal trainer path; special ID (90+)",10,31/31/31/31/31/31
-99,"Carrie",Regular Battle Tree trainer,"Dancer","Normal trainer path; special ID (90+)",53,31/31/31/31/31/31
-100,"Variel",Regular Battle Tree trainer,"Dancer","Normal trainer path; special ID (90+)",53,31/31/31/31/31/31
-101,"Atalanta",Regular Battle Tree trainer,"Dancer","Normal trainer path; special ID (90+)",53,31/31/31/31/31/31
-102,"Harvey",Regular Battle Tree trainer,"Aether Foundation","Normal trainer path; special ID (90+)",73,31/31/31/31/31/31
-103,"Luke",Regular Battle Tree trainer,"Aether Foundation","Normal trainer path; special ID (90+)",73,31/31/31/31/31/31
-104,"Granville",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",5,31/31/31/31/31/31
-105,"Raz",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",5,31/31/31/31/31/31
-106,"Heidi",Regular Battle Tree trainer,"Aether Foundation","Normal trainer path; special ID (90+)",74,31/31/31/31/31/31
-107,"Haley",Regular Battle Tree trainer,"Aether Foundation","Normal trainer path; special ID (90+)",74,31/31/31/31/31/31
-108,"Lea",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",4,31/31/31/31/31/31
-109,"Sylvia",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",4,31/31/31/31/31/31
-110,"Stein",Regular Battle Tree trainer,"Scientist","Normal trainer path; special ID (90+)",11,31/31/31/31/31/31
-111,"Cadel",Regular Battle Tree trainer,"Scientist","Normal trainer path; special ID (90+)",11,31/31/31/31/31/31
-112,"Boris",Regular Battle Tree trainer,"Black Belt","Normal trainer path; special ID (90+)",10,31/31/31/31/31/31
-113,"Bryson",Regular Battle Tree trainer,"Black Belt","Normal trainer path; special ID (90+)",10,31/31/31/31/31/31
-114,"Jo",Regular Battle Tree trainer,"Dancer","Normal trainer path; special ID (90+)",53,31/31/31/31/31/31
-115,"Tasanee",Regular Battle Tree trainer,"Dancer","Normal trainer path; special ID (90+)",53,31/31/31/31/31/31
-116,"Levi",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",5,31/31/31/31/31/31
-117,"Hashim",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",5,31/31/31/31/31/31
-118,"Munin",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",5,31/31/31/31/31/31
-119,"Poppy",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",4,31/31/31/31/31/31
-120,"Tamah",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",4,31/31/31/31/31/31
-121,"Bette",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",4,31/31/31/31/31/31
-122,"Kikujiro",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",19,31/31/31/31/31/31
-123,"Xenophon",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",19,31/31/31/31/31/31
-124,"Placido",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",19,31/31/31/31/31/31
-125,"Ignacio",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",19,31/31/31/31/31/31
-126,"Aino",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",18,31/31/31/31/31/31
-127,"Xio",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",18,31/31/31/31/31/31
-128,"Priya",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",18,31/31/31/31/31/31
-129,"Candy",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",18,31/31/31/31/31/31
-130,"Napoleon",Regular Battle Tree trainer,"Youngster","Normal trainer path; special ID (90+)",2,31/31/31/31/31/31
-131,"Brady",Regular Battle Tree trainer,"Youngster","Normal trainer path; special ID (90+)",2,31/31/31/31/31/31
-132,"Samantha",Regular Battle Tree trainer,"Lass","Normal trainer path; special ID (90+)",3,31/31/31/31/31/31
-133,"Inez",Regular Battle Tree trainer,"Lass","Normal trainer path; special ID (90+)",3,31/31/31/31/31/31
-134,"Niara",Regular Battle Tree trainer,"Preschooler","Normal trainer path; special ID (90+)",7,31/31/31/31/31/31
-135,"Victor",Regular Battle Tree trainer,"Preschooler","Normal trainer path; special ID (90+)",7,31/31/31/31/31/31
-136,"Reina",Regular Battle Tree trainer,"Preschooler","Normal trainer path; special ID (90+)",6,31/31/31/31/31/31
-137,"Naya",Regular Battle Tree trainer,"Preschooler","Normal trainer path; special ID (90+)",6,31/31/31/31/31/31
-138,"Gwenny",Regular Battle Tree trainer,"Backpacker","Normal trainer path; special ID (90+)",13,31/31/31/31/31/31
-139,"Fernanda",Regular Battle Tree trainer,"Backpacker","Normal trainer path; special ID (90+)",13,31/31/31/31/31/31
-140,"Vivek",Regular Battle Tree trainer,"Hiker","Normal trainer path; special ID (90+)",24,31/31/31/31/31/31
-141,"Stellan",Regular Battle Tree trainer,"Hiker","Normal trainer path; special ID (90+)",24,31/31/31/31/31/31
-142,"Savir",Regular Battle Tree trainer,"Office Worker","Normal trainer path; special ID (90+)",36,31/31/31/31/31/31
-143,"Harding",Regular Battle Tree trainer,"Office Worker","Normal trainer path; special ID (90+)",36,31/31/31/31/31/31
-144,"Darrel",Regular Battle Tree trainer,"Office Worker","Normal trainer path; special ID (90+)",32,31/31/31/31/31/31
-145,"Jana",Regular Battle Tree trainer,"Office Worker","Normal trainer path; special ID (90+)",32,31/31/31/31/31/31
-146,"Etta",Regular Battle Tree trainer,"Punk Guy","Normal trainer path; special ID (90+)",12,31/31/31/31/31/31
-147,"Dustin",Regular Battle Tree trainer,"Punk Guy","Normal trainer path; special ID (90+)",12,31/31/31/31/31/31
-148,"Zed",Regular Battle Tree trainer,"Punk Girl","Normal trainer path; special ID (90+)",14,31/31/31/31/31/31
-149,"Edda",Regular Battle Tree trainer,"Punk Girl","Normal trainer path; special ID (90+)",14,31/31/31/31/31/31
-150,"Leena",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; special ID (90+)",33,31/31/31/31/31/31
-151,"Buddy",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; special ID (90+)",33,31/31/31/31/31/31
-152,"Hilario",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; special ID (90+)",34,31/31/31/31/31/31
-153,"Thamina",Regular Battle Tree trainer,"Youth Athlete","Normal trainer path; special ID (90+)",34,31/31/31/31/31/31
-154,"Dolly",Regular Battle Tree trainer,"Rising Star","Normal trainer path; special ID (90+)",21,31/31/31/31/31/31
-155,"Erix",Regular Battle Tree trainer,"Rising Star","Normal trainer path; special ID (90+)",21,31/31/31/31/31/31
-156,"Joaquin",Regular Battle Tree trainer,"Rising Star","Normal trainer path; special ID (90+)",20,31/31/31/31/31/31
-157,"Marianne",Regular Battle Tree trainer,"Rising Star","Normal trainer path; special ID (90+)",20,31/31/31/31/31/31
-158,"Alice",Regular Battle Tree trainer,"Sightseer","Normal trainer path; special ID (90+)",16,31/31/31/31/31/31
-159,"Chen",Regular Battle Tree trainer,"Sightseer","Normal trainer path; special ID (90+)",16,31/31/31/31/31/31
-160,"Christian",Regular Battle Tree trainer,"Sightseer","Normal trainer path; special ID (90+)",15,31/31/31/31/31/31
-161,"Ezra",Regular Battle Tree trainer,"Sightseer","Normal trainer path; special ID (90+)",15,31/31/31/31/31/31
-162,"Sika",Regular Battle Tree trainer,"Janitor","Normal trainer path; special ID (90+)",57,31/31/31/31/31/31
-163,"Paulo",Regular Battle Tree trainer,"Janitor","Normal trainer path; special ID (90+)",57,31/31/31/31/31/31
-164,"Dan",Regular Battle Tree trainer,"Worker","Normal trainer path; special ID (90+)",58,31/31/31/31/31/31
-165,"Omar",Regular Battle Tree trainer,"Worker","Normal trainer path; special ID (90+)",58,31/31/31/31/31/31
-166,"Mechabob",Regular Battle Tree trainer,"Gentleman","Normal trainer path; special ID (90+)",23,31/31/31/31/31/31
-167,"Abel",Regular Battle Tree trainer,"Gentleman","Normal trainer path; special ID (90+)",23,31/31/31/31/31/31
-168,"Donny",Regular Battle Tree trainer,"Madame","Normal trainer path; special ID (90+)",22,31/31/31/31/31/31
-169,"Gracie",Regular Battle Tree trainer,"Madame","Normal trainer path; special ID (90+)",22,31/31/31/31/31/31
-170,"Donna",Regular Battle Tree trainer,"Bellhop","Normal trainer path; special ID (90+)",55,31/31/31/31/31/31
-171,"Gilroy",Regular Battle Tree trainer,"Bellhop","Normal trainer path; special ID (90+)",55,31/31/31/31/31/31
-172,"Patrick",Regular Battle Tree trainer,"Golfer","Normal trainer path; special ID (90+)",60,31/31/31/31/31/31
-173,"Moe",Regular Battle Tree trainer,"Golfer","Normal trainer path; special ID (90+)",60,31/31/31/31/31/31
-174,"Bruce",Regular Battle Tree trainer,"Golfer","Normal trainer path; special ID (90+)",61,31/31/31/31/31/31
-175,"Susanna",Regular Battle Tree trainer,"Golfer","Normal trainer path; special ID (90+)",61,31/31/31/31/31/31
-176,"Lori",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; special ID (90+)",26,31/31/31/31/31/31
-177,"Colby",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; special ID (90+)",26,31/31/31/31/31/31
-178,"Danby",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; special ID (90+)",27,31/31/31/31/31/31
-179,"Izel",Regular Battle Tree trainer,"Pokémon Breeder","Normal trainer path; special ID (90+)",27,31/31/31/31/31/31
-180,"Presta",Regular Battle Tree trainer,"Firefighter","Normal trainer path; special ID (90+)",56,31/31/31/31/31/31
-181,"Calder",Regular Battle Tree trainer,"Firefighter","Normal trainer path; special ID (90+)",56,31/31/31/31/31/31
-182,"Larry",Regular Battle Tree trainer,"Cook","Normal trainer path; special ID (90+)",54,31/31/31/31/31/31
-183,"Tony",Regular Battle Tree trainer,"Cook","Normal trainer path; special ID (90+)",54,31/31/31/31/31/31
-184,"Sam",Regular Battle Tree trainer,"Collector","Normal trainer path; special ID (90+)",25,31/31/31/31/31/31
-185,"Dennis",Regular Battle Tree trainer,"Collector","Normal trainer path; special ID (90+)",25,31/31/31/31/31/31
-186,"Horace",Regular Battle Tree trainer,"Ace Trainer","Normal trainer path; special ID (90+)",5,31/31/31/31/31/31
-187,"Perri",Regular Battle Tree trainer,"Pokémon Center Lady","Normal trainer path; special ID (90+)",94,31/31/31/31/31/31
-188,"Dooley",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",19,31/31/31/31/31/31
-189,"Demiathena",Regular Battle Tree trainer,"Veteran","Normal trainer path; special ID (90+)",18,31/31/31/31/31/31
-190,"Red",Battle Legend (super course),"Battle Legend","Normal trainer path; special ID (90+)",183,31/31/31/31/31/31
-191,"Blue",Battle Legend (super course),"Battle Legend","Normal trainer path; special ID (90+)",184,31/31/31/31/31/31
-192,"Grimsley",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",167,31/31/31/31/31/31
-193,"Anabel",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",171,31/31/31/31/31/31
-194,"Wally",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",168,31/31/31/31/31/31
-195,"Colress",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",169,31/31/31/31/31/31
-196,"Cynthia",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",170,31/31/31/31/31/31
-197,"Plumeria",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",128,31/31/31/31/31/31
-198,"Guzma",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",140,31/31/31/31/31/31
-199,"Kiawe",Featured Trainer,"Captain","Normal trainer path; special ID (90+)",43,31/31/31/31/31/31
-200,"Mallow",Featured Trainer,"Captain","Normal trainer path; special ID (90+)",45,31/31/31/31/31/31
-201,"Sina",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",166,31/31/31/31/31/31
-202,"Dexio",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",98,31/31/31/31/31/31
-203,"Red",Battle Legend (normal course),"Battle Legend","Normal trainer path; special ID (90+)",183,31/31/31/31/31/31
-204,"Blue",Battle Legend (normal course),"Battle Legend","Normal trainer path; special ID (90+)",184,31/31/31/31/31/31
-205,"Kukui",Featured Trainer,"Pokémon Trainer","Normal trainer path; special ID (90+)",188,31/31/31/31/31/31
-206,"Lillie",USUM Multi Battle partner,"Pokémon Trainer","Scouted-partner constructor; hardcoded 31",189,31/31/31/31/31/31
-207,"Sophocles",Battle Agency event trainer,"Pokémon Trainer","Battle Agency event path; fixed 31",186,31/31/31/31/31/31
-208,"Giovanni",Battle Agency event trainer,"Pokémon Trainer","Battle Agency event path; fixed 31",190,31/31/31/31/31/31
-209,"Grunt",Battle Agency event trainer,"Team Rainbow Rocket","Battle Agency event path; fixed 31",208,31/31/31/31/31/31
+trainer_id,english_name,trainer_class,constructor_or_id_class,ivs_hp_atk_def_spa_spd_spe
+0,"Florian","Youngster","Normal trainer path; ID 0–49",19/19/19/19/19/19
+1,"Robin","Youngster","Normal trainer path; ID 0–49",19/19/19/19/19/19
+2,"Max","Youngster","Normal trainer path; ID 0–49",19/19/19/19/19/19
+3,"Bert","Youngster","Normal trainer path; ID 0–49",19/19/19/19/19/19
+4,"Sophia","Lass","Normal trainer path; ID 0–49",19/19/19/19/19/19
+5,"Shanta","Lass","Normal trainer path; ID 0–49",19/19/19/19/19/19
+6,"Rachel","Lass","Normal trainer path; ID 0–49",19/19/19/19/19/19
+7,"Chan","Lass","Normal trainer path; ID 0–49",19/19/19/19/19/19
+8,"Ferdinand","Preschooler","Normal trainer path; ID 0–49",19/19/19/19/19/19
+9,"Rico","Preschooler","Normal trainer path; ID 0–49",19/19/19/19/19/19
+10,"Rocky","Preschooler","Normal trainer path; ID 0–49",19/19/19/19/19/19
+11,"Jasper","Preschooler","Normal trainer path; ID 0–49",19/19/19/19/19/19
+12,"Kendra","Preschooler","Normal trainer path; ID 0–49",19/19/19/19/19/19
+13,"Mercy","Preschooler","Normal trainer path; ID 0–49",19/19/19/19/19/19
+14,"Helen","Preschooler","Normal trainer path; ID 0–49",19/19/19/19/19/19
+15,"Gladys","Preschooler","Normal trainer path; ID 0–49",19/19/19/19/19/19
+16,"Darla","Backpacker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+17,"Tammy","Backpacker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+18,"Reese","Backpacker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+19,"Kayla","Backpacker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+20,"Cleavant","Hiker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+21,"Buster","Hiker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+22,"Arlo","Hiker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+23,"Levine","Hiker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+24,"Percy","Office Worker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+25,"Conley","Office Worker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+26,"Emery","Office Worker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+27,"Winnie","Office Worker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+28,"Prudence","Office Worker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+29,"Dominica","Office Worker","Normal trainer path; ID 0–49",19/19/19/19/19/19
+30,"Kass","Punk Guy","Normal trainer path; ID 0–49",19/19/19/19/19/19
+31,"Scoop","Punk Guy","Normal trainer path; ID 0–49",19/19/19/19/19/19
+32,"Dylan","Punk Guy","Normal trainer path; ID 0–49",19/19/19/19/19/19
+33,"Evander","Punk Guy","Normal trainer path; ID 0–49",19/19/19/19/19/19
+34,"Myrna","Punk Girl","Normal trainer path; ID 0–49",19/19/19/19/19/19
+35,"Eva","Punk Girl","Normal trainer path; ID 0–49",19/19/19/19/19/19
+36,"Agrata","Punk Girl","Normal trainer path; ID 0–49",19/19/19/19/19/19
+37,"Abby","Punk Girl","Normal trainer path; ID 0–49",19/19/19/19/19/19
+38,"Parker","Youth Athlete","Normal trainer path; ID 0–49",19/19/19/19/19/19
+39,"Isaac","Youth Athlete","Normal trainer path; ID 0–49",19/19/19/19/19/19
+40,"Ayden","Youth Athlete","Normal trainer path; ID 0–49",19/19/19/19/19/19
+41,"Alwyn","Youth Athlete","Normal trainer path; ID 0–49",19/19/19/19/19/19
+42,"Mardea","Youth Athlete","Normal trainer path; ID 0–49",19/19/19/19/19/19
+43,"Gabriella","Youth Athlete","Normal trainer path; ID 0–49",19/19/19/19/19/19
+44,"Ryder","Rising Star","Normal trainer path; ID 0–49",19/19/19/19/19/19
+45,"Christopher","Rising Star","Normal trainer path; ID 0–49",19/19/19/19/19/19
+46,"Sorley","Rising Star","Normal trainer path; ID 0–49",19/19/19/19/19/19
+47,"Beatrice","Rising Star","Normal trainer path; ID 0–49",19/19/19/19/19/19
+48,"Brandi","Rising Star","Normal trainer path; ID 0–49",19/19/19/19/19/19
+49,"Marsha","Rising Star","Normal trainer path; ID 0–49",19/19/19/19/19/19
+50,"Cooper","Sightseer","Normal trainer path; ID 50–69",23/23/23/23/23/23
+51,"Darien","Sightseer","Normal trainer path; ID 50–69",23/23/23/23/23/23
+52,"Hart","Sightseer","Normal trainer path; ID 50–69",23/23/23/23/23/23
+53,"Kaula","Sightseer","Normal trainer path; ID 50–69",23/23/23/23/23/23
+54,"Charlene","Sightseer","Normal trainer path; ID 50–69",23/23/23/23/23/23
+55,"Odessa","Sightseer","Normal trainer path; ID 50–69",23/23/23/23/23/23
+56,"Jairo","Janitor","Normal trainer path; ID 50–69",23/23/23/23/23/23
+57,"Xaden","Janitor","Normal trainer path; ID 50–69",23/23/23/23/23/23
+58,"Giles","Janitor","Normal trainer path; ID 50–69",23/23/23/23/23/23
+59,"Skip","Worker","Normal trainer path; ID 50–69",23/23/23/23/23/23
+60,"JT","Worker","Normal trainer path; ID 50–69",23/23/23/23/23/23
+61,"Benjamin","Worker","Normal trainer path; ID 50–69",23/23/23/23/23/23
+62,"Henry","Gentleman","Normal trainer path; ID 50–69",23/23/23/23/23/23
+63,"Ikram","Gentleman","Normal trainer path; ID 50–69",23/23/23/23/23/23
+64,"Jerry","Gentleman","Normal trainer path; ID 50–69",23/23/23/23/23/23
+65,"Cheryl","Madame","Normal trainer path; ID 50–69",23/23/23/23/23/23
+66,"Christy","Madame","Normal trainer path; ID 50–69",23/23/23/23/23/23
+67,"Verna","Madame","Normal trainer path; ID 50–69",23/23/23/23/23/23
+68,"Duncan","Collector","Normal trainer path; ID 50–69",23/23/23/23/23/23
+69,"Nobunaga","Collector","Normal trainer path; ID 50–69",23/23/23/23/23/23
+70,"Arnon","Golfer","Normal trainer path; ID 70–89",27/27/27/27/27/27
+71,"Alim","Golfer","Normal trainer path; ID 70–89",27/27/27/27/27/27
+72,"Zeno","Golfer","Normal trainer path; ID 70–89",27/27/27/27/27/27
+73,"Anisa","Golfer","Normal trainer path; ID 70–89",27/27/27/27/27/27
+74,"Calliope","Golfer","Normal trainer path; ID 70–89",27/27/27/27/27/27
+75,"Christina","Golfer","Normal trainer path; ID 70–89",27/27/27/27/27/27
+76,"Nedry","Pokémon Breeder","Normal trainer path; ID 70–89",27/27/27/27/27/27
+77,"Sheridan","Pokémon Breeder","Normal trainer path; ID 70–89",27/27/27/27/27/27
+78,"Kiernan","Pokémon Breeder","Normal trainer path; ID 70–89",27/27/27/27/27/27
+79,"Dara","Pokémon Breeder","Normal trainer path; ID 70–89",27/27/27/27/27/27
+80,"Rada","Pokémon Breeder","Normal trainer path; ID 70–89",27/27/27/27/27/27
+81,"Gertrude","Pokémon Breeder","Normal trainer path; ID 70–89",27/27/27/27/27/27
+82,"Dyson","Bellhop","Normal trainer path; ID 70–89",27/27/27/27/27/27
+83,"Chip","Bellhop","Normal trainer path; ID 70–89",27/27/27/27/27/27
+84,"Zero","Bellhop","Normal trainer path; ID 70–89",27/27/27/27/27/27
+85,"Julien","Cook","Normal trainer path; ID 70–89",27/27/27/27/27/27
+86,"Sly","Cook","Normal trainer path; ID 70–89",27/27/27/27/27/27
+87,"Noah","Cook","Normal trainer path; ID 70–89",27/27/27/27/27/27
+88,"Brantley","Firefighter","Normal trainer path; ID 70–89",27/27/27/27/27/27
+89,"Camber","Firefighter","Normal trainer path; ID 70–89",27/27/27/27/27/27
+90,"Rendor","Police Officer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+91,"Lou","Police Officer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+92,"Benji","Police Officer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+93,"Cal","Scientist","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+94,"Tivon","Scientist","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+95,"Robyn","Scientist","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+96,"Chucky","Black Belt","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+97,"Iniko","Black Belt","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+98,"Arnold","Black Belt","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+99,"Carrie","Dancer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+100,"Variel","Dancer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+101,"Atalanta","Dancer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+102,"Harvey","Aether Foundation","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+103,"Luke","Aether Foundation","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+104,"Granville","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+105,"Raz","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+106,"Heidi","Aether Foundation","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+107,"Haley","Aether Foundation","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+108,"Lea","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+109,"Sylvia","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+110,"Stein","Scientist","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+111,"Cadel","Scientist","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+112,"Boris","Black Belt","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+113,"Bryson","Black Belt","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+114,"Jo","Dancer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+115,"Tasanee","Dancer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+116,"Levi","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+117,"Hashim","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+118,"Munin","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+119,"Poppy","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+120,"Tamah","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+121,"Bette","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+122,"Kikujiro","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+123,"Xenophon","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+124,"Placido","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+125,"Ignacio","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+126,"Aino","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+127,"Xio","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+128,"Priya","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+129,"Candy","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+130,"Napoleon","Youngster","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+131,"Brady","Youngster","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+132,"Samantha","Lass","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+133,"Inez","Lass","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+134,"Niara","Preschooler","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+135,"Victor","Preschooler","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+136,"Reina","Preschooler","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+137,"Naya","Preschooler","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+138,"Gwenny","Backpacker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+139,"Fernanda","Backpacker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+140,"Vivek","Hiker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+141,"Stellan","Hiker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+142,"Savir","Office Worker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+143,"Harding","Office Worker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+144,"Darrel","Office Worker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+145,"Jana","Office Worker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+146,"Etta","Punk Guy","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+147,"Dustin","Punk Guy","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+148,"Zed","Punk Girl","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+149,"Edda","Punk Girl","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+150,"Leena","Youth Athlete","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+151,"Buddy","Youth Athlete","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+152,"Hilario","Youth Athlete","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+153,"Thamina","Youth Athlete","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+154,"Dolly","Rising Star","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+155,"Erix","Rising Star","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+156,"Joaquin","Rising Star","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+157,"Marianne","Rising Star","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+158,"Alice","Sightseer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+159,"Chen","Sightseer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+160,"Christian","Sightseer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+161,"Ezra","Sightseer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+162,"Sika","Janitor","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+163,"Paulo","Janitor","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+164,"Dan","Worker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+165,"Omar","Worker","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+166,"Mechabob","Gentleman","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+167,"Abel","Gentleman","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+168,"Donny","Madame","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+169,"Gracie","Madame","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+170,"Donna","Bellhop","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+171,"Gilroy","Bellhop","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+172,"Patrick","Golfer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+173,"Moe","Golfer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+174,"Bruce","Golfer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+175,"Susanna","Golfer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+176,"Lori","Pokémon Breeder","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+177,"Colby","Pokémon Breeder","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+178,"Danby","Pokémon Breeder","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+179,"Izel","Pokémon Breeder","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+180,"Presta","Firefighter","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+181,"Calder","Firefighter","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+182,"Larry","Cook","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+183,"Tony","Cook","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+184,"Sam","Collector","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+185,"Dennis","Collector","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+186,"Horace","Ace Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+187,"Perri","Pokémon Center Lady","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+188,"Dooley","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+189,"Demiathena","Veteran","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+190,"Red","Battle Legend","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+191,"Blue","Battle Legend","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+192,"Grimsley","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+193,"Anabel","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+194,"Wally","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+195,"Colress","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+196,"Cynthia","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+197,"Plumeria","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+198,"Guzma","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+199,"Kiawe","Captain","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+200,"Mallow","Captain","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+201,"Sina","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+202,"Dexio","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+203,"Red","Battle Legend","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+204,"Blue","Battle Legend","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+205,"Kukui","Pokémon Trainer","Normal trainer path; special ID (90+)",31/31/31/31/31/31
+206,"Lillie","Pokémon Trainer","Scouted-partner constructor; hardcoded 31",31/31/31/31/31/31
+207,"Sophocles","Pokémon Trainer","Battle Agency event path; fixed 31",31/31/31/31/31/31
+208,"Giovanni","Pokémon Trainer","Battle Agency event path; fixed 31",31/31/31/31/31/31
+209,"Grunt","Team Rainbow Rocket","Battle Agency event path; fixed 31",31/31/31/31/31/31
