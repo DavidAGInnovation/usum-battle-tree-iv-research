@@ -2,7 +2,7 @@
 
 ## Executive conclusion
 
-The supplied Pokémon Ultra Sun retail executable contains the following normal trainer-ID selection at virtual address `0x159790` (raw `.code` offset `0x59790`, assuming the static `.code` mapping base `0x100000`):
+The analyzed Pokémon Ultra Sun retail executable contains the following normal trainer-ID selection at virtual address `0x159790` (raw `.code` offset `0x59790`, assuming the static `.code` mapping base `0x100000`):
 
 ```asm
 uxth    r0, [sp, #0x90]   ; saved incoming trainer ID
@@ -51,11 +51,11 @@ The retail selector contains the special/super-boss constants at these locations
 
 The source `SelectSuperBoss` tables use IDs 192–205 (with 190/191 for the 50th-battle slots), and the normal boss selector uses 203/204. All of these are at or above the `90` cutoff. Therefore a Pokémon created through the normal special-trainer constructor receives `0x1f`/31 as well. The direct partner/scouted branches independently hardcode the same value.
 
-This is an executable-level statement about the ID and constructor branches. It does not require assuming that the trainer’s localized display name is embedded in the code. The requested featured trainers and champions—Acromo, Aza, Blasco, Cintia, Destra, Dexio, Francine, Guzmán, Kiawe, Kukui, Lulú, Sina, Nuria, Lylia, Rojo, and Azul—are therefore covered by the 31-IV result in the categories listed in the research brief.
+This is an executable-level statement about the ID and constructor branches. It does not require assuming that the trainer’s localized display name is embedded in the code. The English-name trainer list and each trainer’s constructor/ID class are documented in the [README table](../README.md#trainers-covered); all entries resolve to 31 IVs in all six stats.
 
 ## Source cross-reference
 
-The supplied Momiji source snapshot agrees with the retail instructions:
+The Momiji source snapshot agrees with the retail instructions:
 
 - `Field/FieldStatic/source/BattleInst/BattleInst.cpp`: `GetPowerRndNormal` returns 19/23/27/31 by trainer-ID range; `MakePartnerPokemon` passes `0x1f`; `MakeTrainerPokemon` calls the range function; `ScoutLilie` passes `0x1f`.
 - `Field/FieldStatic/source/BattleInst/BattleInstTool.cpp`: `CreatePokemon` copies the selected `pow` into all six `initSpec.talentPower` entries.
@@ -66,6 +66,6 @@ The source archive is referenced for auditability only and is not redistributed 
 
 ## Limitations
 
-1. The retail trace was performed on the supplied US USA decrypted image. A different regional revision or update could move addresses or change code, even if the logic remains equivalent.
+1. The retail trace was performed on a US USA decrypted image. A different regional revision or update could move addresses or change code, even if the logic remains equivalent.
 2. The static mapping used here is the extracted `.code` file with VA base `0x100000`; raw offsets are provided so the result can be checked without the original ROM image.
 3. The result proves the construction logic. It does not by itself prove that a later battle-time transformation cannot modify a Pokémon after construction; no such IV mutation was observed in the traced paths.

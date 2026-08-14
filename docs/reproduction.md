@@ -1,6 +1,6 @@
 # Reproduction guide
 
-This guide uses paths supplied by the researcher as external inputs. Do not copy the ROM, the extracted executable, or the source archive into this repository.
+This guide uses external ROM, executable, and source paths as inputs. Do not copy the ROM, the extracted executable, or the source archive into this repository.
 
 ## Inputs
 
@@ -11,7 +11,7 @@ ROM_3DS="/path/to/Pokemon Ultra Sun (USA) Decrypted.3ds"
 CODE_BIN="/path/to/extracted/code.bin"
 ```
 
-The original analysis used the retail image supplied in the research-artifacts directory and an extracted raw `.code` file with SHA-256:
+The analyzed retail build produced an extracted raw `.code` file with SHA-256:
 
 ```text
 b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09
@@ -45,7 +45,7 @@ The same locations as raw offsets are `0x59790`, `0x581a8`, `0x57a1c`, `0x5faf4`
 
 ## Source cross-check
 
-For the supplied Momiji snapshot, inspect the following files:
+For the Momiji snapshot identified in [docs/sources.md](sources.md), inspect the following files:
 
 ```text
 prog/Field/FieldStatic/source/BattleInst/BattleInst.cpp

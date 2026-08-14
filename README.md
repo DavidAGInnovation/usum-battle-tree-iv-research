@@ -19,19 +19,47 @@ The generic Battle Tree partner path and the USUM Lillie/scouted-partner path bo
 
 ## Scope
 
-- Game: Pokémon Ultra Sun, USA retail executable (`CTR-P-A2AA`), decrypted 3DS image supplied for this research.
-- Source comparison: the Momiji source snapshot supplied separately by the user. The source archive, password, ROM, and extracted binaries are **not** copied into this repository.
+- Game: Pokémon Ultra Sun, USA retail executable (`CTR-P-A2AA`), analyzed from a decrypted 3DS image.
+- Source comparison: the Momiji source snapshot identified in [docs/sources.md](docs/sources.md). The source archive, password, ROM, and extracted binaries are **not** copied into this repository.
 - Analysis type: source cross-reference plus ARM32 static disassembly of the retail `.code` section.
-- This is documentation of the result, not a redistribution of Nintendo code or of the supplied source archive.
+- This is documentation of the result, not a redistribution of Nintendo code or of the source archive.
 
 ## Trainers covered
 
-The requested WikiDex categories are included in the scope: Acromo, Aza, Blasco, Cintia, Destra, Dexio, Francine, Guzmán, Kiawe, Kukui, Lulú, Sina, Nuria, Lylia, Rojo, and Azul. The result for each is 31 IVs in all six stats; the executable evidence is category/constructor based rather than a claim that every localized name is stored as a literal in the executable.
+The English trainer names are used throughout this repository. The category, constructor path, and IV result are explicit below; no exact name-to-ID mapping is inferred when the executable only exposes the numeric trainer ID.
+
+| English trainer | Category | Constructor/ID class | IVs (HP/Atk/Def/SpA/SpD/Spe) |
+| --- | --- | --- | --- |
+| Colress | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Grimsley | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Wally | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Cynthia | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Anabel | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Dexio | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Plumeria | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Guzma | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Kiawe | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Kukui | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Mallow | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Sina | Featured Trainer | Normal trainer path; special ID (`90+`) | `31/31/31/31/31/31` |
+| Rada | Default Multi Battle partner | Partner constructor; hardcoded `31` | `31/31/31/31/31/31` |
+| Lillie | USUM Multi Battle partner | Scouted-partner constructor; hardcoded `31` | `31/31/31/31/31/31` |
+| Red | Battle Legend | Special/super-boss ID (`90+`) | `31/31/31/31/31/31` |
+| Blue | Battle Legend | Special/super-boss ID (`90+`) | `31/31/31/31/31/31` |
+
+The range rule itself is:
+
+| Trainer ID | IV value for each of the six stats |
+| --- | ---: |
+| `0–49` | `19` |
+| `50–69` | `23` |
+| `70–89` | `27` |
+| `90+` | `31` |
 
 ## Reproduce
 
-Read [docs/reproduction.md](docs/reproduction.md) for the address map, raw offsets, and commands that operate on an externally supplied extracted `.code` file. The repository intentionally keeps large/proprietary artifacts out of Git; `.gitignore` blocks common ROM, executable, and archive extensions.
+Read [docs/reproduction.md](docs/reproduction.md) for the address map, raw offsets, and commands that operate on an external extracted `.code` file. The repository intentionally keeps large/proprietary artifacts out of Git; `.gitignore` blocks common ROM, executable, and archive extensions.
 
 ## Prior art and attribution
 
-The IV ranges and the 31-IV special/scouted-partner expectation were discussed publicly before this executable trace. What this repository adds is executable-level confirmation for the supplied US retail build and the separate partner/scouted construction paths. Sources and required attribution are listed in [docs/sources.md](docs/sources.md).
+The IV ranges and the 31-IV special/scouted-partner expectation were discussed publicly before this executable trace. What this repository adds is executable-level confirmation for the analyzed US retail build and the separate partner/scouted construction paths. Sources and required attribution are listed in [docs/sources.md](docs/sources.md).

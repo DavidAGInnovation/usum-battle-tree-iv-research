@@ -2,14 +2,14 @@
 
 ## Primary analysis inputs
 
-1. Pokémon Ultra Sun (USA) decrypted 3DS image supplied by the researcher. The image is deliberately not included in this repository.
-2. Momiji source snapshot supplied by the researcher (`momiji_git_program.zip`, commit `3f7c94593424a6afddcd9f92a293a3786c9f6425`, dated 2017-07-13). The archive and password note are deliberately not included in this repository.
+1. Pokémon Ultra Sun (USA) decrypted 3DS image used for the retail trace. The image is deliberately not included in this repository.
+2. Momiji source snapshot (`momiji_git_program.zip`, commit `3f7c94593424a6afddcd9f92a293a3786c9f6425`, dated 2017-07-13). The archive and password note are deliberately not included in this repository.
 
 ## Public prior art
 
 - [Smogon Battle Tree Discussion and Records, page 83](https://www.smogon.com/forums/threads/battle-tree-discussion-and-records.3587215/page-83) — public discussion of the 19/23/27/31 trainer-ID ranges and the then-unconfirmed special-trainer expectation. The post describes the special-trainer conclusion as an educated guess; this repository supplies the executable trace.
 - [Bulbapedia: Battle Tree](https://bulbapedia.bulbagarden.net/wiki/Battle_Tree) — describes special trainers, multi-battle partners, and the all-31-IV behavior reported for scouted partners.
-- [WikiDex: Guía de Pokémon Ultrasol y Pokémon Ultraluna / Árbol de Combate](https://www.wikidex.net/wiki/Gu%C3%ADa_de_Pok%C3%A9mon_Ultrasol_y_Pok%C3%A9mon_Ultraluna/%C3%81rbol_de_Combate) — source for the Spanish category and trainer names used in the research scope: Acromo, Aza, Blasco, Cintia, Destra, Dexio, Francine, Guzmán, Kiawe, Kukui, Lulú, Sina, Nuria, Lylia, Rojo, and Azul.
+- [WikiDex: Guía de Pokémon Ultrasol y Pokémon Ultraluna / Árbol de Combate](https://www.wikidex.net/wiki/Gu%C3%ADa_de_Pok%C3%A9mon_Ultrasol_y_Pok%C3%A9mon_Ultraluna/%C3%81rbol_de_Combate) — source for the Battle Tree categories and trainer roster documented in the README using English names.
 
 ## WikiDex attribution
 
