@@ -39,7 +39,7 @@ This is a complete rule for the normal trainer constructor, rather than a lookup
 | Unsigned trainer ID `70–89` | `27` |
 | Unsigned trainer ID `90–65535` | `31` |
 
-The `uxth` instruction makes the comparison domain an unsigned 16-bit trainer ID. There is no upper-bound branch after the `90` comparison, so every value at or above `90` selects `31`. The retail selector emits special/super-boss IDs in the `190–205` range; those IDs therefore fall in the final row automatically. Partner and Lillie/scouted construction routes do not depend on this range lookup: they pass `31` directly.
+The `uxth` instruction makes the comparison domain an unsigned 16-bit trainer ID. There is no upper-bound branch after the `90` comparison, so every value at or above `90` selects `31`. The retail selector emits special/super-boss IDs in the `190–205` range; those IDs therefore fall in the final row automatically. Partner and Lillie/scouted construction routes do not depend on this range lookup: they pass `31` directly. The complete archive-level mapping, including every ID from `0` through `209` and each `tr_type` display code, is in the [trainer-ID table](trainer-id-table.md).
 
 ## Separate partner and scouted paths
 
@@ -62,9 +62,17 @@ The retail selector contains the special/super-boss constants at these locations
 | `0x158778`, `0x158784` | `0x58778`, `0x58784` | `0xbf` (191), `0xbe` (190) | Super 50th-battle boss slots |
 | `0x158844`, `0x158854` | `0x58844`, `0x58854` | `0xcb` (203), `0xcc` (204) | Normal 20th-battle boss slots |
 
-The source `SelectSuperBoss` tables use IDs 192–205 (with 190/191 for the 50th-battle slots), and the normal boss selector uses 203/204. All of these are at or above the `90` cutoff. Therefore a Pokémon created through the normal special-trainer constructor receives `0x1f`/31 as well. The direct partner/scouted branches independently hardcode the same value.
+The source `SelectSuperBoss` tables identify the 50th-battle slots as IDs `190`/`191`; the normal-course boss selector identifies IDs `203`/`204`. The featured-trainer records occupy IDs `192–202` and `205`. All of these are at or above the `90` cutoff. Therefore a Pokémon created through the normal special-trainer constructor receives `0x1f`/31 as well. The direct partner/scouted branches independently hardcode the same value.
 
-This is an executable-level statement about the ID and constructor branches. It does not require assuming that the trainer’s localized display name is embedded in the code. The English-name trainer list and each trainer’s constructor/ID class are documented in the [README table](../README.md#trainers-covered); all entries resolve to 31 IVs in all six stats.
+## Retail trainer archive and display codes
+
+The retail RomFS archive `/a/2/8/2` is the `battle_tree_trainer` GARC. It contains exactly 210 records (IDs `0–209`), each encoded as a `u16 tr_type`, a `u16 use_poke_cnt`, and that many `u16` set IDs. The selection code reads the record and copies `tr_type` into `NPC_SELECT_ITEM.type` (`trainer::TrType`), whose purpose is trainer icon/display handling. This is the internal display code reported in the [complete table](trainer-id-table.md), shown as a decimal value.
+
+The English retail message archive `/a/0/3/2`, entry `104`, contains the corresponding 210 trainer-name strings. The table therefore reports decoded retail names rather than guessing names from the executable’s numeric constants. The archive is zero-based: ordinary public roster lists numbered `001–190` correspond to archive IDs `0–189`.
+
+The final three records (`207` Sophocles, `208` Giovanni, and `209` Grunt) are Battle Agency event trainers. Their event constructor calls the common Pokémon builder with `BattleFesDefine::POWER`, defined as `0x1f`; they are consequently 31-IV records even though they are not part of the ordinary `0–189` roster. Rada is archive ID `80` (27 IVs on the ordinary path), while the separate default-partner constructor hardcodes 31.
+
+This is an executable-level statement about the ID and constructor branches. It does not require assuming that the trainer’s localized display name is embedded in the code. The English-name trainer list, archive IDs, `tr_type` display codes, and constructor/ID classes are documented in the [complete trainer-ID table](trainer-id-table.md).
 
 ## Source cross-reference
 
@@ -73,6 +81,8 @@ The Momiji source snapshot agrees with the retail instructions:
 - `Field/FieldStatic/source/BattleInst/BattleInst.cpp`: `GetPowerRndNormal` returns 19/23/27/31 by trainer-ID range; `MakePartnerPokemon` passes `0x1f`; `MakeTrainerPokemon` calls the range function; `ScoutLilie` passes `0x1f`.
 - `Field/FieldStatic/source/BattleInst/BattleInstTool.cpp`: `CreatePokemon` copies the selected `pow` into all six `initSpec.talentPower` entries.
 - `Field/FieldStatic/include/BattleInst/BattleInstData.h`: Battle Tree set data contains species, four moves, EV flag, nature, item, and form, but no IV field.
+- `Field/FieldStatic/source/Script/ScriptFuncSetAppCall.cpp`: trainer selection reads `tr_type` from the archive record and assigns it to `NPC_SELECT_ITEM.type` for display.
+- `Field/FieldStatic/source/BattleFes/BattleFes.cpp` and `BattleFesDefine.h`: the archive has 210 records; IDs `207–209` are Battle Agency event trainers and `BattleFesDefine::POWER` is `0x1f` (31).
 - `Savedata/include/BattleInstSave.h` and `Savedata/source/BattleInstSave.cpp`: the scouted-partner save block stores the trainer ID, two set IDs, and two ability indices, but no IV array.
 
 The source archive is referenced for auditability only and is not redistributed here.
