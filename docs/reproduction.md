@@ -1,10 +1,10 @@
 # Reproduction guide
 
-This guide uses external ROM, executable, and source paths as inputs. Do not copy the ROM, the extracted executable, or the source archive into this repository.
+This guide uses external ROM, executable, and source paths as inputs. Do not copy the ROM, the extracted executable, or the source archive into the repository.
 
 ## Inputs
 
-Set these shell variables to your own files:
+Set these shell variables to local copies of the required files:
 
 ```sh
 ROM_3DS="/path/to/Pokemon Ultra Sun (USA) Decrypted.3ds"
@@ -17,7 +17,7 @@ The analyzed retail build produced an extracted raw `.code` file with SHA-256:
 b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09
 ```
 
-Hash your own extracted file before relying on the addresses:
+Hash the extracted file before relying on the addresses:
 
 ```sh
 shasum -a 256 "$CODE_BIN"
@@ -45,7 +45,7 @@ The same locations as raw offsets are `0x59790`, `0x581a8`, `0x57a1c`, `0x5faf4`
 
 ## Source cross-check
 
-For the Momiji snapshot identified in [docs/sources.md](sources.md), inspect the following files:
+For the Momiji snapshot documented in [docs/sources.md](sources.md), inspect the following files:
 
 ```text
 prog/Field/FieldStatic/source/BattleInst/BattleInst.cpp
@@ -59,4 +59,4 @@ The relevant source functions are `GetPowerRndNormal`, `MakeTrainerPokemon`, `Ma
 
 ## Optional local helper
 
-The repository includes `scripts/inspect-offsets.sh`, which prints the target offsets and, when given a raw `.code` file, invokes radare2 for a compact inspection.
+The included `scripts/inspect-offsets.sh` helper prints the target offsets and, when given a raw `.code` file, invokes radare2 for a compact inspection.

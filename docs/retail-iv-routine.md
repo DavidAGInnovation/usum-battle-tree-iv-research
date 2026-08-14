@@ -30,7 +30,7 @@ Because `movlo`/`movhs` use the unsigned comparison flags produced by `cmp`, the
 
 ## Complete numeric-ID coverage
 
-This is a complete rule for the normal trainer constructor, rather than a lookup limited to the named special trainers:
+This is a complete rule for the normal trainer constructor, rather than a lookup limited to special-trainer records:
 
 | Normal-constructor input | IV value for HP, Attack, Defense, Special Attack, Special Defense, and Speed |
 | --- | ---: |
@@ -39,7 +39,7 @@ This is a complete rule for the normal trainer constructor, rather than a lookup
 | Unsigned trainer ID `70–89` | `27` |
 | Unsigned trainer ID `90–65535` | `31` |
 
-The `uxth` instruction makes the comparison domain an unsigned 16-bit trainer ID. There is no upper-bound branch after the `90` comparison, so every value at or above `90` selects `31`. The retail selector emits special/super-boss IDs in the `190–205` range; those IDs therefore fall in the final row automatically. Partner and Lillie/scouted construction routes do not depend on this range lookup: they pass `31` directly. The complete archive-level mapping, including every ID from `0` through `209` and each `tr_type` trainer-class code, is in the [trainer-ID table](trainer-id-table.md).
+The `uxth` instruction makes the comparison domain an unsigned 16-bit trainer ID. There is no upper-bound branch after the `90` comparison, so every value at or above `90` selects `31`. The retail selector emits special/super-boss IDs in the `190–205` range; those IDs therefore fall in the final row automatically. Partner and Lillie/scouted construction routes do not depend on this range lookup: they pass `31` directly. The complete archive-level mapping, including every ID from `0` through `209` and its resolved trainer class, is in the [trainer-ID table](trainer-id-table.md).
 
 ## Separate partner and scouted paths
 
@@ -66,13 +66,13 @@ The source `SelectSuperBoss` tables identify the 50th-battle slots as IDs `190`/
 
 ## Retail trainer archive and trainer-class codes
 
-The retail RomFS archive `/a/2/8/2` is the `battle_tree_trainer` GARC. It contains exactly 210 records (IDs `0–209`), each encoded as a `u16 tr_type`, a `u16 use_poke_cnt`, and that many `u16` set IDs. The selection code reads the record and copies `tr_type` into `NPC_SELECT_ITEM.type` (`trainer::TrType`). This is the internal trainer-class/category code reported in the [complete table](trainer-id-table.md), shown as a decimal value; it is not the Battle Tree trainer ID.
+The retail RomFS archive `/a/2/8/2` is the `battle_tree_trainer` GARC. It contains exactly 210 records (IDs `0–209`), each encoded as a `u16 tr_type`, a `u16 use_poke_cnt`, and that many `u16` set IDs. The selection code reads the record and copies `tr_type` into `NPC_SELECT_ITEM.type` (`trainer::TrType`). This is the internal trainer-class/category code used to resolve the class labels in the [complete table](trainer-id-table.md); it is not the Battle Tree trainer ID. The numeric field itself is omitted from that table.
 
 The English retail message archive `/a/0/3/2`, entry `104`, contains the corresponding 210 trainer-name strings. The same archive’s entry `111` contains the localized trainer-class/category string for each `tr_type`; `TrainerTypeName::GetTrainerTypeName` passes the numeric `tr_type` directly as that message index. The table therefore reports decoded retail names and class labels rather than guessing from executable constants. The archive is zero-based: ordinary public roster lists numbered `001–190` correspond to archive IDs `0–189`.
 
 The final three records (`207` Sophocles, `208` Giovanni, and `209` Grunt) are Battle Agency event trainers. Their event constructor calls the common Pokémon builder with `BattleFesDefine::POWER`, defined as `0x1f`; they are consequently 31-IV records even though they are not part of the ordinary `0–189` roster. Rada is archive ID `80` (27 IVs on the ordinary path), while the separate default-partner constructor hardcodes 31.
 
-This is an executable-level statement about the ID and constructor branches. It does not require assuming that the trainer’s localized name or class label is embedded in the executable code; both are read from the retail message archive. The English-name trainer list, archive IDs, `tr_type` trainer-class codes, and constructor/ID classes are documented in the [complete trainer-ID table](trainer-id-table.md).
+This is an executable-level statement about the ID and constructor branches. It does not require assuming that the trainer’s localized name or class label is embedded in the executable code; both are read from the retail message archive. The English-name trainer list, archive IDs, resolved trainer classes, and constructor/ID classes are documented in the [complete trainer-ID table](trainer-id-table.md).
 
 ## Source cross-reference
 

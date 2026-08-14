@@ -1,6 +1,6 @@
 # Pokémon Ultra Sun/Ultra Moon Battle Tree IV research
 
-This repository records a static-analysis result for the Battle Tree Pokémon constructor in the US retail executable. It answers the previously open question: which individual-value (IV) value is assigned when Battle Tree Pokémon are created?
+This document records a static-analysis result for the Battle Tree Pokémon constructor in the US retail executable. The analysis determines which individual-value (IV) value is assigned when Battle Tree Pokémon are created.
 
 ## Result
 
@@ -15,24 +15,24 @@ For the normal trainer-construction path, the retail executable selects one IV v
 
 The value is passed to the common Pokémon-construction helper, so it is applied to HP, Attack, Defense, Special Attack, Special Defense, and Speed. The Battle Tree set record itself has no IV field.
 
-The generic Battle Tree partner path and the USUM Lillie/scouted-partner path both pass the constant `0x1f` (`31`) to the same helper. The special-trainer selector uses IDs in the `90+` range (including the special/super-boss slots), so the named featured trainers and champions in the research scope resolve to 31 IVs in all six stats. See the evidence table and caveats in [the detailed report](docs/retail-iv-routine.md).
+The generic Battle Tree partner path and the USUM Lillie/scouted-partner path both pass the constant `0x1f` (`31`) to the same helper. The special-trainer selector uses IDs in the `90+` range (including the special/super-boss slots), so the featured trainers and champions listed in the trainer table resolve to 31 IVs in all six stats. See the evidence table and caveats in [the detailed report](docs/retail-iv-routine.md).
 
 ### Complete numeric-ID coverage
 
-The range table applies to every normal trainer ID passed to `MakeTrainerPokemon`, not only to the named trainers listed below. The executable first narrows the input to an unsigned 16-bit value (`uxth`), then uses no upper-bound check after the `90` comparison. Thus `90+` means every unsigned trainer ID from `90` through `65535`; the game’s special/super-boss IDs (including `190–205`) are a subset of that final row.
+The range table applies to every normal trainer ID passed to `MakeTrainerPokemon`, including every trainer record listed below. The executable first narrows the input to an unsigned 16-bit value (`uxth`), then uses no upper-bound check after the `90` comparison. Thus `90+` means every unsigned trainer ID from `90` through `65535`; the game’s special/super-boss IDs (including `190–205`) are a subset of that final row.
 
 The [complete trainer-ID table](docs/trainer-id-table.md) inventories every retail Battle Tree trainer record (`0–209`) with its decoded English name, internal trainer class, constructor/ID class, and six-stat IV result. A machine-readable copy is available as [data/battle-tree-trainer-ids.csv](data/battle-tree-trainer-ids.csv). The archive uses zero-based IDs; public ordinary-roster lists numbered `001–190` are one-based.
 
 ## Scope
 
 - Game: Pokémon Ultra Sun, USA retail executable (`CTR-P-A2AA`), analyzed from a decrypted 3DS image.
-- Source comparison: the Momiji source snapshot identified in [docs/sources.md](docs/sources.md). The source archive, password, ROM, and extracted binaries are **not** copied into this repository.
+- Source comparison: the Momiji source snapshot documented in [docs/sources.md](docs/sources.md). The source archive, password, ROM, and extracted binaries are **not** included here.
 - Analysis type: source cross-reference plus ARM32 static disassembly of the retail `.code` section.
 - This is documentation of the result, not a redistribution of Nintendo code or of the source archive.
 
-## Trainers covered
+## Special trainers and partners
 
-The English trainer names are used throughout this repository. The table below is a quick summary of the requested named trainers; the full archive-level name-to-ID and trainer-class mapping is in the [complete trainer-ID table](docs/trainer-id-table.md).
+This section summarizes featured trainers, Battle Tree partners, and Battle Legends. The complete archive-level name-to-ID and trainer-class mapping is in the [complete trainer-ID table](docs/trainer-id-table.md).
 
 | English trainer | Archive ID(s) | Internal trainer class | Constructor/ID class | IVs (HP/Atk/Def/SpA/SpD/Spe) |
 | --- | --- | --- | --- | --- |
@@ -66,8 +66,8 @@ The range rule itself is:
 
 ## Reproduce
 
-Read [docs/reproduction.md](docs/reproduction.md) for the address map, raw offsets, and commands that operate on an external extracted `.code` file. The repository intentionally keeps large/proprietary artifacts out of Git; `.gitignore` blocks common ROM, executable, and archive extensions.
+Read [docs/reproduction.md](docs/reproduction.md) for the address map, raw offsets, and commands that operate on an external extracted `.code` file. Large/proprietary artifacts are intentionally kept out of Git; `.gitignore` blocks common ROM, executable, and archive extensions.
 
 ## Prior art and attribution
 
-The IV ranges and the 31-IV special/scouted-partner expectation were discussed publicly before this executable trace. What this repository adds is executable-level confirmation for the analyzed US retail build and the separate partner/scouted construction paths. Sources and required attribution are listed in [docs/sources.md](docs/sources.md).
+The IV ranges and the 31-IV special/scouted-partner expectation were discussed publicly before this executable trace. The analysis provides executable-level confirmation for the analyzed US retail build and the separate partner/scouted construction paths. Sources and required attribution are listed in [docs/sources.md](docs/sources.md).
