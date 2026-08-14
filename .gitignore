@@ -1,0 +1,30 @@
+# Proprietary or very large game/source artifacts. Keep them outside this repo.
+*.3ds
+*.3dsx
+*.cia
+*.cxi
+*.code
+*.bin
+*.cro
+*.crs
+*.romfs
+*.zip
+*.7z
+*.rar
+*.nds
+*.gba
+*.sav
+*.pk*
+
+# Local extraction and disassembly output
+/rom/
+/extracted/
+/build/
+/tmp/
+*.dis
+*.log
+
+# macOS/editor noise
+.DS_Store
+.idea/
+.vscode/
