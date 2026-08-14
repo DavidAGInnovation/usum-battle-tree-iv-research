@@ -28,6 +28,19 @@ Because `movlo`/`movhs` use the unsigned comparison flags produced by `cmp`, the
 
 `r2` is the `pow`/talent-power argument used by the common constructor. The source implementation writes that value into every one of the six `talentPower` entries, not just one stat.
 
+## Complete numeric-ID coverage
+
+This is a complete rule for the normal trainer constructor, rather than a lookup limited to the named special trainers:
+
+| Normal-constructor input | IV value for HP, Attack, Defense, Special Attack, Special Defense, and Speed |
+| --- | ---: |
+| Unsigned trainer ID `0–49` | `19` |
+| Unsigned trainer ID `50–69` | `23` |
+| Unsigned trainer ID `70–89` | `27` |
+| Unsigned trainer ID `90–65535` | `31` |
+
+The `uxth` instruction makes the comparison domain an unsigned 16-bit trainer ID. There is no upper-bound branch after the `90` comparison, so every value at or above `90` selects `31`. The retail selector emits special/super-boss IDs in the `190–205` range; those IDs therefore fall in the final row automatically. Partner and Lillie/scouted construction routes do not depend on this range lookup: they pass `31` directly.
+
 ## Separate partner and scouted paths
 
 The normal trainer branch is not the only constructor in use:

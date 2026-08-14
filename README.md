@@ -17,6 +17,10 @@ The value is passed to the common Pokémon-construction helper, so it is applied
 
 The generic Battle Tree partner path and the USUM Lillie/scouted-partner path both pass the constant `0x1f` (`31`) to the same helper. The special-trainer selector uses IDs in the `90+` range (including the special/super-boss slots), so the named featured trainers and champions in the research scope resolve to 31 IVs in all six stats. See the evidence table and caveats in [the detailed report](docs/retail-iv-routine.md).
 
+### Complete numeric-ID coverage
+
+The range table applies to every normal trainer ID passed to `MakeTrainerPokemon`, not only to the named trainers listed below. The executable first narrows the input to an unsigned 16-bit value (`uxth`), then uses no upper-bound check after the `90` comparison. Thus `90+` means every unsigned trainer ID from `90` through `65535`; the game’s special/super-boss IDs (including `190–205`) are a subset of that final row.
+
 ## Scope
 
 - Game: Pokémon Ultra Sun, USA retail executable (`CTR-P-A2AA`), analyzed from a decrypted 3DS image.
