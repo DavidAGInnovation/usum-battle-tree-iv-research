@@ -7,9 +7,10 @@
 
 ## Retail archive evidence
 
-- RomFS `/a/2/8/2` (`battle_tree_trainer`) — 210 zero-based trainer records. Each record supplies `tr_type`, the numeric `trainer::TrType` used by the trainer-selection UI for icon/display handling, plus the Pokémon set IDs.
+- RomFS `/a/2/8/2` (`battle_tree_trainer`) — 210 zero-based trainer records. Each record supplies `tr_type`, the numeric `trainer::TrType` trainer-class/category code, plus the Pokémon set IDs.
 - English message archive `/a/0/3/2`, entry `104` — the 210 English trainer-name strings used to label the records in [docs/trainer-id-table.md](trainer-id-table.md).
-- The archive-level IDs, categories, constructor paths, display codes, and six-stat IV results are reproduced in [docs/trainer-id-table.md](trainer-id-table.md) and [data/battle-tree-trainer-ids.csv](../data/battle-tree-trainer-ids.csv).
+- English message archive `/a/0/3/2`, entry `111` — the localized trainer-class/category strings indexed directly by `tr_type` (`TrainerTypeName::GetTrainerTypeName`).
+- The archive-level IDs, roster categories, internal class labels, constructor paths, category codes, and six-stat IV results are reproduced in [docs/trainer-id-table.md](trainer-id-table.md) and [data/battle-tree-trainer-ids.csv](../data/battle-tree-trainer-ids.csv).
 
 ## Public prior art
 
