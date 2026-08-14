@@ -23,6 +23,13 @@ The range table applies to every normal trainer ID passed to `MakeTrainerPokemon
 
 The [complete trainer-ID table](docs/trainer-id-table.md) inventories every retail Battle Tree trainer record (`0–209`) with its decoded English name, internal trainer class, constructor/ID class, and six-stat IV result. A machine-readable copy is available as [data/battle-tree-trainer-ids.csv](data/battle-tree-trainer-ids.csv). The archive uses zero-based IDs; public ordinary-roster lists numbered `001–190` are one-based.
 
+The display class and the lower-level trainer-type group are separate fields.
+The group bytes for the special, partner, and event records (`190–209`) are
+decoded in [special-trainer-groups.md](docs/special-trainer-groups.md). That
+table shows, for example, that Red and Blue use the internal Champion group,
+whereas Cynthia's Battle Tree record uses the normal/non-boss group despite
+her story role.
+
 ## Scope
 
 - Game: Pokémon Ultra Sun, USA retail executable (`CTR-P-A2AA`), analyzed from a decrypted 3DS image.
@@ -32,7 +39,7 @@ The [complete trainer-ID table](docs/trainer-id-table.md) inventories every reta
 
 ## Special trainers and partners
 
-This section summarizes featured trainers, Battle Tree partners, and Battle Legends. The complete archive-level name-to-ID and trainer-class mapping is in the [complete trainer-ID table](docs/trainer-id-table.md).
+This section summarizes featured trainers, Battle Tree partners, and Battle Legends. The complete archive-level name-to-ID and trainer-class mapping is in the [complete trainer-ID table](docs/trainer-id-table.md), and the separate internal group field is decoded in [special-trainer-groups.md](docs/special-trainer-groups.md).
 
 | English trainer | Archive ID(s) | Internal trainer class | Constructor/ID class | IVs (HP/Atk/Def/SpA/SpD/Spe) |
 | --- | --- | --- | --- | --- |

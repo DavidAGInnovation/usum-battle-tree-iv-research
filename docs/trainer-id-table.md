@@ -2,7 +2,7 @@
 
 This table covers every trainer record in the US retail Battle Tree trainer archive (IDs `0–209`). The archive ID is the zero-based message/record index; public lists that number the ordinary roster `001–190` are one-based, so archive ID `0` corresponds to public number `001`.
 
-The internal trainer class is the localized category displayed for each record; it is separate from the Battle Tree trainer ID. The English trainer names below come from entry 104, and the English trainer-class names come from entry 111.
+The internal trainer class is the localized category displayed for each record; it is separate from the Battle Tree trainer ID. The English trainer names below come from entry 104, and the English trainer-class names come from entry 111. The lower-level trainer-type group (`NORA`, `LEADER`, `BIGFOUR`, or `CHAMPION`, among others) is a separate field; the special-record values are documented in [special-trainer-groups.md](special-trainer-groups.md).
 
 | Trainer ID | English trainer | Internal trainer class | Constructor/ID class | IVs (HP/Atk/Def/SpA/SpD/Spe) |
 | ---: | --- | --- | --- | --- |

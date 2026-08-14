@@ -70,6 +70,13 @@ The retail RomFS archive `/a/2/8/2` is the `battle_tree_trainer` GARC. It contai
 
 The English retail message archive `/a/0/3/2`, entry `104`, contains the corresponding 210 trainer-name strings. The same archive’s entry `111` contains the localized trainer-class/category string for each `tr_type`; `TrainerTypeName::GetTrainerTypeName` passes the numeric `tr_type` directly as that message index. The table therefore reports decoded retail names and class labels rather than guessing from executable constants. The archive is zero-based: ordinary public roster lists numbered `001–190` correspond to archive IDs `0–189`.
 
+The trainer-type record has another classification field that is not the
+localized display class. RomFS `/a/1/0/5` contains the fixed 20-byte records
+matching `TrainerTypeData::TRTYPE_DATA`; byte `0x01` is the group value returned
+by `TrainerTypeData::GetGroup`. The special-record group mapping, including the
+fact that Red and Blue are `TRTYPE_GRP_CHAMPION` while Cynthia is
+`TRTYPE_GRP_NORA`, is documented in [special-trainer-groups.md](special-trainer-groups.md).
+
 The final three records (`207` Sophocles, `208` Giovanni, and `209` Grunt) are Battle Agency event trainers. Their event constructor calls the common Pokémon builder with `BattleFesDefine::POWER`, defined as `0x1f`; they are consequently 31-IV records even though they are not part of the ordinary `0–189` roster. Rada is archive ID `80` (27 IVs on the ordinary path), while the separate default-partner constructor hardcodes 31.
 
 This is an executable-level statement about the ID and constructor branches. It does not require assuming that the trainer’s localized name or class label is embedded in the executable code; both are read from the retail message archive. The English-name trainer list, archive IDs, resolved trainer classes, and constructor/ID classes are documented in the [complete trainer-ID table](trainer-id-table.md).

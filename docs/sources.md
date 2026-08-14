@@ -7,7 +7,8 @@
 
 ## Retail archive evidence
 
-- RomFS `/a/2/8/2` (`battle_tree_trainer`) — 210 zero-based trainer records. Each record supplies `tr_type`, the numeric `trainer::TrType` trainer-class/category code, plus the Pokémon set IDs.
+- RomFS `/a/2/8/2` (`battle_tree_trainer`) — 210 zero-based trainer records. Each record supplies `tr_type`, the numeric `trainer::TrType` trainer-class/category code, plus the Pokémon set IDs. The extracted GARC SHA-256 is `56e35c8f448283b17952557c500f6ee4a7e2f5cb37f8f9bcd2a0f8b90a7e90dc`.
+- RomFS `/a/1/0/5` — 223 fixed 20-byte trainer-type records matching the `TRTYPE_DATA` layout. The `group` byte is decoded for the special records in [special-trainer-groups.md](special-trainer-groups.md). The extracted GARC SHA-256 is `05478939a9b901ff072dd854fff999b1574256e8d22f282b75e80ccc260e5bf9`.
 - English message archive `/a/0/3/2`, entry `104` — the 210 English trainer-name strings used to label the records in [docs/trainer-id-table.md](trainer-id-table.md).
 - English message archive `/a/0/3/2`, entry `111` — the localized trainer-class/category strings indexed directly by `tr_type` (`TrainerTypeName::GetTrainerTypeName`).
 - The archive-level IDs, English names, internal class labels, constructor paths, and six-stat IV results are reproduced in [docs/trainer-id-table.md](trainer-id-table.md) and [data/battle-tree-trainer-ids.csv](../data/battle-tree-trainer-ids.csv).
