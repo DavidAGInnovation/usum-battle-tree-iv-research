@@ -13,6 +13,41 @@
 - English message archive `/a/0/3/2`, entry `111` — the localized trainer-class/category strings indexed directly by `tr_type` (`TrainerTypeName::GetTrainerTypeName`).
 - The archive-level IDs, English names, internal class labels, constructor paths, and six-stat IV results are reproduced in [docs/trainer-id-table.md](trainer-id-table.md) and [data/battle-tree-trainer-ids.csv](../data/battle-tree-trainer-ids.csv).
 
+## Source-level battle-state audit
+
+The source snapshot was also used to check the proof boundary after Pokémon
+construction:
+
+- `poke_lib/pml/src/pokepara/pml_PokemonParamLocal.h` — the six persistent
+  talent/IV fields are packed at `CoreDataBlockB + 0x38`.
+- `poke_lib/pml/src/pokepara/pml_PokemonCoreParam.cpp` and
+  `pml_PokemonParamAccessor.cpp` — `ChangeTalentPower` and the six
+  `SetTalent*` accessors are the canonical IV mutator.
+- `niji_project/prog/Battle/source/btl_IntrudeSystem.cpp` — the one
+  non-debug Battle call site found for that mutator, used for SOS/intrusion
+  bonuses.
+- `niji_project/prog/Battle/source/btl_ServerFlow.cpp` and
+  `btl_BattleRule.cpp` — the intrusion-system construction and the
+  `BTL_COMPETITOR_WILD` eligibility guard.
+- `niji_project/prog/Battle/source/battle_SetupParam.cpp` and
+  `Field/FieldStatic/source/BattleInst/BattleInst.cpp` — Battle Tree setup uses
+  the Battle House trainer path and assigns `BTL_COMPETITOR_INST`.
+
+This is a source-level path-exclusion audit, not a claim that every retail
+instruction or compiler-generated alias has been exhaustively classified.
+
+## Retail-binary state audit
+
+The retail `.code` write-set audit is reported in the [retail writer
+inventory](retail-iv-routine.md#retail-binary-writer-inventory-for-the-analyzed-build).
+It resolves the randomized `CoreDataBlockB` accessor, identifies the packed IV
+word and six masks/stores, records the separate bit-30/31 flag writes, and
+enumerates direct callers of both `ChangeTalentPower` and the whole-core
+initializer. The audit uses the same VA base (`0x100000`) and `.code` hash
+listed in [reproduction.md](reproduction.md); it is specific to that US retail
+build and does not claim to eliminate arbitrary pointer aliases or unmodeled
+copies.
+
 ## Public prior art
 
 - [Smogon Battle Tree Discussion and Records, page 83](https://www.smogon.com/forums/threads/battle-tree-discussion-and-records.3587215/page-83) — public discussion of the 19/23/27/31 trainer-ID ranges and the then-unconfirmed special-trainer expectation. The post describes the special-trainer conclusion as an educated guess; the retail executable trace provides the code-level confirmation.

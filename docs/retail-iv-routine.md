@@ -96,8 +96,122 @@ The Momiji source snapshot agrees with the retail instructions:
 
 The source archive is referenced for auditability only and is not redistributed here.
 
+## Proof boundary: construction versus battle-time state
+
+The trace proves a postcondition at the end of each traced constructor, not a
+global invariant for the rest of the battle. Let `p(id)` be the value selected
+by the normal trainer-ID branches (or the explicit `31` used by the partner,
+scouted, and event branches). The proof at the constructor boundary is:
+
+1. The normal branch computes `p(id)` in `r2`; the other traced branches load
+   `31` directly.
+2. Each branch passes that value to the common Pokémon-parameter helper.
+3. `CreatePokemon` copies the helper's `pow` argument into all six
+   `initSpec.talentPower` entries.
+4. The helper therefore returns a Pokémon whose six IV inputs are all
+   `p(id)`.
+
+That conclusion is conditional on reaching the traced helper and is about the
+object immediately after construction. It does not imply that every later
+operation preserves those fields. In particular, a hypothetical battle-time
+function that writes an IV after the helper returns would leave every
+constructor instruction and source cross-reference above unchanged while
+changing the Pokémon observed in battle. The construction evidence therefore
+cannot distinguish that program from one in which no such writer exists.
+
+“No IV mutation was observed” is consequently a statement about the finite
+paths that were traced, not an exhaustive proof of non-reachability. To promote
+it to an end-to-end immutability result, the analysis would need to identify
+the runtime IV-field offsets, enumerate every direct or indirect write (and
+copy) to those fields on every path from construction through battle setup and
+transformation, and inspect each reachable writer. Dynamic watchpoints over
+those fields would be useful corroboration, but observations alone still do
+not quantify over untraced paths.
+
+### Source-level reachability check
+
+The Momiji snapshot lets us tighten the result for the Battle Tree without
+claiming more than the source supports. The persistent IV representation is
+the packed word at `CoreDataBlockB + 0x38`: six five-bit fields
+(`talent_hp`, `talent_atk`, `talent_def`, `talent_agi`, `talent_spatk`, and
+`talent_spdef`). `CoreParam::ChangeTalentPower` is the canonical mutator; it
+selects one of those fields through `Accessor::SetTalent*` and then recalculates
+the corresponding derived stat.
+
+An exhaustive search of the source snapshot's `Battle/` subtree finds one
+non-debug call site for that mutator:
+`IntrudeSystem::ApplyIntrudeCountBonus_TalentPower`. It is reached only after
+`SetupAppearPokeParam_ByEncountData` creates an SOS/intrusion Pokémon. The
+server constructs `IntrudeSystem` only when `MainModule::CanIntrudeBattle()` is
+true, and `BattleRule::CanIntrudeBattle` rejects every competitor that is not
+`BTL_COMPETITOR_WILD`.
+
+The Battle Tree `BattleInst::StartBattle` path calls
+`BTL_SETUP_BattleHouseTrainer` (or its multi-battle variant); those setup
+functions set `bp->competitor = BTL_COMPETITOR_INST`. Thus the intrusion writer
+is unreachable on the source-defined Battle Tree setup path, and no other
+battle-source call to `ChangeTalentPower` or `SetTalent*` was found. This is a
+source-level path-exclusion result, stronger than merely not seeing a write in
+a handful of dynamic traces.
+
+### Retail-binary writer inventory for the analyzed build
+
+The same conclusion can be checked against the US retail `.code` rather than
+only against source names. The block-position helpers at `0x4ad588`,
+`0x4ad608`, `0x4ad68c`, and `0x4ad710` resolve the randomized core-data blocks;
+`0x4ad608` is the runtime `CoreDataBlockB` accessor. In that returned block
+pointer, the six persistent IV fields occupy the word at `+0x34` (the source
+layout's `CoreDataBlockB + 0x38` comment includes the enclosing layout
+adjustment). The masks and stores are:
+
+| Field | Mask | Store VA (raw `.code` offset) |
+| --- | ---: | ---: |
+| HP | `0x0000001f` | `0x3214c4` (`0x2214c4`) |
+| Attack | `0x000003e0` | `0x321620` (`0x221620`) |
+| Defense | `0x00007c00` | `0x321660` (`0x221660`) |
+| Speed | `0x000f8000` | `0x3215e0` (`0x2215e0`) |
+| Special Attack | `0x01f00000` | `0x321ab8` (`0x221ab8`) |
+| Special Defense | `0x3e000000` | `0x321af8` (`0x221af8`) |
+
+Each is a read-modify-write, so it changes only one five-bit field and
+preserves the other five. The adjacent writes at `0x3218f8` and `0x321c50`
+modify only bits 30 and 31 of the same word; those are the separate egg/name
+flags, not IV fields.
+
+An aligned ARM branch scan of the retail `.code` found the six setters called
+in two places: the six-value parameter-materialization sequence at
+`0x3209d4–0x320a24`, and the switch body at `0x324d84` that clamps its value to
+`0x1f` and dispatches by `PowerID`. The latter is the retail
+`CoreParam::ChangeTalentPower`. Its only direct caller is `0x380388` (raw
+offset `0x280388`), reached from the intrusion-bonus dispatch; no Battle Tree
+setup call reaches that writer in the source-defined competitor path.
+
+The binary also contains a whole-core initializer at `0x320528` that copies
+the packed word as part of initialization. Its only three callers are
+`0x320c70`, `0x320e28`, and `0x320f00`, all in the adjacent construction/
+initialization routines; there is no battle-time caller in the analyzed
+executable. This accounts for the statically visible bulk-copy write in
+addition to the six field setters.
+
+Consequently, for this exact retail build, the evidence establishes a much
+stronger result than finite trace observations: no field-level IV writer, and
+no reachable whole-core initializer, is present on the Battle Tree
+construction-to-transformation path identified above. The source
+`BTL_POKEPARAM::HENSIN_Set` path is consistent with that result: it copies
+transient battle state and preserves/restores `m_coreParam`, which contains the
+persistent IV-bearing parameter.
+
+This is still a build-specific static write-set result, not a mathematical
+proof over arbitrary machine aliases. A raw pointer alias, an unrecognized
+bulk copy, or a different regional/update binary would require re-running the
+inventory. Dynamic watchpoints over the resolved `CoreDataBlockB + 0x34` word
+would be useful corroboration, but no emulator/debugger watchpoint trace is
+included here. The defensible claim is therefore “no IV mutation is reachable
+on the audited Battle Tree path in this retail build under the stated static
+analysis,” rather than absolute immutability of every possible execution.
+
 ## Limitations
 
 1. The retail trace was performed on a US USA decrypted image. A different regional revision or update could move addresses or change code, even if the logic remains equivalent.
 2. The static mapping used here is the extracted `.code` file with VA base `0x100000`; raw offsets are provided so the result can be checked without the original ROM image.
-3. The result proves the construction logic. It does not by itself prove that a later battle-time transformation cannot modify a Pokémon after construction; no such IV mutation was observed in the traced paths.
+3. The constructor proof is now supplemented by a retail-binary writer inventory: the resolved packed IV word, six field-level stores, the whole-core initializer, and the `ChangeTalentPower` call graph are enumerated above. This establishes that no IV mutation is reachable on the audited Battle Tree path in this exact build under the stated static-analysis assumptions. It still does not quantify over arbitrary aliases, unrecognized bulk copies, different builds, or executions outside that path; dynamic watchpoints would be corroboration, not a substitute for the static inventory. No such IV mutation was observed in the traced paths.

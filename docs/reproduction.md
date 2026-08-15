@@ -34,14 +34,28 @@ radare2 -a arm -b 32 -m 0x100000 "$CODE_BIN"
 Useful commands inside radare2:
 
 ```text
+aaa                      # required before axt/xref queries
 s 0x159790; pd 24       # normal trainer-ID IV selection
 s 0x1581a8; pd 20       # generic partner branch
 s 0x157a1c; pd 24       # ScoutLilie/scouted-partner path
 s 0x15faf4; pd 32       # common constructor helper
 s 0x158760; pd 180      # special trainer selector constants
+s 0x4ad608; pd 80       # runtime CoreDataBlockB accessor
+s 0x321498; pd 36       # HP IV setter
+s 0x3215b0; pd 36       # Speed IV setter
+s 0x3215f0; pd 36       # Attack IV setter
+s 0x321630; pd 36       # Defense IV setter
+s 0x321a88; pd 36       # Special Attack IV setter
+s 0x321ac8; pd 36       # Special Defense IV setter
+s 0x324d84; pd 96       # ChangeTalentPower dispatch
+axt 0x324d84             # direct callers of ChangeTalentPower
+s 0x320528; pd 48       # whole-core initialization copy
+axt 0x320528             # direct callers of that initializer
 ```
 
-The same locations as raw offsets are `0x59790`, `0x581a8`, `0x57a1c`, `0x5faf4`, and `0x58760` respectively.
+The same locations as raw offsets are `0x59790`, `0x581a8`, `0x57a1c`,
+`0x5faf4`, and `0x58760` respectively. The writer-inventory locations are
+documented with both forms in the [retail writer inventory](retail-iv-routine.md#retail-binary-writer-inventory-for-the-analyzed-build).
 
 ## Source cross-check
 

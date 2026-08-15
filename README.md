@@ -15,7 +15,13 @@ For the normal trainer-construction path, the retail executable selects one IV v
 
 The value is passed to the common Pokémon-construction helper, so it is applied to HP, Attack, Defense, Special Attack, Special Defense, and Speed. The Battle Tree set record itself has no IV field.
 
-The generic Battle Tree partner path and the USUM Lillie/scouted-partner path both pass the constant `0x1f` (`31`) to the same helper. The special-trainer selector uses IDs in the `90+` range (including the special/super-boss slots), so the featured trainers and champions listed in the trainer table resolve to 31 IVs in all six stats. See the evidence table and caveats in [the detailed report](docs/retail-iv-routine.md).
+For the analyzed US retail build, the follow-on binary audit resolves the
+packed runtime IV word, enumerates the six direct field writers and the
+whole-core initializer, and finds no reachable writer on the audited Battle
+Tree construction-to-transformation path. See the [retail writer inventory](docs/retail-iv-routine.md#retail-binary-writer-inventory-for-the-analyzed-build)
+for the build-specific scope and remaining alias/copy caveat.
+
+The generic Battle Tree partner path and the USUM Lillie/scouted-partner path both pass the constant `0x1f` (`31`) to the same helper. The special-trainer selector uses IDs in the `90+` range (including the special/super-boss slots), so the featured trainers and champions listed in the trainer table resolve to 31 IVs in all six stats. See the evidence table and the [construction-proof boundary](docs/retail-iv-routine.md#proof-boundary-construction-versus-battle-time-state) in [the detailed report](docs/retail-iv-routine.md).
 
 ### Complete numeric-ID coverage
 
