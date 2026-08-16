@@ -294,6 +294,47 @@ do not quantify the values flowing through every branch: Pawn locals/stack
 temporaries, native-query results, random draws, and computed score arguments
 still require a VM-aware symbolic interpreter or a live trace.
 
+### Abstract path-coverage audit
+
+To tighten that boundary, `scripts/audit-battle-ai-flow.py` builds a
+may-reachability graph from each disassembly. It follows both outcomes of
+every conditional jump, every direct call, every `switch` case-table target,
+and (conservatively) every possible target of an indirect Pawn call. Native
+returns remain unconstrained. This proves which decoded instructions and
+branches are reachable in the abstract control-flow graph; it does not claim
+that every native predicate is satisfiable in a real battle state.
+
+Run it against the extracted disassemblies with:
+
+```text
+python3 scripts/audit-battle-ai-flow.py /tmp/pawn.KeuKRY
+```
+
+The resulting branch coverage is:
+
+| Member | Static conditional/unconditional | May-reachable conditional/unconditional | Unreachable decoded instructions |
+| ---: | ---: | ---: | ---: |
+| 0 | 6 / 1 | 6 / 1 | 1 (`halt`) |
+| 1 | 21 / 11 | 9 / 2 | 168 |
+| 2 Basic | 1,272 / 501 | 1,272 / 501 | 1 (`halt`) |
+| 3 Double | 1,620 / 301 | 1,618 / 300 | 47 |
+| 4 Expert | 3,200 / 762 | 3,200 / 762 | 1 (`halt`) |
+| 5 Intrude (inferred) | 18 / 13 | 9 / 2 | 133 |
+| 6 Item | 49 / 14 | 9 / 0 | 539 |
+| 7 | 4 / 1 | 4 / 1 | 1 (`halt`) |
+| 8 Pokechange | 88 / 19 | 88 / 19 | 1 (`halt`) |
+| 9 Royal | 203 / 49 | 203 / 49 | 1 (`halt`) |
+| 10 Strong | 148 / 36 | 148 / 36 | 1 (`halt`) |
+
+For Basic and Expert, every decoded branch is in the abstract may-reachable
+graph (apart from the file's initial `halt`). Double has three branch opcodes
+inside statically decoded but unreachable helper paths; the smaller allowance,
+intrude, and item members contain more dead or archive-only helper code. The
+audit therefore closes the *control-flow coverage* part of the proof for the
+major move programs, while preserving the semantic caveat: an unconstrained
+native result can take either branch in the model, and the model does not
+derive the concrete score from the live battle state.
+
 The IDs resolve through `tr_ai_cmd.h`; for example, Basic and Expert use the
 HP/status/type/field/ability/reserve families, Double adds partner and shared
 random commands (`96`, `97`, `101`, `102`, `111`), Royal uses ranking command
@@ -386,24 +427,33 @@ Expert together, the engine does not select one of these labels as a level.
 
 ### Not yet proven
 
-- A path-complete symbolic execution of every condition/score/threshold branch;
-  the branch-opcode inventory is complete, but the static audit still does not
-  propagate every value through intermediate Pawn variables, native-query
-  results, random draws, and computed score arguments.
-- That Strong or Expert is monotonically more capable than Basic.
+- A value-complete symbolic execution of every condition/score/threshold
+  branch. The new abstract audit covers both control-flow outcomes, but it
+  intentionally leaves native-query results, random draws, and computed
+  values symbolic; without the retail Pawn host semantics it cannot prove a
+  concrete score/action theorem for every live state.
+- That Strong or Expert is monotonically more capable than Basic. The native
+  command sets are not nested, which disproves a strict structural superset
+  interpretation; a behavioral ordering would require a separately defined
+  capability relation and a proof over all states.
 - The inferred `intrude`/archive-only names without recovering `BattleAi.gaix`
   or tracing the retail `datIdx` passed to `ArcFileLoadDataBuf`.
-- That every special trainer uses the same mask in every non-Tree mode or after
-  every phase override; the source actually documents several intentional
-  exceptions.
+- Retail-binary completeness of the mask-writer set. At source scope, the
+  universal claim that every special trainer uses one mask is disproved by the
+  explicit Royal, wild, record-fight, intrusion, and reinforcement branches
+  listed above; proving that no additional writer exists in the retail binary
+  still needs a binary write-set audit.
 
 ## Remaining proof boundary
 
-Two independent steps remain for an end-to-end result. First, recovering
-`BattleAi.gaix` (or tracing the retail `datIdx` passed to `ArcFileLoadDataBuf`)
-would promote the inferred `intrude`/archive-only map to an exact name
-mapping. Second, a Pawn-VM symbolic execution or dynamic trace of
-`p_Score` and `p_PokeChangeEnable` per script, candidate, and live state would
-validate the static reading against every reachable branch. Dynamic
-watchpoints/logging are useful corroboration, but observations alone still do
-not quantify over untraced inputs and paths.
+Three independent steps remain for an end-to-end retail result. First,
+recovering `BattleAi.gaix` (or tracing the retail `datIdx` passed to
+`ArcFileLoadDataBuf`) would promote the inferred `intrude`/archive-only map to
+an exact name mapping. Second, a Pawn-VM execution with the retail native
+dispatcher modeled—or an equivalent dynamic trace of `p_Score` and
+`p_PokeChangeEnable` per script, candidate, and live state—would validate the
+value flow against every reachable branch. Third, a stripped-binary write-set
+audit would establish whether the supplied source's mask-writer inventory is
+complete for the retail build. Dynamic watchpoints/logging are useful
+corroboration, but observations alone still do not quantify over untraced
+inputs and paths.

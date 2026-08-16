@@ -50,6 +50,9 @@ files from the same Momiji snapshot:
 - `niji_project/prog/Battle/source/tr_ai/btl_AiJudge.cpp` — bitmask iteration.
 - `niji_project/prog/Battle/source/tr_ai/btl_AiWazaJudge.cpp` and
   `btl_AiPokeChangeJudge.cpp` — move and switching score accumulation.
+- `niji_project/prog/Battle/source/btl_mainmodule.cpp` and `btl_client.cpp` —
+  effective mode/phase mask selectors and intrusion or reinforcement
+  replacement masks.
 - `niji_project/prog/Battle/source/tr_ai/btl_AiScript.cpp` — Pawn loading,
   result variables, and symbolic script-to-archive mapping.
 - `niji_project/prog/Battle/source/tr_ai/tr_ai_cmd.h` and
@@ -68,6 +71,15 @@ where the archive index is still missing. The extracted retail `.code` also
 matches the analyzed build hash `b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09`
 at VA base `0x100000`; that build identity check did not recover a symbolic
 `datIdx` trace, so it does not replace the missing `BattleAi.gaix`.
+
+The control-flow coverage check is reproducible with
+`scripts/audit-battle-ai-flow.py`. It consumes the numbered `.lst` files
+emitted by the bundled Pawn disassembler, follows conditional jumps, direct
+calls, switch tables, and conservative indirect-call targets, and reports
+static versus may-reachable branch counts. It is an abstract reachability
+check: the retail `AI_CMD` host and concrete native-query values are not
+reconstructed, so the script is not a substitute for a value-complete Pawn-VM
+execution.
 
 ## Retail-binary state audit
 

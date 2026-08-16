@@ -74,3 +74,17 @@ The relevant source functions are `GetPowerRndNormal`, `MakeTrainerPokemon`, `Ma
 ## Optional local helper
 
 The included `scripts/inspect-offsets.sh` helper prints the target offsets and, when given a raw `.code` file, invokes radare2 for a compact inspection.
+
+## Battle-AI control-flow audit
+
+After extracting and disassembling the eleven members of RomFS `/a/0/8/4`,
+run the abstract reachability audit:
+
+```sh
+python3 scripts/audit-battle-ai-flow.py /path/to/pawn-lst-directory
+```
+
+The report separates all statically decoded branch opcodes from the subset in
+the conservative may-reachable graph. It does not model the retail `AI_CMD`
+native dispatcher or evaluate concrete battle-state predicates, so it cannot
+by itself prove a total score/action ordering.
