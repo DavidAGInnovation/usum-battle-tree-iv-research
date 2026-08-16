@@ -57,20 +57,34 @@ files from the same Momiji snapshot:
   result variables, and symbolic script-to-archive mapping.
 - `niji_project/prog/Battle/source/tr_ai/tr_ai_cmd.h` and
   `btl_BattleAiCommand.cpp` — the native tactical query surface.
+- The archived Git history of `niji_project/prog/Battle/source/tr_ai_script/`
+  — `btl_ai.pprj`/`btl_ai.files` preserve the name-ordered Pawn script list
+  (the files were later removed from the working tree).
+- `tool_project/TouchIDEditor/gflib_cpp/tools/GFArchiver.exe` (from archived
+  Git history) and the tracked
+  `gflib2/RenderingEngine/resource/bloom_resource/prog/build.bat` — the
+  archiver documents and uses `--sort=name_up`, the ascending-name rule used to
+  reconstruct the Battle AI member indices.
 
 For the analyzed US retail ROM, RomFS `/a/0/8/4` is the compact GARC candidate
 for `ARCID_BATTLE_AI`; it contains eleven valid Pawn AMX members. Its extracted
 GARC SHA-256 is `91bcf5119e76ee06ac55d081b14c1951ecfd7c9d59152548c9478750be33c28d`.
 The generated `BattleAi.gaix` archive-index file is absent from the source
-snapshot, so the note records the member inventory without assigning numeric
-member indices to the named scripts as a fully recovered fact. The AMX members
-were validated with the bundled Pawn disassembler; embedded debug labels and
-lexical member ordering provide the documented direct/inferred assignments, and
-the static command-ID/score-delta and branch-opcode audit is explicitly marked
-where the archive index is still missing. The extracted retail `.code` also
-matches the analyzed build hash `b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09`
-at VA base `0x100000`; that build identity check did not recover a symbolic
-`datIdx` trace, so it does not replace the missing `BattleAi.gaix`.
+snapshot, but its numeric map is reconstructed exactly from three independent
+facts: the archived `btl_ai.pprj`/`btl_ai.files` script list is name-ordered,
+the bundled `GFArchiver.exe` documents the ascending `name_up` sort rule, and
+the retail AMX members follow that order. Embedded labels identify every
+member except slot 5's copied `bandAI` label; the C++ `GetArcDataIndex` switch
+leaves `intrude` as the only remaining functional role. The complete map is
+therefore `0 allowance, 1 band, 2 basic, 3 double, 4 expert, 5 intrude, 6
+item, 7 moving, 8 pokechange, 9 royal, 10 strong`. The AMX members were
+validated with the bundled Pawn disassembler; the static command-ID/score-
+delta and branch-opcode audit is separately marked where value-complete VM
+execution is still missing. The extracted retail `.code` also matches the
+analyzed build hash
+`b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09` at VA base
+`0x100000`; that build identity check did not recover a symbolic `datIdx` trace,
+which is corroboration still available rather than a missing numeric mapping.
 
 The complete source archive also contains the retail Pawn execution sources:
 `gflib2/pawn/source/amx.c`, `gflib2/pawn/include/amx.h`,

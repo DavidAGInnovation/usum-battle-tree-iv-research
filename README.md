@@ -84,7 +84,8 @@ Read [docs/reproduction.md](docs/reproduction.md) for the address map, raw offse
 The battle-AI architecture and the current retail AMX evidence are documented
 in [docs/battle-ai.md](docs/battle-ai.md). That note distinguishes the proven
 score-selection engine from the static per-script AMX command and score audit,
-and labels the remaining inferred archive-name assignments.
+and records the exact reconstructed numeric `BattleAi.gaix` map (the original
+generated file bytes are not included in the supplied source snapshot).
 
 ## Prior art and attribution
 

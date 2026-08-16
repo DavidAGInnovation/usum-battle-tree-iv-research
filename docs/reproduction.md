@@ -27,6 +27,21 @@ The manifest records the source RomFS path, GARC/member hashes, and the
 `.code` hash. It is safe to keep the output outside the repository because
 the ROM and the extracted executable are copyrighted retail inputs.
 
+The archive-index source file `BattleAi.gaix` is not present in the supplied
+snapshot. Its numeric map can nevertheless be checked against the archived
+Pawn project/tool evidence and the retail member order documented in
+[battle-ai.md](battle-ai.md):
+
+```text
+0 allowance   1 band       2 basic      3 double
+4 expert      5 intrude    6 item       7 moving
+8 pokechange  9 royal      10 strong
+```
+
+This is an exact numeric reconstruction of the index map; extracting the
+original generated header or tracing `datIdx` at runtime would only provide an
+additional direct artifact/corroboration.
+
 The analyzed retail build produced an extracted raw `.code` file with SHA-256:
 
 ```text

@@ -46,12 +46,20 @@ recovers:
   `btl_AiScriptCommandHandler.cpp`, and `tr_ai_cmd.h`) from the source archive.
 
 This removes “missing input files” as the reason the VM/native analysis could
-not proceed. It does not, by itself, complete the two quantified analyses:
-the source archive has no generated `BattleAi.gaix`, and a stripped `.code`
-file still needs a writer-set audit. The recovered source shows exactly how
-the VM is initialized, how `AI_CMD` is dispatched, and how `p_Score` and
-`p_PokeChangeEnable` are read; proving every concrete score for every battle
-state still requires a VM execution/model of the native battle-state queries.
+not proceed. The source archive still omits the generated `BattleAi.gaix`
+file itself, but its archived Pawn project history and archived
+`GFArchiver.exe` resolve the numeric member order: the project lists the
+scripts in ascending name order, the archiver exposes the corresponding
+`name_up` sort mode, and the tracked resource build rules invoke that mode.
+The retail member order is exactly
+`allowance, band, basic, double, expert, intrude, item, moving, pokechange,
+royal, strong`. Thus the numeric `BattleAi.gaix` map is reconstructed exactly
+from independent source/tool and retail-archive evidence; only the original
+generated file bytes and a direct runtime `datIdx` observation remain absent.
+The recovered source shows exactly how the VM is initialized, how `AI_CMD` is
+dispatched, and how `p_Score` and `p_PokeChangeEnable` are read; proving every
+concrete score for every battle state still requires a VM execution/model of
+the native battle-state queries.
 
 ## Runtime flow
 
@@ -215,29 +223,36 @@ The source names nine functional script roles (Basic, Strong, Expert, Double,
 Allowance, Royal, Intrude, Item Basic, and Pokechange Basic), while this retail
 archive has eleven members. The generated `arc_index/BattleAi.gaix` file that
 assigns the symbolic constants to numeric archive members is not present in the
-supplied source snapshot. The AMX data itself does, however, contain debug
-labels, and the member order matches the lexical order of the source names plus
-two archive-only labels. The resulting map is:
+supplied source snapshot. Its numeric map is nevertheless recoverable: the
+archived `btl_ai.pprj`/`btl_ai.files` list is name-ordered, `GFArchiver.exe`
+and the tracked archiver build rules document/use the `name_up` sort rule, and
+the retail AMX members follow that ascending order. The AMX labels identify every member except the copied label
+on slot 5; the C++ enum supplies the only remaining functional role
+(`intrude`). The resulting exact numeric map is:
 
 | Member | Embedded label | Symbolic role | Status |
 | ---: | --- | --- | --- |
 | 0 | `allowanceAI` | `btl_ai_allowance_AMX` | Directly identified. |
-| 1 | `bandAI` | archive-only `band` candidate | Not referenced by the supplied C++ enum. |
+| 1 | `bandAI` | archive-only `band` | Legacy/archive-only member; not referenced by the supplied C++ enum. |
 | 2 | `basicAI` | `btl_ai_basic_AMX` | Directly identified. |
 | 3 | `doubleAI` | `btl_ai_double_AMX` | Directly identified. |
 | 4 | `expertAI` | `btl_ai_expert_AMX` | Directly identified. |
-| 5 | `bandAI` | `btl_ai_intrude_AMX` | Best-supported lexical-slot assignment; embedded debug label is stale/copy-pasted. |
+| 5 | `bandAI` | `btl_ai_intrude_AMX` | Exact lexical slot; embedded debug label is stale/copy-pasted from `band`. |
 | 6 | item-number checks | `btl_ai_item_AMX` | Directly identified by item-focused code. |
-| 7 | `movingAI` | archive-only `moving` candidate | Not referenced by the supplied C++ enum. |
+| 7 | `movingAI` | archive-only `moving` | Legacy/archive-only member; not referenced by the supplied C++ enum. |
 | 8 | `pokechangeAI` | `btl_ai_pokechange_AMX` | Directly identified. |
 | 9 | `royalAI` | `btl_ai_royal_AMX` | Directly identified. |
 | 10 | `strongAI` | `btl_ai_strong_AMX` | Directly identified. |
 
-The `intrude` assignment is an inference rather than a recovered `BattleAi.gaix`
-constant: member 5 occupies the exact lexical slot between `expert` and `item`,
-and `SetIntrudeAI` is the only supplied C++ path that needs that missing role.
-Members 1 and 7 are real, valid AMX programs but are not reachable through any
-script number in the supplied `BtlAiScriptNo` enum.
+The `intrude` assignment is no longer an unconstrained inference. Members 1
+and 7 already account for the two archive-only legacy names (`band` and
+`moving`); every other member is directly labeled, and `intrude` is the only
+remaining role named by the C++ `BtlAiScriptNo`/`GetArcDataIndex` switch. Its
+slot 5 position is also forced by the ascending-name order between `expert` and
+`item`. The copied `bandAI` debug label is therefore a stale script label, not
+the archive-index identity. Members 1 and 7 are real, valid AMX programs but
+are not reachable through any script number in the supplied `BtlAiScriptNo`
+enum.
 
 The retail executable was also extracted from the supplied decrypted US ROM and
 matches the `.code` hash used by the IV audit:
@@ -246,13 +261,13 @@ matches the `.code` hash used by the IV audit:
 b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09
 ```
 
-The VA base is `0x100000`. That confirms the build identity, but the retail binary is stripped:
-the generated `BattleAi.gaix` object is not present and the static inspection did
-not recover a symbolic `datIdx` trace at the archive-load call. Consequently the
-lexical-slot assignments above remain explicitly inferred, rather than being
-promoted to an exact retail name map. A debugger/emulator hook at
-`ArcFileLoadDataBuf` (or an equivalent trace of `AiScript::GetArcDataIndex`) is
-the remaining way to turn that inference into a direct observation.
+The VA base is `0x100000`. That confirms the build identity. The retail binary
+is stripped, so it does not contain the generated `BattleAi.gaix` text and the
+static inspection did not recover a symbolic `datIdx` trace at the archive-load
+call; those are provenance gaps, not unresolved numeric slots. A
+debugger/emulator hook at `ArcFileLoadDataBuf` (or an equivalent trace of
+`AiScript::GetArcDataIndex`) would be useful corroboration, but is not required
+to establish the map above.
 
 ## Static AMX audit
 
@@ -270,7 +285,7 @@ the remaining caveat below.
 | 2 Basic | 599 | 12 | 55 | −20, −12, −10, −8, −6, −5, −1 |
 | 3 Double | 626 | 45 | 43 | −30, −20, −12, −11, −10, −8, −7, −5, −4, −3, −2, −1, +1, +2, +3, +4, +5, +8, +20 |
 | 4 Expert | 1,855 | 144 | 59 | −12, −10, −8, −7, −5, −4, −3, −2, −1, +1, +2, +3, +4 |
-| 5 Intrude (inferred) | 12 | 2 | 5 | −20, −10, +1 |
+| 5 Intrude | 12 | 2 | 5 | −20, −10, +1 |
 | 6 Item | 47 | 0 | 6 | −20, +1, +2, +10 |
 | 7 archive-only moving | 2 | 2 | 2 | −10, +1 |
 | 8 Pokechange | 63 | 1 | 24 | dynamic reserve score; literal +180/+220 random bonuses appear in the code/data |
@@ -343,7 +358,7 @@ The resulting branch coverage is:
 | 2 Basic | 1,272 / 501 | 1,272 / 501 | 1 (`halt`) |
 | 3 Double | 1,620 / 301 | 1,618 / 300 | 47 |
 | 4 Expert | 3,200 / 762 | 3,200 / 762 | 1 (`halt`) |
-| 5 Intrude (inferred) | 18 / 13 | 9 / 2 | 133 |
+| 5 Intrude | 18 / 13 | 9 / 2 | 133 |
 | 6 Item | 49 / 14 | 9 / 0 | 539 |
 | 7 | 4 / 1 | 4 / 1 | 1 (`halt`) |
 | 8 Pokechange | 88 / 19 | 88 / 19 | 1 (`halt`) |
@@ -461,8 +476,9 @@ Expert together, the engine does not select one of these labels as a level.
   command sets are not nested, which disproves a strict structural superset
   interpretation; a behavioral ordering would require a separately defined
   capability relation and a proof over all states.
-- The inferred `intrude`/archive-only names without recovering `BattleAi.gaix`
-  or tracing the retail `datIdx` passed to `ArcFileLoadDataBuf`.
+- The original generated `BattleAi.gaix` file bytes and a direct retail
+  `datIdx` trace have not been recovered. The numeric map itself is established
+  by the archived project/tool ordering plus the retail member inventory above.
 - Retail-binary completeness of the mask-writer set. The matching retail
   `.code` section has now been extracted and hash-verified, but the complete
   binary audit of direct, indirect, aliased, and copied writes has not yet been
@@ -472,14 +488,13 @@ Expert together, the engine does not select one of these labels as a level.
 
 ## Remaining proof boundary
 
-Three independent steps remain for an end-to-end retail result. First,
-recovering `BattleAi.gaix` (or tracing the retail `datIdx` passed to
-`ArcFileLoadDataBuf`) would promote the inferred `intrude`/archive-only map to
-an exact name mapping. Second, a Pawn-VM execution with the retail native
-dispatcher modeled—or an equivalent dynamic trace of `p_Score` and
-`p_PokeChangeEnable` per script, candidate, and live state—would validate the
-value flow against every reachable branch. Third, a stripped-binary write-set
-audit would establish whether the supplied source's mask-writer inventory is
-complete for the retail build. Dynamic watchpoints/logging are useful
-corroboration, but observations alone still do not quantify over untraced
-inputs and paths.
+Two independent steps remain for an end-to-end retail result. First, a Pawn-VM
+execution with the retail native dispatcher modeled—or an equivalent dynamic
+trace of `p_Score` and `p_PokeChangeEnable` per script, candidate, and live
+state—would validate the value flow against every reachable branch. Second, a
+stripped-binary write-set audit would establish whether the supplied source's
+mask-writer inventory is complete for the retail build. Recovering the original
+`BattleAi.gaix` bytes or tracing `datIdx` would be useful corroboration of the
+already reconstructed map, but neither is a remaining proof obligation for its
+numeric assignments. Dynamic watchpoints/logging are useful corroboration, but
+observations alone still do not quantify over untraced inputs and paths.
