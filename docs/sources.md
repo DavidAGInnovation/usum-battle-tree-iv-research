@@ -63,8 +63,11 @@ snapshot, so the note records the member inventory without assigning numeric
 member indices to the named scripts as a fully recovered fact. The AMX members
 were validated with the bundled Pawn disassembler; embedded debug labels and
 lexical member ordering provide the documented direct/inferred assignments, and
-the static command-ID/score-delta audit is explicitly marked where the archive
-index is still missing.
+the static command-ID/score-delta and branch-opcode audit is explicitly marked
+where the archive index is still missing. The extracted retail `.code` also
+matches the analyzed build hash `b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09`
+at VA base `0x100000`; that build identity check did not recover a symbolic
+`datIdx` trace, so it does not replace the missing `BattleAi.gaix`.
 
 ## Retail-binary state audit
 

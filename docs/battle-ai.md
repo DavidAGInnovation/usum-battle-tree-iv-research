@@ -54,6 +54,38 @@ The relevant source files are `battle_def.h`, `btl_AiJudge.cpp`,
 `btl_BattleAi.cpp`, `btl_AiWazaJudge.cpp`, `btl_AiPokeChangeJudge.cpp`,
 `btl_AiScript.cpp`, and `btl_BattleAiCommand.cpp` in the Momiji snapshot.
 
+## Mask writers and mode/phase overrides
+
+The source-level mask inventory is more informative than the trainer labels.
+`BattleAi::ChangeScript` replaces the target mask in all three judges; it does
+not add a bit to the previous mask. The reachable writes and effective
+selection branches are:
+
+| Writer or selector | Context | Mask written/returned | Consequence |
+| --- | --- | --- | --- |
+| `BattleInst::SetVsTrainer` + `SetAiBit` | Ordinary NPC trainer or AI partner | `AI_BIT = 0x107`; `0x10f` in Double/Multi | Basic + Strong + Expert + Pokechange, with Double added for the two multi-Pokémon rules. No trainer-ID branch appears here. |
+| `BattleInst::SetVsTrainerRoyal` | Royal setup data | Stored `AI_BIT + ROYAL = 0x127` | The later Royal selector below is the effective runtime branch. |
+| `MainModule::GetClientAIBit` | `BTL_RULE_ROYAL` | `0x125` (`BASIC + EXPERT + ROYAL + POKECHANGE`) | Royal omits Strong in the effective selector and uses the Royal script. |
+| `MainModule::GetClientAIBit` | Ultra Beast, or wild Nūṣi/Nekurozuma | `0x007` | Basic + Strong + Expert only; no Pokechange bit. |
+| `MainModule::GetClientAIBit` | Ordinary wild Double | `0x008` | Double-only wild AI branch. |
+| `MainModule::GetClientAIBit` | Record-fight NPC data | `0x107`, plus `DOUBLE` for Double | Uses the fixed record-fight mask rather than the stored NPC mask. |
+| `BTL_CLIENT::SetIntrudeAI` | Intrusion phase | `0x040` | Replaces the mask with Intrude only. |
+| `BTL_CLIENT::SetReinforceAI` | Reinforcement phase | `0x00f` (`BASIC + STRONG + EXPERT + DOUBLE`) | Replaces the mask; Pokechange is not enabled. |
+
+For ordinary non-record NPC battles, `GetClientAIBit` returns the stored
+`m_trainerParam[clientID].ai_bit` (and clears an invalid Double bit in a
+single battle). Thus a trainer record can carry a mode bit, but the supplied
+`SetVsTrainer` constructor gives every ordinary trainer the same base mask.
+The apparent Royal `0x127`/effective `0x125` difference is not a contradiction:
+the Royal rule branch in `GetClientAIBit` supersedes the stored value when the
+AI object is constructed.
+
+This closes the source-level question about special trainers: there is no
+ordinary trainer-ID-specific upgrade, while non-Tree modes and phase changes
+are explicitly allowed to use different masks. It does **not** establish that
+no compiler-generated or retail-only writer exists outside the supplied source
+snapshot.
+
 ## What each enabled component does
 
 | Component | Judge range | Candidate being scored | Proven engine behavior |
@@ -183,6 +215,21 @@ and `SetIntrudeAI` is the only supplied C++ path that needs that missing role.
 Members 1 and 7 are real, valid AMX programs but are not reachable through any
 script number in the supplied `BtlAiScriptNo` enum.
 
+The retail executable was also extracted from the supplied decrypted US ROM and
+matches the `.code` hash used by the IV audit:
+
+```text
+b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09
+```
+
+The VA base is `0x100000`. That confirms the build identity, but the retail binary is stripped:
+the generated `BattleAi.gaix` object is not present and the static inspection did
+not recover a symbolic `datIdx` trace at the archive-load call. Consequently the
+lexical-slot assignments above remain explicitly inferred, rather than being
+promoted to an exact retail name map. A debugger/emulator hook at
+`ArcFileLoadDataBuf` (or an equivalent trace of `AiScript::GetArcDataIndex`) is
+the remaining way to turn that inference into a direct observation.
+
 ## Static AMX audit
 
 The following counts come from the Pawn disassemblies of the 11 extracted
@@ -221,6 +268,31 @@ The exact numeric ID sets are:
 9  : 0,24,26,28,31,33,34,45,62,71,72,93,94,117,120
 10 : 0,24,26,28,33,34,45,57,62,67,71,72,81,93,94,96,97,117
 ```
+
+The disassembly also gives an exhaustive *opcode* inventory of the control
+flow, but not an exhaustive semantic execution. The following counts are
+static Pawn opcodes (`jzer`, `jnz`, `jeq`, `jneq`, signed comparisons, and
+related conditional jumps; then unconditional `jump`). They are included to
+make the remaining symbolic-execution work measurable:
+
+| Member | Conditional jumps | Unconditional jumps |
+| ---: | ---: | ---: |
+| 0 | 6 | 1 |
+| 1 | 21 | 11 |
+| 2 | 1,272 | 501 |
+| 3 | 1,620 | 301 |
+| 4 | 3,200 | 762 |
+| 5 | 18 | 13 |
+| 6 | 49 | 14 |
+| 7 | 4 | 1 |
+| 8 | 88 | 19 |
+| 9 | 203 | 49 |
+| 10 | 148 | 36 |
+
+These counts cover every branch opcode in all eleven extracted programs. They
+do not quantify the values flowing through every branch: Pawn locals/stack
+temporaries, native-query results, random draws, and computed score arguments
+still require a VM-aware symbolic interpreter or a live trace.
 
 The IDs resolve through `tr_ai_cmd.h`; for example, Basic and Expert use the
 HP/status/type/field/ability/reserve families, Double adds partner and shared
@@ -276,6 +348,24 @@ ladder: the programs have different command surfaces and different scoring
 objectives, and all enabled scripts are accumulated rather than selected as a
 single level.
 
+### Why the command surface is not a monotone tier proof
+
+The static command sets make the non-monotonicity concrete. Strong uses five
+commands that Basic does not (`28`, `45`, `81`, `96`, `97`):
+`CMD_COMP_POWER`, `CMD_IF_WAZA_HINSHI`, `CMD_CHECK_AGI_RANK`, and the two
+common-random comparisons. Basic uses 42 commands that Strong does not. Expert
+also has 16 commands absent from Basic (`22`, `47`, `49`, `63`, `80`, `81`,
+`82`, `83`, `84`, `88`, `96`, `97`, `101`, `102`, `112`, `119`), while Basic
+has 12 commands absent from Expert (`14`, `39`, `54`, `59`, `60`, `74`, `75`,
+`78`, `100`, `104`, `108`, `122`).
+
+Thus neither `Strong ⊇ Basic` nor `Expert ⊇ Basic` holds even at the native
+query surface. This disproves a simple structural “strict superset” reading,
+but it is not by itself a complete behavioral ordering theorem: command
+arguments, branch conditions, score deltas, and the live battle state still
+determine the final action. Since the ordinary mask enables Basic, Strong, and
+Expert together, the engine does not select one of these labels as a level.
+
 ## What is proven, and what is not
 
 ### Proven by the current evidence
@@ -287,24 +377,33 @@ single level.
 - The scripts execute as Pawn programs and call a native C++ battle-query
   interface.
 - Action and candidate ties are randomized.
-- No per-special-trainer AI mask branch appears in the ordinary
-  `SetVsTrainer` path.
+- No per-special-trainer AI mask branch appears in the ordinary `SetVsTrainer`
+  path; the source-level writer inventory identifies the explicit Royal, wild,
+  record-fight, intrusion, and reinforcement overrides.
+- The retail AMX archive has been fully inventoried and all branch opcodes,
+  direct command IDs, and direct score-delta literals have been counted for all
+  eleven members.
 
 ### Not yet proven
 
 - A path-complete symbolic execution of every condition/score/threshold branch;
-  the static audit records each recoverable call site and literal delta, but
-  not every value computed through intermediate Pawn variables.
+  the branch-opcode inventory is complete, but the static audit still does not
+  propagate every value through intermediate Pawn variables, native-query
+  results, random draws, and computed score arguments.
 - That Strong or Expert is monotonically more capable than Basic.
 - The inferred `intrude`/archive-only names without recovering `BattleAi.gaix`
   or tracing the retail `datIdx` passed to `ArcFileLoadDataBuf`.
 - That every special trainer uses the same mask in every non-Tree mode or after
-  every phase override.
+  every phase override; the source actually documents several intentional
+  exceptions.
 
 ## Remaining proof boundary
 
-Recovering `BattleAi.gaix` (or tracing the retail `datIdx` passed to
-`ArcFileLoadDataBuf`) would promote the inferred `intrude`/archive-only map to
-an exact name mapping. A dynamic trace of `p_Score` and
-`p_PokeChangeEnable` per script and candidate would then validate the static
-reading against live battle state.
+Two independent steps remain for an end-to-end result. First, recovering
+`BattleAi.gaix` (or tracing the retail `datIdx` passed to `ArcFileLoadDataBuf`)
+would promote the inferred `intrude`/archive-only map to an exact name
+mapping. Second, a Pawn-VM symbolic execution or dynamic trace of
+`p_Score` and `p_PokeChangeEnable` per script, candidate, and live state would
+validate the static reading against every reachable branch. Dynamic
+watchpoints/logging are useful corroboration, but observations alone still do
+not quantify over untraced inputs and paths.
