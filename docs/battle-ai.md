@@ -29,6 +29,30 @@ no branch that selects a different mask for a featured character. Battle mode
 and phase overrides are separate: Double/Multi adds the Double script, Royal
 uses the Royal script, and intrusion/reinforcement code can replace the mask.
 
+## Recovery status for the remaining evidence
+
+The actual decrypted US retail ROM and the complete Momiji source archive are
+now available as analysis inputs. `scripts/extract-retail-battle-ai.py`
+reproduces the extraction without copying either input into the repository. It
+recovers:
+
+- RomFS `/a/0/8/4`, a 410,792-byte GARC with eleven valid AMX members, hash
+  `91bcf5119e76ee06ac55d081b14c1951ecfd7c9d59152548c9478750be33c28d`;
+- the raw ExeFS `.code` section, 5,914,624 bytes at VA base `0x100000`, hash
+  `b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09`; and
+- the standard Pawn VM (`amx.c`/`amx.h`), the Game Freak Pawn host
+  (`gfl2_PawnBase.*`), and the complete native AI dispatcher and command
+  handler (`btl_AiScript.cpp`, `btl_BattleAiCommand.cpp`,
+  `btl_AiScriptCommandHandler.cpp`, and `tr_ai_cmd.h`) from the source archive.
+
+This removes “missing input files” as the reason the VM/native analysis could
+not proceed. It does not, by itself, complete the two quantified analyses:
+the source archive has no generated `BattleAi.gaix`, and a stripped `.code`
+file still needs a writer-set audit. The recovered source shows exactly how
+the VM is initialized, how `AI_CMD` is dispatched, and how `p_Score` and
+`p_PokeChangeEnable` are read; proving every concrete score for every battle
+state still requires a VM execution/model of the native battle-state queries.
+
 ## Runtime flow
 
 The source-level flow is:
@@ -428,21 +452,23 @@ Expert together, the engine does not select one of these labels as a level.
 ### Not yet proven
 
 - A value-complete symbolic execution of every condition/score/threshold
-  branch. The new abstract audit covers both control-flow outcomes, but it
-  intentionally leaves native-query results, random draws, and computed
-  values symbolic; without the retail Pawn host semantics it cannot prove a
-  concrete score/action theorem for every live state.
+  branch. The retail Pawn VM, host lifecycle, and native `AI_CMD` dispatcher
+  sources have now been recovered, but no VM-aware symbolic harness has yet
+  propagated every local, native-query result, random draw, and computed score
+  through every live state. The source therefore removes an evidence gap; it
+  does not by itself prove a concrete score/action theorem for every state.
 - That Strong or Expert is monotonically more capable than Basic. The native
   command sets are not nested, which disproves a strict structural superset
   interpretation; a behavioral ordering would require a separately defined
   capability relation and a proof over all states.
 - The inferred `intrude`/archive-only names without recovering `BattleAi.gaix`
   or tracing the retail `datIdx` passed to `ArcFileLoadDataBuf`.
-- Retail-binary completeness of the mask-writer set. At source scope, the
-  universal claim that every special trainer uses one mask is disproved by the
-  explicit Royal, wild, record-fight, intrusion, and reinforcement branches
-  listed above; proving that no additional writer exists in the retail binary
-  still needs a binary write-set audit.
+- Retail-binary completeness of the mask-writer set. The matching retail
+  `.code` section has now been extracted and hash-verified, but the complete
+  binary audit of direct, indirect, aliased, and copied writes has not yet been
+  performed. At source scope, the universal claim that every special trainer
+  uses one mask is disproved by the explicit Royal, wild, record-fight,
+  intrusion, and reinforcement branches listed above.
 
 ## Remaining proof boundary
 

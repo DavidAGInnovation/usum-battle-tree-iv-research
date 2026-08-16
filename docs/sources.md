@@ -72,6 +72,21 @@ matches the analyzed build hash `b5388f7500d91be01499a99ca007c98212068608ed7c83c
 at VA base `0x100000`; that build identity check did not recover a symbolic
 `datIdx` trace, so it does not replace the missing `BattleAi.gaix`.
 
+The complete source archive also contains the retail Pawn execution sources:
+`gflib2/pawn/source/amx.c`, `gflib2/pawn/include/amx.h`,
+`gflib2/pawn/source/gfl2_Pawn.cpp`, `gflib2/pawn/source/gfl2_PawnBase.cpp`,
+and the Battle AI host/dispatcher sources listed above. These sources establish
+the VM instruction semantics, `AMX_EXEC`/sleep lifecycle, native registration,
+`AI_CMD` command-table dispatch, and the `p_Score`/
+`p_PokeChangeEnable` result boundary. They do not supply the generated
+archive-index constants or a complete symbolic model of all battle-state
+objects queried by the native commands.
+
+The extraction is reproducible with
+`scripts/extract-retail-battle-ai.py`; it writes a manifest containing the
+GARC/member hashes and the `.code` hash. The script intentionally does not
+bundle the ROM or source archive.
+
 The control-flow coverage check is reproducible with
 `scripts/audit-battle-ai-flow.py`. It consumes the numbered `.lst` files
 emitted by the bundled Pawn disassembler, follows conditional jumps, direct
