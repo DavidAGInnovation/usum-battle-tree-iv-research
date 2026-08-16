@@ -36,6 +36,36 @@ construction:
 This is a source-level path-exclusion audit, not a claim that every retail
 instruction or compiler-generated alias has been exhaustively classified.
 
+## Battle-AI source and retail archive evidence
+
+The battle-AI note in [battle-ai.md](battle-ai.md) uses the following source
+files from the same Momiji snapshot:
+
+- `niji_project/prog/Battle/include/battle_def.h` — script IDs and bit flags.
+- `niji_project/prog/Field/FieldStatic/include/BattleInst/BattleInst.h` and
+  `.../source/BattleInst/BattleInst.cpp` — the `0x107` Battle Tree base mask
+  and Double/Multi addition.
+- `niji_project/prog/Battle/source/tr_ai/btl_BattleAi.cpp` — action-selection
+  order and cross-action score comparison.
+- `niji_project/prog/Battle/source/tr_ai/btl_AiJudge.cpp` — bitmask iteration.
+- `niji_project/prog/Battle/source/tr_ai/btl_AiWazaJudge.cpp` and
+  `btl_AiPokeChangeJudge.cpp` — move and switching score accumulation.
+- `niji_project/prog/Battle/source/tr_ai/btl_AiScript.cpp` — Pawn loading,
+  result variables, and symbolic script-to-archive mapping.
+- `niji_project/prog/Battle/source/tr_ai/tr_ai_cmd.h` and
+  `btl_BattleAiCommand.cpp` — the native tactical query surface.
+
+For the analyzed US retail ROM, RomFS `/a/0/8/4` is the compact GARC candidate
+for `ARCID_BATTLE_AI`; it contains eleven valid Pawn AMX members. Its extracted
+GARC SHA-256 is `91bcf5119e76ee06ac55d081b14c1951ecfd7c9d59152548c9478750be33c28d`.
+The generated `BattleAi.gaix` archive-index file is absent from the source
+snapshot, so the note records the member inventory without assigning numeric
+member indices to the named scripts as a fully recovered fact. The AMX members
+were validated with the bundled Pawn disassembler; embedded debug labels and
+lexical member ordering provide the documented direct/inferred assignments, and
+the static command-ID/score-delta audit is explicitly marked where the archive
+index is still missing.
+
 ## Retail-binary state audit
 
 The retail `.code` write-set audit is reported in the [retail writer

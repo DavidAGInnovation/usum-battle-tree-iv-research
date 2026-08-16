@@ -81,6 +81,11 @@ The range rule itself is:
 
 Read [docs/reproduction.md](docs/reproduction.md) for the address map, raw offsets, and commands that operate on an external extracted `.code` file. Large/proprietary artifacts are intentionally kept out of Git; `.gitignore` blocks common ROM, executable, and archive extensions.
 
+The battle-AI architecture and the current retail AMX evidence are documented
+in [docs/battle-ai.md](docs/battle-ai.md). That note distinguishes the proven
+score-selection engine from the static per-script AMX command and score audit,
+and labels the remaining inferred archive-name assignments.
+
 ## Prior art and attribution
 
 The IV ranges and the 31-IV special/scouted-partner expectation were discussed publicly before this executable trace. The analysis provides executable-level confirmation for the analyzed US retail build and the separate partner/scouted construction paths. Sources and required attribution are listed in [docs/sources.md](docs/sources.md).
