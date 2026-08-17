@@ -101,6 +101,11 @@ The extraction is reproducible with
 GARC/member hashes and the `.code` hash. The script intentionally does not
 bundle the ROM or source archive.
 
+The final proof-status ledger for the Battle-AI claims is in
+[proof-closure.md](proof-closure.md). It records which claims are disproved,
+which artifact-recovery result is negative, and which stronger whole-binary
+theorem is explicitly outside the present analysis.
+
 The control-flow coverage check is reproducible with
 `scripts/audit-battle-ai-flow.py`. It consumes the numbered `.lst` files
 emitted by the bundled Pawn disassembler, follows conditional jumps, direct

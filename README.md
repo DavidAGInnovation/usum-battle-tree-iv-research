@@ -86,6 +86,8 @@ in [docs/battle-ai.md](docs/battle-ai.md). That note distinguishes the proven
 score-selection engine from the static per-script AMX command and score audit,
 and records the exact reconstructed numeric `BattleAi.gaix` map (the original
 generated file bytes are not included in the supplied source snapshot).
+The final verdict for every former proof-boundary item is in
+[docs/proof-closure.md](docs/proof-closure.md); no item is left unclassified.
 
 ## Prior art and attribution
 

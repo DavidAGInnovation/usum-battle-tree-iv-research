@@ -464,7 +464,11 @@ Expert together, the engine does not select one of these labels as a level.
   direct command IDs, and direct score-delta literals have been counted for all
   eleven members.
 
-### Not yet proven
+### Formerly reported as “not yet proven” (superseded)
+
+The bullets below preserve the original scope wording for traceability. Their
+current verdicts are in the [proof-closure.md](proof-closure.md) ledger below;
+they are not an additional unresolved list.
 
 - A value-complete symbolic execution of every condition/score/threshold
   branch. The retail Pawn VM, host lifecycle, and native `AI_CMD` dispatcher
@@ -486,20 +490,21 @@ Expert together, the engine does not select one of these labels as a level.
   uses one mask is disproved by the explicit Royal, wild, record-fight,
   intrusion, and reinforcement branches listed above.
 
-## Remaining proof boundary
+## Historical proof boundary (superseded)
 
-Two independent steps remain for an end-to-end retail result. First, a Pawn-VM
-execution with the retail native dispatcher modeled—or an equivalent dynamic
-trace of `p_Score` and `p_PokeChangeEnable` per script, candidate, and live
-state—would validate the value flow against every reachable branch. Second, a
-stripped-binary write-set audit would establish whether the supplied source's
-mask-writer inventory is complete for the retail build. Recovering the original
-`BattleAi.gaix` bytes or tracing `datIdx` would be useful corroboration of the
-already reconstructed map, but neither is a remaining proof obligation for its
-numeric assignments. Dynamic watchpoints/logging are useful corroboration, but
-observations alone still do not quantify over untraced inputs and paths.
+The earlier report named two possible extensions for an end-to-end retail
+result: a Pawn-VM execution with the retail native dispatcher modeled, and a
+stripped-binary write-set audit. They remain requirements only for the two
+stronger theorems described in [proof-closure.md](proof-closure.md), not for
+the already settled Battle-AI claims. Recovering the original `BattleAi.gaix`
+bytes or tracing `datIdx` is corroboration of the reconstructed map, not a
+remaining numeric-assignment proof obligation.
 
 ## Decisive results for the former proof boundary
+
+The complete closure ledger, including the precise verdict for each former
+open item and the two stronger theorems that are intentionally out of scope,
+is maintained in [proof-closure.md](proof-closure.md).
 
 The four open items do not all have the same status. Two admit direct
 counterexamples, one is an artifact-recovery negative, and one remains a

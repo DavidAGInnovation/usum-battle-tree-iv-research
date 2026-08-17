@@ -119,3 +119,6 @@ The report separates all statically decoded branch opcodes from the subset in
 the conservative may-reachable graph. It does not model the retail `AI_CMD`
 native dispatcher or evaluate concrete battle-state predicates, so it cannot
 by itself prove a total score/action ordering.
+
+The final disposition of the former proof-boundary items is recorded in
+[proof-closure.md](proof-closure.md).
