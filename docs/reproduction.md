@@ -127,12 +127,15 @@ To reproduce the retail AI-mask candidate sweep after extracting the CROs and
 python3 scripts/audit-retail-ai-mask-writers.py \
   /tmp/usum-retail-battle-ai/code.bin \
   /path/to/extracted-cros \
+  --main-text-size 0x4ba000 \
   --json /tmp/usum-ai-mask-writers.json
 ```
 
 The sweep is intentionally an over-approximation of scalar, double-word, and
 register-list stores using the two source-layout displacements `0x4` and
-`0x1c`, while tracking local immediate and literal-pool constants. It records candidates,
+`0x1c`, while tracking local immediate and literal-pool constants. The
+`0x4ba000` text bound comes from the retail NCCH ExHeader and excludes the raw
+ExeFS `.code` read-only/data tail from the executable sweep. It records candidates,
 relocation sites, scalar/double-word/register-list store forms, and a
 conservative local register-provenance class for each candidate. It now
 identifies the three direct source-mapped writers in the retail `.code`
@@ -158,3 +161,17 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-proof-boundary-separation.py \
 The verifier checks the exact bytes and confirms that the `Battle.cro` store
 has no relocation at the instruction; it deliberately does not assign a C++
 object type from the displacement alone.
+
+The section-aware pass also leaves one real Thumb same-offset collision at
+`.code:0x688`. Verify its surrounding object behavior with:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-retail-mask-layout-disproof.py \
+  /tmp/usum-retail-battle-ai/code.bin
+```
+
+This check confirms that the sequence treats offset `0` as a bitfield and
+builds a payload at `+0x24` after writing `8` at `+0x1c`; it therefore cannot
+be either recovered source-defined `ai_bit` layout. It does not claim that
+every unrelated same-displacement store in the stripped retail image has
+been assigned a C++ object type.

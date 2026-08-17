@@ -16,7 +16,9 @@ not that proof itself.  The CRO pass records relocation-backed literal loads
 and a deliberately local register-provenance class; aliases, copied
 structures, and the ARM/Thumb interprocedural function graph still have to be
 resolved before a writer can be declared (or ruled out) as an ``ai_bit``
-writer.
+writer.  For the main image, ``--main-text-size`` can be set from the retail
+NCCH ExHeader so read-only/data bytes appended to the raw ExeFS ``.code`` do
+not inflate the executable candidate set.
 """
 
 from __future__ import annotations
@@ -226,6 +228,7 @@ def scan(
     code: bytes,
     mode: int,
     *,
+    instruction_size: int | None = None,
     limit: int | None = None,
     code_file_offset: int = 0,
     relocation_file_offsets: set[int] | None = None,
@@ -238,7 +241,8 @@ def scan(
     # rest of the candidate sweep silently disappear.
     md.skipdata = True
     rows: list[dict[str, object]] = []
-    instructions = list(md.disasm(code, 0))
+    instruction_bytes = code if instruction_size is None else code[:instruction_size]
+    instructions = list(md.disasm(instruction_bytes, 0))
 
     def reg_name(reg: int) -> str:
         return md.reg_name(reg).lower()
@@ -464,6 +468,12 @@ def main() -> None:
     parser.add_argument("cro_dir", type=Path, help="directory of extracted CRO files")
     parser.add_argument("--json", dest="json_path", type=Path)
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument(
+        "--main-text-size",
+        type=lambda value: int(value, 0),
+        default=None,
+        help="scan only this many bytes as executable text in the main .code image",
+    )
     args = parser.parse_args()
 
     code = args.code.read_bytes()
@@ -472,13 +482,19 @@ def main() -> None:
     # The main ExeFS section is mixed ARM/Thumb and stripped.  Both linear
     # sweeps are retained as over-approximations and labelled by mode.
     for mode, label in ((CS_MODE_ARM, "arm"), (CS_MODE_THUMB, "thumb")):
-        hits = scan(code, mode, limit=args.limit)
+        hits = scan(
+            code,
+            mode,
+            instruction_size=args.main_text_size,
+            limit=args.limit,
+        )
         rows.append(
             {
                 "module": ".code",
                 "mode": label,
                 "code_sha256": sha256(code),
                 "code_size": len(code),
+                "instruction_size": args.main_text_size,
                 "hits": hits,
                 "hit_count": len(hits),
                 "stack_base_hits": sum(bool(x["stack_base"]) for x in hits),
@@ -561,6 +577,7 @@ def main() -> None:
         "fields": {name: hex(offset) for name, offset in FIELDS.items()},
         "mode": "relocation-aware local provenance classification; not alias-complete",
         "main_code_relocations": "unavailable: ExeFS .code is a stripped mapped image, not a CRO",
+        "main_code_text_size": args.main_text_size,
         "provenance_counts": dict(
             sorted(
                 Counter(

@@ -3,33 +3,35 @@
   "inputs": {
     "main_code_sha256": "b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09",
     "main_code_size": 5914624,
+    "main_code_text_size": 4956160,
+    "main_code_text_size_source": "recovered/retail-code-layout.json",
     "cro_count": 132,
     "candidate_offsets": ["0x4", "0x1c"]
   },
   "candidate_counts": {
-    "main_code_arm": 27709,
-    "main_code_thumb": 22673,
+    "main_code_arm": 25604,
+    "main_code_thumb": 19703,
     "cro_arm": 22338,
-    "all_store_forms": 72720
+    "all_store_forms": 67645
   },
   "provenance_counts": {
-    "function-arg": 5467,
-    "immediate-constant": 612,
-    "literal-constant": 2182,
-    "memory-derived": 631,
+    "function-arg": 5447,
+    "immediate-constant": 534,
+    "literal-constant": 2109,
+    "memory-derived": 586,
     "relocation-derived": 5036,
-    "stack-pointer": 11867,
-    "unknown": 46925
+    "stack-pointer": 11740,
+    "unknown": 42193
   },
   "store_kind_counts": {
-    "double-high": 3956,
+    "double-high": 2747,
     "double-low": 460,
-    "register-list": 38481,
-    "scalar": 29823
+    "register-list": 35692,
+    "scalar": 28746
   },
-  "mask_constant_candidates": 337,
+  "mask_constant_candidates": 325,
   "mask_constant_candidates_by_value": {
-    "0x7": 87,
+    "0x7": 75,
     "0x8": 210,
     "0xf": 28,
     "0x40": 8,
@@ -39,15 +41,27 @@
   "mask_constant_candidates_by_value_provenance": {
     "computed-constant": 2,
     "immediate-constant": 321,
-    "literal-constant": 14
+    "literal-constant": 2
   },
   "additional_candidate_disposition": {
-    "main_thumb_constant_candidates": 14,
-    "main_thumb_constant_candidates_status": "12 disproved as code writers; 1 disproved as a Thumb writer; 1 remains an unresolved same-offset collision",
-    "main_thumb_constant_candidates_basis": "Offsets 0x510af4, 0x511510, 0x511f0c, 0x512928, 0x513310, 0x513d2c, 0x514770, 0x51518c, 0x515bf4, 0x516690, 0x51707c, and 0x517a90 decode to the same repeated data pattern under Thumb (stm r0!, {r0,r1,r2,r3,r5,r7}, surrounded by movs/ands zero padding); the same bytes decode as data-like ARM and have no recovered Thumb prologue or call target. Offset 0x3d3600 lies inside an ARM-executable function reached by ARM branches/calls, so its Thumb decode is not a Thumb writer. Offset 0x688 is real Thumb code that writes 8 at +0x1c, but its object identity is not recovered and it does not match any source-level ai_bit writer; it remains a collision candidate rather than proof of an AI-mask write.",
+    "main_thumb_constant_candidates": 2,
+    "main_thumb_constant_candidates_status": "both rejected as source ai_bit writers; 0x3d3600 is an ARM-code overlap and 0x688 is a source-layout-incompatible collision",
+    "main_thumb_constant_candidates_basis": "After applying the retail ExHeader text boundary at 0x4ba000, only offsets 0x688 and 0x3d3600 remain in the executable region. Offset 0x3d3600 lies inside an ARM-executable function reached by ARM branches/calls, so its Thumb decode is not a Thumb writer. Offset 0x688 is real Thumb code, but its surrounding sequence first ORs 0x20 into [r0] and then uses a separate +0x24 payload after writing 8 at +0x1c. That object behavior is incompatible with both recovered source layouts: MainModule::TRAINER_DATA has a playerStatus pointer at +0x0, while BSP_TRAINER_DATA::CORE_DATA has tr_id at +0x0 and ai_bit at +0x4. Thus 0x688 is disproved as either source-defined ai_bit writer. It remains possible only as an unrelated retail object using the same displacement, so this refinement does not prove universal aliased/copied writer completeness.",
     "main_arm_stack_constant_candidates": 1,
     "main_arm_stack_constant_candidates_status": "not_an_object_writer",
     "main_arm_stack_constant_candidates_basis": "The 0x29b56c store uses sp as its base and writes a local temporary, not either heap/object argument."
+  },
+  "main_thumb_layout_disproof": {
+    "offset": "0x688",
+    "function_start": "0x5fc",
+    "verified_by": "scripts/verify-retail-mask-layout-disproof.py",
+    "observed_sequence": [
+      "ldr r3, [r0]; orrs r3, r4; str r3, [r0]",
+      "movs r3, #8; str r3, [r0, #0x1c]",
+      "branch target adds +0x24 and writes decoded payload bytes"
+    ],
+    "source_layout_conflict": "MainModule::TRAINER_DATA has a playerStatus pointer at +0x0; BSP_TRAINER_DATA::CORE_DATA has tr_id at +0x0 and ai_bit at +0x4.",
+    "verdict": "Disproved as either source-defined ai_bit writer; an unrelated retail object at the same displacement remains outside this local structural proof."
   },
   "source_writer_inventory": [
     {
@@ -131,5 +145,5 @@
     "executable_targets": 58255,
     "invalid": 0
   },
-  "verdict": "The expanded pass now recognizes scalar, double-word, and register-list stores, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 337 mask-valued candidates, but 321 are immediate-value collisions (mostly 0x7/0x8/0xf), 14 are literal-pool values, and only the three 0x10f/0x127 stores are source-mapped. It still leaves 46,925 rows with unknown base provenance; the other non-mapped rows have only local register/constant classifications, not C++ object identity. Interprocedural aliases, copied structs, and stripped-main-code relocations remain unresolved, so complete aliased/copy writer coverage is not established."
+  "verdict": "The section-aware pass recognizes scalar, double-word, and register-list stores only in the 0x4ba000-byte executable text region, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 325 mask-valued candidates, but 321 are immediate-value collisions (mostly 0x7/0x8/0xf), 2 are literal-pool values, and only the three 0x10f/0x127 stores are source-mapped. It still leaves 42,193 rows with unknown base provenance; the other non-mapped rows have only local register/constant classifications, not C++ object identity. Interprocedural aliases, copied structs, and stripped-main-code relocations remain unresolved, so complete aliased/copy writer coverage is not established."
 }

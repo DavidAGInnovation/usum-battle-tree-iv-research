@@ -73,15 +73,16 @@ read-only scanner
 enumerates scalar, double-word, and register-list stores whose effective
 address reaches either source-layout displacement in the exact extracted
 build. It covers all 132 extracted CRO code segments and both linear ARM and
-Thumb over-approximations of the stripped `.code` section. On the hashed inputs
+Thumb over-approximations of the executable `.code` text region from the
+retail ExHeader. On the hashed inputs
 above it found:
 
 | Image region | Store candidates |
 | --- | ---: |
-| ExeFS `.code`, ARM sweep | 27,709 |
-| ExeFS `.code`, Thumb sweep | 22,673 |
+| ExeFS `.code` text, ARM sweep | 25,604 |
+| ExeFS `.code` text, Thumb sweep | 19,703 |
 | 132 CRO code segments, ARM sweep | 22,338 |
-| **Total** | **72,720** |
+| **Total** | **67,645** |
 
 The displacement is not an object identity: it is also common in stack frames
 and unrelated C++ structures. For example, `Battle.cro` contributes candidate
@@ -92,24 +93,36 @@ CRO relocation tables: 45,221 import and 56,581 internal records, all 101,802
 recognized as `R_ARM_ABS32`, with 58,255 executable-segment targets and no
 malformed entries. None of the candidate stores is itself a relocation
 patch site. The expanded pass recognizes scalar, double-word, and register-list
-stores. It classifies 72,720 candidates in total; 27,709 ARM and 22,673 Thumb
-`.code` candidates plus 22,338 ARM candidates across the 132 CRO segments.
+stores. The retail ExHeader gives the executable text boundary as `0x4ba000`
+bytes; the raw `.code` tail is not instruction text and is excluded from the
+main image sweep. On that section-aware input it classifies 67,645 candidates
+in total: 25,604 ARM and 19,703 Thumb `.code` candidates plus 22,338 ARM
+candidates across the 132 CRO segments.
 It also confirms three direct source-mapped writers in the main image:
 `0x58260` (`stm r5,{r4,r7}`) and `0x582d4` (`str r7,[r5,#4]`) write the
 ordinary `0x107`/Double `0x10f` mask at `+0x4` on the two `SetVsTrainer`
 branches, while `0x59370` (`str r1,[r2,#4]`) writes Royal `0x127`. The
-remaining base classifications are 5,467 function-argument, 612
-immediate-constant, 2,182 literal-constant, 631 memory-derived, 5,036
-relocation-derived, 11,867 stack-relative, and 46,925 unknown; the exact
+remaining base classifications are 5,447 function-argument, 534
+immediate-constant, 2,109 literal-constant, 586 memory-derived, 5,036
+relocation-derived, 11,740 stack-relative, and 42,193 unknown; the exact
 counts are recorded in
 [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).
-The scan reports 337 mask-valued candidates: 321 immediate values, 14
+The ExHeader values and the exact section-boundary calculation are preserved in
+[`recovered/retail-code-layout.json`](../recovered/retail-code-layout.json).
+The scan reports 325 mask-valued candidates: 321 immediate values, 2
 literal-pool values, and 2 computed values. Most are same-offset collisions
 with `0x7`, `0x8`, or `0xf`; only the three `0x10f`/`0x127` stores are mapped
-to the source. Of the 14 Thumb constants, 12 are repeated data, one is an ARM
-code overlap, and `0x688` is real Thumb code whose object identity remains
-unresolved. The remaining ARM mask-valued candidate is a stack temporary;
-none of these residual rows is promoted to an object writer.
+to the source. Of the two executable Thumb constants, one (`0x3d3600`) is an
+ARM-code overlap. The other (`0x688`) is real Thumb code, but its surrounding
+sequence ORs a flag into offset `0`, writes `8` at `+0x1c`, and then consumes a
+separate `+0x24` payload. That behavior is incompatible with both recovered
+source layouts: `MainModule::TRAINER_DATA` has a pointer at `+0x0`, while
+`BSP_TRAINER_DATA::CORE_DATA` has `tr_id` at `+0x0` and `ai_bit` at `+0x4`.
+It is therefore disproved as either source-defined `ai_bit` writer. The
+remaining ARM mask-valued candidate is a stack temporary. These refinements
+remove the residual candidates that could be identified from their instruction
+context, but an unrelated retail object using the same displacement still
+cannot be excluded without whole-program object provenance.
 At the `MainModule::TRAINER_DATA` layout, the source separately specifies
 aggregate initialization, `trainerParam_StoreCore` zeroing, and
 `trainerParam_StoreNPCTrainer` copying `GetAIBit()` into `+0x1c`; those three

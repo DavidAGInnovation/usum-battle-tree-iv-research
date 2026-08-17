@@ -1,0 +1,22 @@
+{
+  "artifact": "retail NCCH code-set layout used by the ai_bit writer audit",
+  "source": {
+    "rom": "Pokemon Ultra Sun (USA) Decrypted.3ds",
+    "ncch_partition_offset": "0x4000",
+    "exheader_offset": "0x4200",
+    "exheader_hash_sha256": "7c442b035822d490db2a229f4f184e59e6cf7756989f88019e23a8b55068a5d4"
+  },
+  "code_set_info": {
+    "text_address": "0x100000",
+    "text_size_pages": "0x4ba",
+    "text_size_bytes": "0x4ba000",
+    "raw_exefs_code_size": "0x5a4000",
+    "raw_tail_after_text": "0xea000",
+    "ro_address": "0x4b99f0",
+    "ro_size": "0x40000",
+    "data_address": "0x5ba000",
+    "data_size_pages": "0xad",
+    "bss_size": "0xac948"
+  },
+  "audit_use": "The main-image scanner is invoked with --main-text-size 0x4ba000; literal-pool lookups still use the complete raw .code bytes, but instruction decoding stops at the ExHeader text boundary."
+}
