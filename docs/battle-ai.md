@@ -21,7 +21,10 @@ one switching program. The engine runs every enabled program in the relevant
 judge, adds their returned scores, and chooses the highest-scoring action. The
 source labels `BASIC` (basic), `STRONG` (攻撃型AI, attack-oriented), and
 `EXPERT` (expert) establish their intended roles, but do not prove that Expert
-is a strict superset of Strong or that either is always “smarter”.
+is a strict superset of Strong or that either is always “smarter”. A strict
+command-set interpretation is disproved below; a behavioral comparison is
+defined separately as a quantified score/action relation rather than left as
+an informal difficulty label.
 
 The current Battle Tree evidence also does not show a trainer-ID-specific AI
 upgrade. `SetVsTrainer` applies the same base mask to the trainer data and has
@@ -60,6 +63,31 @@ The recovered source shows exactly how the VM is initialized, how `AI_CMD` is
 dispatched, and how `p_Score` and `p_PokeChangeEnable` are read; proving every
 concrete score for every battle state still requires a VM execution/model of
 the native battle-state queries.
+
+### Retail `ai_bit` writer candidate sweep
+
+`MainModule::TRAINER_DATA::ai_bit` is at offset `0x1c` in the recovered source
+layout. The new read-only scanner
+[`scripts/audit-retail-ai-mask-writers.py`](../scripts/audit-retail-ai-mask-writers.py)
+enumerates literal ARM stores with that displacement in the exact extracted
+build. It covers all 132 extracted CRO code segments and both linear ARM and
+Thumb over-approximations of the stripped `.code` section. On the hashed
+inputs above it found:
+
+| Image region | Candidate stores | Stack-base candidates |
+| --- | ---: | ---: |
+| ExeFS `.code`, ARM sweep | 2,286 | 703 |
+| ExeFS `.code`, Thumb sweep | 1,125 | 126 |
+| 132 CRO code segments, ARM sweep | 2,265 | (module-specific) |
+
+The displacement is not an object identity: it is also common in stack frames
+and unrelated C++ structures. For example, `Battle.cro` contributes ten
+literal candidates, including an initializer-like pair and a loop over an
+array-of-structures; neither can be called an `ai_bit` writer without resolving
+the CRO relocations and object type. This is therefore a complete candidate
+inventory for the stated pattern, not a complete direct/indirect/aliased/copy
+writer proof. The remaining binary theorem is precisely the relocation-aware
+field-sensitive lift described in [`proof-closure.md`](proof-closure.md).
 
 ## Runtime flow
 
@@ -374,6 +402,20 @@ major move programs, while preserving the semantic caveat: an unconstrained
 native result can take either branch in the model, and the model does not
 derive the concrete score from the live battle state.
 
+### Direct Pawn-VM execution check (execution validation only)
+
+The recovered `amx.c` was compiled with the extracted retail members and the
+`AI_CMD` callback interface. With a zero-return callback, members 02 (Basic),
+04 (Expert), and 10 (Strong) all return successfully with score zero. With a
+second deterministic callback that supplies synthetic random/HP/query values,
+the same members return Basic `-10`, Expert `0`, and Strong `+1` (seed `1`).
+This is useful evidence that native results and random draws actually flow
+through the live AMX body into `p_Score`; it is not a legal battle-state
+counterexample because the callback does not instantiate the retail handler's
+object graph or enforce cross-command state correlations. Consequently it
+validates the execution path while leaving the all-`σ` score/action theorem
+unproved.
+
 The IDs resolve through `tr_ai_cmd.h`; for example, Basic and Expert use the
 HP/status/type/field/ability/reserve families, Double adds partner and shared
 random commands (`96`, `97`, `101`, `102`, `111`), Royal uses ranking command
@@ -440,11 +482,36 @@ has 12 commands absent from Expert (`14`, `39`, `54`, `59`, `60`, `74`, `75`,
 `78`, `100`, `104`, `108`, `122`).
 
 Thus neither `Strong ⊇ Basic` nor `Expert ⊇ Basic` holds even at the native
-query surface. This disproves a simple structural “strict superset” reading,
-but it is not by itself a complete behavioral ordering theorem: command
-arguments, branch conditions, score deltas, and the live battle state still
-determine the final action. Since the ordinary mask enables Basic, Strong, and
-Expert together, the engine does not select one of these labels as a level.
+query surface. This disproves a simple structural “strict superset” reading.
+It does not, by itself, prove or disprove a behavioral score ordering, because
+command arguments, branch conditions, score deltas, and the live battle state
+still determine the final action. Since the ordinary mask enables Basic,
+Strong, and Expert together, the engine does not select one of these labels as
+a level.
+
+### A behavioral ordering is now a precise theorem
+
+Let `Q(s)` be the set of native command IDs used by script `s`. The structural
+relation is `s1 >=struct s0` iff `Q(s0) ⊆ Q(s1)`; the command-set witnesses
+above disprove `Strong >=struct Basic` and `Expert >=struct Basic`.
+
+To avoid smuggling a difficulty assumption into the word “capable”, define
+`F_s(σ,c,r)` as the score and switch-enable output returned by script `s` for
+legal live state `σ`, candidate `c`, and random trace `r`. Score dominance is
+the quantified relation:
+
+```text
+s1 >=score s0  iff  for every (σ,c,r), F_s1(σ,c,r) >= F_s0(σ,c,r)
+```
+
+An action-dominance claim additionally needs a utility function over actions
+and the tie/randomness policy used by the judges. The recovered native
+dispatcher and Pawn VM are sufficient to execute a chosen state, but a
+complete legal-state model and an all-state symbolic proof have not been
+constructed. A direct VM probe with a synthetic native callback confirms that
+the extracted Basic, Strong, and Expert bodies execute and that changing
+native/random returns changes their scores; it is execution-path validation,
+not a legal-state witness for `>=score` or `>=action`.
 
 ## What is proven, and what is not
 
@@ -472,14 +539,15 @@ they are not an additional unresolved list.
 
 - A value-complete symbolic execution of every condition/score/threshold
   branch. The retail Pawn VM, host lifecycle, and native `AI_CMD` dispatcher
-  sources have now been recovered, but no VM-aware symbolic harness has yet
-  propagated every local, native-query result, random draw, and computed score
-  through every live state. The source therefore removes an evidence gap; it
-  does not by itself prove a concrete score/action theorem for every state.
+  sources have now been recovered, and the extracted members execute through
+  that VM interface. No all-state symbolic model of native results, object
+  aliases, random traces, and host scheduling has been completed, so the
+  execution path is validated but no universal score/action theorem is
+  claimed.
 - That Strong or Expert is monotonically more capable than Basic. The native
-  command sets are not nested, which disproves a strict structural superset
-  interpretation; a behavioral ordering would require a separately defined
-  capability relation and a proof over all states.
+  command sets are not nested, which disproves strict structural dominance.
+  Behavioral score dominance is now defined above; it remains a quantified
+  theorem requiring a legal-state model, not an undefined label.
 - The original generated `BattleAi.gaix` file bytes and a direct retail
   `datIdx` trace have not been recovered. The numeric map itself is established
   by the archived project/tool ordering plus the retail member inventory above.
@@ -527,9 +595,11 @@ score/action theorem for every state is not.
 The native command sets are not nested. Strong uses commands absent from Basic
 (`28`, `45`, `81`, `96`, `97`), while Basic uses 42 commands absent from
 Strong. Expert and Basic are also mutually non-subsuming. Thus “Strong” or
-“Expert” as a strict structural superset of Basic is false. A behavioral claim
-such as “always chooses a better action” still has no defined capability
-relation and cannot be evaluated until one is specified.
+“Expert” as a strict structural superset of Basic is false. A behavioral score
+relation is now explicit (`F_s(σ,c,r)` quantified over legal states,
+candidates, and random traces), but it is not established by command sets or
+by a synthetic callback. An action relation additionally requires a utility
+function and tie policy.
 
 ### The original `BattleAi.gaix` bytes are absent from the supplied artifacts
 

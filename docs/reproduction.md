@@ -120,5 +120,19 @@ the conservative may-reachable graph. It does not model the retail `AI_CMD`
 native dispatcher or evaluate concrete battle-state predicates, so it cannot
 by itself prove a total score/action ordering.
 
+To reproduce the retail AI-mask candidate sweep after extracting the CROs and
+`.code` section, run:
+
+```sh
+python3 scripts/audit-retail-ai-mask-writers.py \
+  /tmp/usum-retail-battle-ai/code.bin \
+  /path/to/extracted-cros \
+  --json /tmp/usum-ai-mask-writers.json
+```
+
+The sweep is intentionally an over-approximation of literal stores using the
+source-layout displacement `0x1c`. It records candidates and stack-base
+stores; it does not classify aliases or copied structures as `ai_bit` writers.
+
 The final disposition of the former proof-boundary items is recorded in
 [proof-closure.md](proof-closure.md).
