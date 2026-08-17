@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Enumerate literal ARM stores using the TRAINER_DATA ``ai_bit`` offset.
+"""Enumerate literal ARM stores using source-defined ``ai_bit`` offsets.
 
 This is a deliberately conservative *candidate* audit.  In the retail
-source, ``MainModule::TRAINER_DATA::ai_bit`` is at offset ``0x1c``.  A literal
-``str/strb/strh`` displacement of ``0x1c`` is therefore worth reviewing, but
-the displacement alone does not identify the pointee: the same offset occurs
-in stack frames and unrelated structures.  The script reports all such
+source, ``BSP_TRAINER_DATA::CORE_DATA::ai_bit`` is at offset ``0x4`` and
+``MainModule::TRAINER_DATA::ai_bit`` is at offset ``0x1c``. A literal
+``str/strb/strh`` displacement of either value is therefore worth reviewing,
+but the displacement alone does not identify the pointee: both offsets occur
+in stack frames and unrelated structures. The script reports all such
 candidates in the extracted CRO code segments and in the raw ExeFS ``.code``
-section.  It never silently classifies a candidate as an AI-mask writer.
+section. It never silently classifies a candidate as an AI-mask writer.
 
 The output is evidence for the boundary of a whole-binary data-flow proof,
 not that proof itself.  Relocations, aliases, copied structures, and the
@@ -54,6 +55,12 @@ STORE_IDS = {
     ARM_INS_STREXH,
 }
 
+FIELDS = {
+    "BSP_TRAINER_DATA::CORE_DATA::ai_bit": 0x4,
+    "MainModule::TRAINER_DATA::ai_bit": 0x1C,
+}
+FIELD_BY_OFFSET = {offset: name for name, offset in FIELDS.items()}
+
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -86,11 +93,14 @@ def scan(code: bytes, mode: int, *, limit: int | None = None) -> list[dict[str, 
         if ins.id not in STORE_IDS or len(ins.operands) < 2:
             continue
         mem = ins.operands[1]
-        if mem.type != ARM_OP_MEM or mem.mem.disp != 0x1C:
+        if mem.type != ARM_OP_MEM or mem.mem.disp not in FIELD_BY_OFFSET:
             continue
+        field = FIELD_BY_OFFSET[mem.mem.disp]
         rows.append(
             {
                 "offset": ins.address,
+                "displacement": hex(mem.mem.disp),
+                "field": field,
                 "mnemonic": ins.mnemonic,
                 "operands": ins.op_str,
                 "stack_base": mem.mem.base == ARM_REG_SP,
@@ -126,6 +136,9 @@ def main() -> None:
                 "hits": hits,
                 "hit_count": len(hits),
                 "stack_base_hits": sum(bool(x["stack_base"]) for x in hits),
+                "field_counts": {
+                    field: sum(x["field"] == field for x in hits) for field in FIELDS
+                },
                 "truncated": args.limit is not None and len(hits) >= args.limit,
             }
         )
@@ -143,13 +156,15 @@ def main() -> None:
                 "hits": hits,
                 "hit_count": len(hits),
                 "stack_base_hits": sum(bool(x["stack_base"]) for x in hits),
+                "field_counts": {
+                    field: sum(x["field"] == field for x in hits) for field in FIELDS
+                },
                 "truncated": args.limit is not None and len(hits) >= args.limit,
             }
         )
 
     result = {
-        "field": "MainModule::TRAINER_DATA::ai_bit",
-        "offset": "0x1c",
+        "fields": {name: hex(offset) for name, offset in FIELDS.items()},
         "mode": "candidate enumeration; not alias-complete",
         "modules": rows,
     }

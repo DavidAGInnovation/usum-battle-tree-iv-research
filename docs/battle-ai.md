@@ -66,28 +66,30 @@ the native battle-state queries.
 
 ### Retail `ai_bit` writer candidate sweep
 
-`MainModule::TRAINER_DATA::ai_bit` is at offset `0x1c` in the recovered source
-layout. The new read-only scanner
+The recovered source has two `ai_bit` layouts: `BSP_TRAINER_DATA::CORE_DATA::ai_bit`
+at offset `0x4` and `MainModule::TRAINER_DATA::ai_bit` at offset `0x1c`. The new
+read-only scanner
 [`scripts/audit-retail-ai-mask-writers.py`](../scripts/audit-retail-ai-mask-writers.py)
-enumerates literal ARM stores with that displacement in the exact extracted
-build. It covers all 132 extracted CRO code segments and both linear ARM and
-Thumb over-approximations of the stripped `.code` section. On the hashed
-inputs above it found:
+enumerates literal ARM stores with either source-layout displacement in the
+exact extracted build. It covers all 132 extracted CRO code segments and both
+linear ARM and Thumb over-approximations of the stripped `.code` section. On
+the hashed inputs above it found:
 
-| Image region | Candidate stores | Stack-base candidates |
+| Image region | `+0x4` candidates | `+0x1c` candidates |
 | --- | ---: | ---: |
-| ExeFS `.code`, ARM sweep | 2,286 | 703 |
-| ExeFS `.code`, Thumb sweep | 1,125 | 126 |
-| 132 CRO code segments, ARM sweep | 2,265 | (module-specific) |
+| ExeFS `.code`, ARM sweep | 12,498 | 2,286 |
+| ExeFS `.code`, Thumb sweep | 4,336 | 1,125 |
+| 132 CRO code segments, ARM sweep | 7,313 | 2,265 |
 
 The displacement is not an object identity: it is also common in stack frames
-and unrelated C++ structures. For example, `Battle.cro` contributes ten
-literal candidates, including an initializer-like pair and a loop over an
-array-of-structures; neither can be called an `ai_bit` writer without resolving
-the CRO relocations and object type. This is therefore a complete candidate
-inventory for the stated pattern, not a complete direct/indirect/aliased/copy
-writer proof. The remaining binary theorem is precisely the relocation-aware
-field-sensitive lift described in [`proof-closure.md`](proof-closure.md).
+and unrelated C++ structures. For example, `Battle.cro` contributes literal
+candidates at both offsets, including an initializer-like pair and a loop over
+an array-of-structures; neither can be called an `ai_bit` writer without
+resolving the CRO relocations and object type. This is therefore a complete
+candidate inventory for the stated literal pattern, not a complete
+direct/indirect/aliased/copy writer proof. The remaining binary theorem is
+precisely the relocation-aware field-sensitive lift described in
+[`proof-closure.md`](proof-closure.md).
 
 ## Runtime flow
 
@@ -511,7 +513,13 @@ complete legal-state model and an all-state symbolic proof have not been
 constructed. A direct VM probe with a synthetic native callback confirms that
 the extracted Basic, Strong, and Expert bodies execute and that changing
 native/random returns changes their scores; it is execution-path validation,
-not a legal-state witness for `>=score` or `>=action`.
+not a legal-state witness for `>=score` or `>=action`. A stronger contract-level
+check is now available: a callback vector satisfying the native return
+contracts yields Basic `0` and Strong `−1` (Expert `0`) on the exact retail
+members. Thus Strong score dominance is disproved over that abstraction. The
+Expert ordering and the quantified legal-retail-state theorems remain open
+until an equivalent witness or an all-state model ties the values to reachable
+battle object graphs.
 
 ## What is proven, and what is not
 

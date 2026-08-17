@@ -131,8 +131,9 @@ python3 scripts/audit-retail-ai-mask-writers.py \
 ```
 
 The sweep is intentionally an over-approximation of literal stores using the
-source-layout displacement `0x1c`. It records candidates and stack-base
-stores; it does not classify aliases or copied structures as `ai_bit` writers.
+two source-layout displacements `0x4` and `0x1c`. It records candidates and
+stack-base stores; it does not classify aliases or copied structures as
+`ai_bit` writers.
 
 The final disposition of the former proof-boundary items is recorded in
 [proof-closure.md](proof-closure.md).

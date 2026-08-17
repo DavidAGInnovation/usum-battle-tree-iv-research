@@ -15,10 +15,10 @@ universal proof.
 | Former item | Verdict | Evidence and exact scope |
 | --- | --- | --- |
 | The existing branch-opcode audit is a value-complete symbolic execution of every condition, score, and threshold branch. | **Disproved as a characterization of the audit.** | The recovered native dispatcher makes branch results depend on live state: `CMDFUNC_IF_RND_UNDER` draws a fresh random byte, `CMDFUNC_IF_HP_UNDER` reads the active HP ratio, and `CMDFUNC_GET_MAX_WAZA_POWER_INCLUDE_AFFINITY` computes a state-dependent value. The host reads `p_Score` and `p_PokeChangeEnable` only after the Pawn program returns. Thus opcode reachability does not determine one score/action for every legal state. The audit proves branch-opcode coverage and literal extraction, not a value-complete all-state theorem. |
-| Strong or Expert is monotonically more capable than Basic. | **Strict structural dominance is disproved; behavioral score/action dominance is now defined but not established.** | Let `Q(s)` be the native-command IDs used by script `s`. The structural claim `Q(Basic) ⊆ Q(Strong)` or `Q(Basic) ⊆ Q(Expert)` is false in both cases, with witnesses in each direction. For a behavioral theorem, define `F_s(σ,c,r)` as the returned script score and switch-enable result for live state `σ`, candidate `c`, and random trace `r`; score dominance is `∀σ,c,r: F_Strong ≥ F_Basic` (and analogously for Expert). The recovered VM and dispatcher execute the real AMX bodies, but the native callback must still be modeled over all legal `σ`; a synthetic callback is a sanity check, not a behavioral witness. |
+| Strong or Expert is monotonically more capable than Basic. | **Strict structural dominance is disproved. Strong score dominance is disproved over the native-contract abstraction; Expert score dominance and both legal-retail-state theorems remain unestablished.** | Let `Q(s)` be the native-command IDs used by script `s`. The structural claim `Q(Basic) ⊆ Q(Strong)` or `Q(Basic) ⊆ Q(Expert)` is false in both cases, with witnesses in each direction. Define `F_s(σ,c,r)` as the returned script score and switch-enable result for legal live state `σ`, candidate `c`, and random trace `r`; the retail theorem would require `∀σ,c,r: F_Strong ≥ F_Basic` (and analogously for Expert). A direct VM run over a native-contract return vector gives Strong `−1` versus Basic `0`, so command contracts alone do not imply Strong dominance. Because the vector has not been realized by one fully instantiated retail object graph, this is a counterexample to the contract abstraction, not yet a counterexample to the narrower `∀`-over-legal-retail-states theorem. No analogous Expert contract witness has been established. |
 | The original generated `BattleAi.gaix` bytes can be recovered from the supplied source and ROM. | **Disproved for these inputs; equivalent reconstruction proved.** | The complete archived Git object database has zero `BattleAi.gaix` objects, the source archive has no path with that name, and the retail RomFS has no generated `.gaix` file. The retail GARC, archived project ordering, archiver sort rule, and C++ index switch force the numeric map. The source-compatible header is reconstructed at [`recovered/BattleAi.gaix`](../recovered/BattleAi.gaix). It is logically equivalent, not byte-identical. A runtime `datIdx` trace would be corroboration only, not a remaining numeric-map proof obligation. |
 | Every special trainer uses one AI mask in every mode and phase. | **Disproved at source scope.** | The source has explicit alternatives: ordinary `0x107`, Royal `0x125`, special-wild `0x007`, wild Double `0x008`, intrusion `0x040`, reinforcement `0x00f`, and Battle Festival Basic-only reductions. Therefore the universal same-mask statement is false. |
-| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Not established; the candidate sweep is complete but the alias/data-flow proof is not.** | The exact retail `.code` and all 132 CROs were extracted and hashed. `scripts/audit-retail-ai-mask-writers.py` enumerates every literal ARM store with displacement `0x1c` in the CRO code segments and both linear ARM/Thumb over-approximations of `.code`: 2,286 ARM and 1,125 Thumb `.code` candidates, plus 2,265 CRO ARM candidates. Most are stack slots or unrelated structures; the Battle CRO alone has ten. Relocations, function boundaries, aliases, and copied-structure destinations are not resolved by a displacement scan, so no candidate can be promoted to (or excluded from) `ai_bit` without a whole-binary data-flow proof. |
+| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Not established; the candidate sweep is complete but the alias/data-flow proof is not.** | The source has two layouts: `BSP_TRAINER_DATA::CORE_DATA::ai_bit` at `+0x4` and `MainModule::TRAINER_DATA::ai_bit` at `+0x1c`. On the exact extracted build, `scripts/audit-retail-ai-mask-writers.py` finds 12,498 ARM / 4,336 Thumb `.code` candidates at `+0x4`, 2,286 ARM / 1,125 Thumb `.code` candidates at `+0x1c`, and 7,313 `+0x4` / 2,265 `+0x1c` candidates across the 132 CRO code segments. These are literal-displacement candidates, mostly stack slots or unrelated structures; relocations, function boundaries, aliases, and copied-structure destinations are not resolved, so no candidate can be promoted to (or excluded from) `ai_bit` without a whole-binary data-flow proof. |
 
 ## What is closed, and what is not being claimed
 
@@ -85,3 +85,38 @@ the source-level conclusions.
 Those are not gaps in the classification above; they are new, stronger claims
 with materially larger hypotheses than the source/AMX conclusions documented
 here.
+
+### Contract-level score counterexample
+
+To separate a real result from an arbitrary callback experiment, define
+`F_s^contract` over native return vectors that obey each dispatcher function's
+documented return contract, without yet requiring that one retail battle object
+graph realize every component simultaneously. The following vector is within
+those contracts on the Strong member `10` path:
+
+```text
+CHECK_WAZASEQNO=0       GET_CURRENT_WAZANO=1  CHECK_DAMAGE_WAZA=1
+COMP_POWER=1            CHECK_MONSNO=1       CHECK_TOKUSEI=1
+CHECK_BTL_RULE=0        IF_WAZA_HINSHI=0     CHECK_WAZA_USABLE=0
+CHECK_WAZA_AISYOU=0     IF_HAVE_ITEM=0       all other calls on path=0
+```
+
+The values have the native meanings `COMP_POWER_NOTOP`, a move/species ID of
+`1`, true/false predicates, and otherwise valid zero-valued flags. They satisfy
+the individual native return contracts; the tuple is deliberately not claimed
+to be a fully correlated retail object graph. Running the exact retail AMX
+bodies through the recovered VM with that callback produces:
+
+```text
+member 02 (Basic):  score  0
+member 10 (Strong): score -1
+member 04 (Expert): score  0
+```
+
+Therefore `F_Strong^contract >= F_Basic^contract` is false. This closes the
+previously unclassified *contract-level* question and proves that the labels
+cannot be ordered from the dispatcher contracts alone. It does not silently
+promote the result to a retail-state witness: proving or disproving the
+narrower theorem still requires either a concrete state construction showing
+that this correlated vector is reachable, or a value-complete symbolic model
+of the native object graph and random/host semantics.
