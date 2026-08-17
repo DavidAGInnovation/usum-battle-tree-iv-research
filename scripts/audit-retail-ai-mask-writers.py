@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Enumerate literal ARM stores using source-defined ``ai_bit`` offsets.
+"""Enumerate ARM store candidates using source-defined ``ai_bit`` offsets.
 
 This is a deliberately conservative *candidate* audit.  In the retail
 source, ``BSP_TRAINER_DATA::CORE_DATA::ai_bit`` is at offset ``0x4`` and
 ``MainModule::TRAINER_DATA::ai_bit`` is at offset ``0x1c``. A literal
-``str/strb/strh`` displacement of either value is therefore worth reviewing,
-but the displacement alone does not identify the pointee: both offsets occur
-in stack frames and unrelated structures. The script reports all such
-candidates in the extracted CRO code segments and in the raw ExeFS ``.code``
-section. It never silently classifies a candidate as an AI-mask writer.
+``str/strb/strh``, ``strd``, or register-list store whose effective address
+reaches either value is therefore worth reviewing, but the displacement alone
+does not identify the pointee: both offsets occur in stack frames and unrelated
+structures. The script reports all such candidates in the extracted CRO code
+segments and in the raw ExeFS ``.code`` section. It never silently classifies a
+candidate as an AI-mask writer.
 
 The output is evidence for the boundary of a whole-binary data-flow proof,
 not that proof itself.  The CRO pass records relocation-backed literal loads
@@ -32,9 +33,14 @@ from capstone.arm import (
     ARM_INS_STR,
     ARM_INS_STRB,
     ARM_INS_STRBT,
+    ARM_INS_STRD,
     ARM_INS_STREX,
     ARM_INS_STREXB,
     ARM_INS_STREXH,
+    ARM_INS_STM,
+    ARM_INS_STMDA,
+    ARM_INS_STMDB,
+    ARM_INS_STMIB,
     ARM_INS_STRH,
     ARM_INS_STRHT,
     ARM_INS_STRT,
@@ -58,12 +64,17 @@ STORE_IDS = {
     ARM_INS_STREXB,
     ARM_INS_STREXH,
 }
+STORE_MULTI_IDS = {ARM_INS_STM, ARM_INS_STMDA, ARM_INS_STMDB, ARM_INS_STMIB}
 
 FIELDS = {
     "BSP_TRAINER_DATA::CORE_DATA::ai_bit": 0x4,
     "MainModule::TRAINER_DATA::ai_bit": 0x1C,
 }
 FIELD_BY_OFFSET = {offset: name for name, offset in FIELDS.items()}
+# Composite values emitted by the source-level selectors.  Single-bit values
+# are deliberately excluded: they occur too often in unrelated structures to
+# be useful as an AI-mask discriminator.
+AI_MASK_VALUES = {0x107, 0x10F, 0x125, 0x127, 0x007, 0x008, 0x040, 0x00F}
 
 
 def sha256(data: bytes) -> str:
@@ -232,7 +243,7 @@ def scan(
     def reg_name(reg: int) -> str:
         return md.reg_name(reg).lower()
 
-    def provenance(index: int, base: int) -> dict[str, object]:
+    def provenance(index: int) -> dict[str, dict[str, object]]:
         """Track only local ARM register copies and literal relocations.
 
         This intentionally stops at calls/branches and treats unknown loads,
@@ -255,17 +266,45 @@ def scan(
                 continue
             mnemonic = ins.mnemonic.lower()
             ops = ins.operands
-            if j < index and (mnemonic in {"b", "bl", "bx", "blx", "pop"}
-                              or mnemonic.startswith("b.")):
-                # The target may be outside this local window; discard all
-                # register facts instead of inventing a cross-block alias.
+            if mnemonic == "push" and any(reg_name(op.reg) == "lr" for op in ops if op.type == 1):
+                # A conventional ARM/Thumb prologue starts a function with
+                # PUSH {...,lr}; restore the incoming argument facts here.
+                state = {f"r{i}": {"kind": "function-arg", "arg": i} for i in range(4)}
+                continue
+            if j < index and mnemonic in {"bl", "blx"}:
+                # A conforming ARM call preserves r4-r11; invalidate only
+                # caller-saved facts while retaining constants held in the
+                # callee-saved registers used by compiler-generated structs.
+                state = {name: value for name, value in state.items() if name not in {"r0", "r1", "r2", "r3", "r12", "lr"}}
+                continue
+            if j < index and mnemonic in {"b", "bx", "pop"}:
+                # Conditional branches preserve register facts on the local
+                # fall-through path.  Unconditional transfers/calls may leave
+                # the local block, so discard facts rather than inventing a
+                # cross-block alias.
                 state = {}
                 continue
-            if mnemonic in {"mov", "movs"} and len(ops) >= 2 and ops[0].type == 1:
+            if (mnemonic in {"mov", "movs"} or (mnemonic.startswith("mov") and mnemonic not in {"movw", "movt", "mvn", "mvns"})) and len(ops) >= 2 and ops[0].type == 1:
                 dst = reg_name(ops[0].reg)
                 src = reg_name(ops[1].reg) if ops[1].type == 1 else None
                 if src is not None and src in state:
                     state[dst] = {**state[src], "via": f"{mnemonic} {src}"}
+                else:
+                    state.pop(dst, None)
+                continue
+            if mnemonic in {"mvn", "mvns"} and len(ops) >= 2 and ops[0].type == 1:
+                dst = reg_name(ops[0].reg)
+                if ops[1].type == 2:
+                    state[dst] = {"kind": "immediate-constant", "value": (~ops[1].imm) & 0xFFFFFFFF}
+                else:
+                    state.pop(dst, None)
+                continue
+            if mnemonic in {"movw", "movt"} and len(ops) >= 2 and ops[0].type == 1:
+                dst = reg_name(ops[0].reg)
+                if ops[1].type == 2:
+                    old = int(state.get(dst, {}).get("value", 0))
+                    value = ((old & 0xFFFF) | (ops[1].imm << 16)) if mnemonic == "movt" else ((old & 0xFFFF0000) | ops[1].imm)
+                    state[dst] = {"kind": "immediate-constant", "value": value & 0xFFFFFFFF}
                 else:
                     state.pop(dst, None)
                 continue
@@ -276,11 +315,35 @@ def scan(
                 else:
                     state.pop(dst, None)
                 continue
+            if mnemonic in {"orr", "orrs", "add", "adds", "sub", "subs", "and", "ands", "bic", "bics"} and len(ops) >= 3 and ops[0].type == 1 and ops[1].type == 1:
+                dst, left = reg_name(ops[0].reg), state.get(reg_name(ops[1].reg), {}).get("value")
+                right = ops[2].imm if ops[2].type == 2 else state.get(reg_name(ops[2].reg), {}).get("value")
+                if right is not None and ops[2].type == 1 and ops[2].shift.type:
+                    if ops[2].shift.type == 2:  # LSL
+                        right = (right << ops[2].shift.value) & 0xFFFFFFFF
+                    elif ops[2].shift.type == 3:  # LSR
+                        right = (right & 0xFFFFFFFF) >> ops[2].shift.value
+                    elif ops[2].shift.type == 1:  # ASR
+                        signed = right if right < 0x80000000 else right - 0x100000000
+                        right = (signed >> ops[2].shift.value) & 0xFFFFFFFF
+                if left is None or right is None:
+                    state.pop(dst, None)
+                elif mnemonic.startswith("orr"):
+                    state[dst] = {"kind": "computed-constant", "value": (left | right) & 0xFFFFFFFF}
+                elif mnemonic.startswith("add"):
+                    state[dst] = {"kind": "computed-constant", "value": (left + right) & 0xFFFFFFFF}
+                elif mnemonic.startswith("sub"):
+                    state[dst] = {"kind": "computed-constant", "value": (left - right) & 0xFFFFFFFF}
+                elif mnemonic.startswith("and"):
+                    state[dst] = {"kind": "computed-constant", "value": left & right}
+                else:
+                    state[dst] = {"kind": "computed-constant", "value": left & (~right)}
+                continue
             if mnemonic in {"ldr", "ldrb", "ldrh"} and len(ops) >= 2 and ops[0].type == 1 and ops[1].type == 3:
                 dst = reg_name(ops[0].reg)
                 mem = ops[1].mem
                 if mem.base == ARM_REG_PC:  # ARM PC; literal pool load.
-                    literal = ins.address + 8 + mem.disp
+                    literal = (ins.address + 8 + mem.disp) if mode == CS_MODE_ARM else (((ins.address + 4) & ~3) + mem.disp)
                     file_offset = code_file_offset + literal
                     rel = (relocations_by_file_offset or {}).get(file_offset)
                     if rel is not None:
@@ -288,6 +351,12 @@ def scan(
                             "kind": "relocation-derived",
                             "literal_file_offset": hex(file_offset),
                             **rel,
+                        }
+                    elif 0 <= literal <= len(code) - 4:
+                        state[dst] = {
+                            "kind": "literal-constant",
+                            "value": struct.unpack_from("<I", code, literal)[0],
+                            "literal_file_offset": hex(file_offset),
                         }
                     else:
                         state.pop(dst, None)
@@ -303,37 +372,77 @@ def scan(
             # A write to a register from any other instruction invalidates its
             # local fact.  Keep this conservative and avoid modelling flags,
             # register lists, or compiler-specific idioms here.
-            if ops and ops[0].type == 1 and mnemonic not in {"str", "strb", "strh", "strex", "strexb", "strexh"}:
+            if ops and ops[0].type == 1 and mnemonic not in {"str", "strb", "strh", "strd", "strex", "strexb", "strexh", "stm", "stmia", "stmib", "stmda", "stmdb"}:
                 state.pop(reg_name(ops[0].reg), None)
-        if base == ARM_REG_SP:
-            return {"kind": "stack-pointer"}
-        return state.get(reg_name(base), {"kind": "unknown"})
+        return state
 
     for index, ins in enumerate(instructions):
-        if ins.id not in STORE_IDS or len(ins.operands) < 2:
+        # Normalize scalar stores, double-word stores, and register-list stores
+        # into (base register, field displacement, value register) tuples.
+        candidates: list[tuple[int, int, int, str]] = []
+        if ins.id in STORE_IDS and len(ins.operands) >= 2:
+            mem = ins.operands[1]
+            if mem.type == ARM_OP_MEM:
+                candidates.append((mem.mem.base, mem.mem.disp, ins.operands[0].reg, "scalar"))
+        elif ins.id == ARM_INS_STRD and len(ins.operands) >= 3:
+            mem = ins.operands[2]
+            if mem.type == ARM_OP_MEM:
+                # STRD writes the first register at disp and the second at
+                # disp+4 on the little-endian ARM retail target.
+                candidates.append((mem.mem.base, mem.mem.disp, ins.operands[0].reg, "double-low"))
+                candidates.append((mem.mem.base, mem.mem.disp + 4, ins.operands[1].reg, "double-high"))
+        elif ins.id in STORE_MULTI_IDS and len(ins.operands) >= 2:
+            base_reg = ins.operands[0].reg
+            regs = sorted(op.reg for op in ins.operands[1:] if op.type == 1)
+            mnemonic = ins.mnemonic.lower()
+            if "ib" in mnemonic:
+                first_offset = 4
+            elif "db" in mnemonic:
+                first_offset = -4 * len(regs)
+            elif "da" in mnemonic:
+                first_offset = -4 * (len(regs) - 1)
+            else:  # STM/IA: increment after.
+                first_offset = 0
+            candidates.extend(
+                (base_reg, first_offset + 4 * slot, reg, "register-list")
+                for slot, reg in enumerate(regs)
+            )
+        else:
             continue
-        mem = ins.operands[1]
-        if mem.type != ARM_OP_MEM or mem.mem.disp not in FIELD_BY_OFFSET:
-            continue
-        field = FIELD_BY_OFFSET[mem.mem.disp]
-        rows.append(
-            {
-                "offset": ins.address,
-                "displacement": hex(mem.mem.disp),
-                "field": field,
-                "mnemonic": ins.mnemonic,
-                "operands": ins.op_str,
-                "stack_base": mem.mem.base == ARM_REG_SP,
-                "bytes": ins.bytes.hex(),
-                "relocation_at_instruction": (
-                    relocation_file_offsets is not None
-                    and code_file_offset + ins.address in relocation_file_offsets
-                ),
-                "base_provenance": provenance(index, mem.mem.base),
-            }
-        )
-        if limit is not None and len(rows) >= limit:
-            break
+
+        for base_reg, displacement, value_reg, store_kind in candidates:
+            if displacement not in FIELD_BY_OFFSET:
+                continue
+            mem_base = base_reg
+            field = FIELD_BY_OFFSET[displacement]
+            state = provenance(index)
+            source = state.get(reg_name(value_reg), {"kind": "unknown"})
+            base = {"kind": "stack-pointer"} if mem_base == ARM_REG_SP else state.get(reg_name(mem_base), {"kind": "unknown"})
+            rows.append(
+                {
+                    "offset": ins.address,
+                    "displacement": hex(displacement),
+                    "field": field,
+                    "mnemonic": ins.mnemonic,
+                    "operands": ins.op_str,
+                    "store_kind": store_kind,
+                    "stack_base": mem_base == ARM_REG_SP,
+                    "bytes": ins.bytes.hex(),
+                    "relocation_at_instruction": (
+                        relocation_file_offsets is not None
+                        and code_file_offset + ins.address in relocation_file_offsets
+                    ),
+                    "base_provenance": base,
+                    "value_provenance": source,
+                    "ai_mask_constant": (
+                        source.get("value") in AI_MASK_VALUES
+                        if source.get("kind") in {"immediate-constant", "literal-constant", "computed-constant"}
+                        else False
+                    ),
+                }
+            )
+            if limit is not None and len(rows) >= limit:
+                return rows
     return rows
 
 
@@ -364,6 +473,7 @@ def main() -> None:
                 "field_counts": {
                     field: sum(x["field"] == field for x in hits) for field in FIELDS
                 },
+                "ai_mask_constant_candidates": sum(bool(x["ai_mask_constant"]) for x in hits),
                 "truncated": args.limit is not None and len(hits) >= args.limit,
             }
         )
@@ -394,6 +504,7 @@ def main() -> None:
                 "field_counts": {
                     field: sum(x["field"] == field for x in hits) for field in FIELDS
                 },
+                "ai_mask_constant_candidates": sum(bool(x["ai_mask_constant"]) for x in hits),
                 "truncated": args.limit is not None and len(hits) >= args.limit,
             }
         )
@@ -408,6 +519,16 @@ def main() -> None:
                     hit["base_provenance"]["kind"]
                     for module in rows
                     for hit in module["hits"]
+                ).items()
+            )
+        ),
+        "ai_mask_constant_candidate_count": sum(
+            bool(hit["ai_mask_constant"]) for module in rows for hit in module["hits"]
+        ),
+        "store_kind_counts": dict(
+            sorted(
+                Counter(
+                    hit["store_kind"] for module in rows for hit in module["hits"]
                 ).items()
             )
         ),

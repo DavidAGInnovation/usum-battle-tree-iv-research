@@ -70,28 +70,37 @@ The recovered source has two `ai_bit` layouts: `BSP_TRAINER_DATA::CORE_DATA::ai_
 at offset `0x4` and `MainModule::TRAINER_DATA::ai_bit` at offset `0x1c`. The new
 read-only scanner
 [`scripts/audit-retail-ai-mask-writers.py`](../scripts/audit-retail-ai-mask-writers.py)
-enumerates literal ARM stores with either source-layout displacement in the
-exact extracted build. It covers all 132 extracted CRO code segments and both
-linear ARM and Thumb over-approximations of the stripped `.code` section. On
-the hashed inputs above it found:
+enumerates scalar, double-word, and register-list stores whose effective
+address reaches either source-layout displacement in the exact extracted
+build. It covers all 132 extracted CRO code segments and both linear ARM and
+Thumb over-approximations of the stripped `.code` section. On the hashed inputs
+above it found:
 
-| Image region | `+0x4` candidates | `+0x1c` candidates |
-| --- | ---: | ---: |
-| ExeFS `.code`, ARM sweep | 12,498 | 2,286 |
-| ExeFS `.code`, Thumb sweep | 4,336 | 1,125 |
-| 132 CRO code segments, ARM sweep | 7,313 | 2,265 |
+| Image region | Store candidates |
+| --- | ---: |
+| ExeFS `.code`, ARM sweep | 27,709 |
+| ExeFS `.code`, Thumb sweep | 22,673 |
+| 132 CRO code segments, ARM sweep | 22,338 |
+| **Total** | **72,720** |
 
 The displacement is not an object identity: it is also common in stack frames
-and unrelated C++ structures. For example, `Battle.cro` contributes literal
-candidates at both offsets, including an initializer-like pair and a loop over
+and unrelated C++ structures. For example, `Battle.cro` contributes candidate
+stores at both offsets, including an initializer-like pair and a loop over
 an array-of-structures; neither can be called an `ai_bit` writer without
 resolving the CRO relocations and object type. The scanner now parses all 132
 CRO relocation tables: 45,221 import and 56,581 internal records, all 101,802
 recognized as `R_ARM_ABS32`, with 58,255 executable-segment targets and no
-malformed entries. None of the literal candidate stores is itself a relocation
-patch site. A conservative local register-provenance pass classifies the
-29,823 candidates as relocation-derived, stack-relative, or unknown; this run
-found 47, 7,387, and 22,389 respectively. The exact counts are recorded in
+malformed entries. None of the candidate stores is itself a relocation
+patch site. The expanded pass recognizes scalar, double-word, and register-list
+stores. It classifies 72,720 candidates in total; 27,709 ARM and 22,673 Thumb
+`.code` candidates plus 22,338 ARM candidates across the 132 CRO segments.
+It also confirms two direct source-mapped writers in the main image:
+`0x58260` (`stm r5,{r4,r7}`) writes the ordinary `0x107`/Double `0x10f` mask at
+`+0x4`, and `0x59370` (`str r1,[r2,#4]`) writes Royal `0x127`. The remaining
+base classifications are 5,171 function-argument, 2,153 literal-constant,
+564 memory-derived, 5,035 relocation-derived, 11,867 stack-relative, and
+47,930 unknown; the exact
+counts are recorded in
 [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).
 This is stronger relocation-aware evidence, not a complete direct/indirect/
 aliased/copy writer proof: the stripped ExeFS `.code` has no CRO/CRS relocation

@@ -7,20 +7,55 @@
     "candidate_offsets": ["0x4", "0x1c"]
   },
   "candidate_counts": {
-    "main_code_arm": 14784,
-    "main_code_thumb": 5461,
-    "cro_arm": 9578
+    "main_code_arm": 27709,
+    "main_code_thumb": 22673,
+    "cro_arm": 22338,
+    "all_store_forms": 72720
   },
   "provenance_counts": {
-    "relocation-derived": 47,
-    "stack-pointer": 7387,
-    "unknown": 22389
+    "function-arg": 5171,
+    "literal-constant": 2153,
+    "memory-derived": 564,
+    "relocation-derived": 5035,
+    "stack-pointer": 11867,
+    "unknown": 47930
   },
+  "store_kind_counts": {
+    "double-high": 3956,
+    "double-low": 460,
+    "register-list": 38481,
+    "scalar": 29823
+  },
+  "composite_mask_constant_candidates": 15,
+  "high_confidence_direct_writers": [
+    {
+      "image": ".code",
+      "offset": "0x58260",
+      "instruction": "stm r5, {r4, r7}",
+      "field_displacement": "0x4",
+      "mask_value": ["0x107", "0x10f"],
+      "source_mapping": "BattleInst::SetVsTrainer / SetAiBit",
+      "source_file": "Field/FieldStatic/source/BattleInst/BattleInst.cpp",
+      "source_lines": "81-88, 620-638",
+      "basis": "r7 is loaded from retail literal 0x107 and conditionally becomes 0x10f; register-list store writes r4 at +0x0 and r7 at +0x4"
+    },
+    {
+      "image": ".code",
+      "offset": "0x59370",
+      "instruction": "str r1, [r2, #4]",
+      "field_displacement": "0x4",
+      "mask_value": "0x127",
+      "source_mapping": "BattleInst::SetVsTrainerRoyal",
+      "source_file": "Field/FieldStatic/source/BattleInst/BattleInst.cpp",
+      "source_lines": "2160-2166",
+      "basis": "r1 is loaded from a retail literal 0x127 and r2 is the second function argument, matching BSP_TRAINER_DATA::SetAIBit"
+    }
+  ],
   "cro_relocations": {
     "import_and_internal": 101802,
     "type_counts": {"R_ARM_ABS32": 101802},
     "executable_targets": 58255,
     "invalid": 0
   },
-  "verdict": "The local pass classifies register bases but does not recover C++ object identity, interprocedural aliases, copied structs, or stripped-main-code relocations. It therefore strengthens the negative evidence and does not establish complete retail ai_bit writer coverage."
+  "verdict": "The expanded pass now recognizes scalar, double-word, and register-list stores and confirms the two source-mapped direct writers above. It still does not recover C++ object identity for 47,930 candidates, interprocedural aliases, copied structs, or stripped-main-code relocations; complete aliased/copy writer coverage is therefore not established."
 }
