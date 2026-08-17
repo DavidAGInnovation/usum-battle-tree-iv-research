@@ -140,3 +140,18 @@ the full retail run is [`recovered/retail-ai-mask-provenance.json`](../recovered
 
 The final disposition of the former proof-boundary items is recorded in
 [proof-closure.md](proof-closure.md).
+The constructive separating examples for the remaining native-state and
+object-provenance boundaries are in
+[`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
+
+Verify the two concrete object-identity examples with:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-proof-boundary-separation.py \
+  /tmp/usum-retail-battle-ai/code.bin \
+  /path/to/extracted-cros
+```
+
+The verifier checks the exact bytes and confirms that the `Battle.cro` store
+has no relocation at the instruction; it deliberately does not assign a C++
+object type from the displacement alone.

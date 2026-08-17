@@ -99,6 +99,9 @@ table, and CRO relocations still do not identify C++ object types or
 interprocedural register aliases. The remaining binary theorem is precisely
 the whole-program field-sensitive lift described in
 [`proof-closure.md`](proof-closure.md).
+Concrete examples showing why a displacement candidate cannot be promoted to
+an `ai_bit` writer without object provenance are preserved in
+[`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
 
 ## Runtime flow
 

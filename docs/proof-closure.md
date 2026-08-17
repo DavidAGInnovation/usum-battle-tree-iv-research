@@ -31,6 +31,25 @@ behavioral comparison is no longer undefined: it is a quantified score/action
 relation with a stated state space and tie policy. It is simply not proved by
 the present artifacts.
 
+### Constructive separation of the residual obligations
+
+The two residual caveats are not merely missing documentation. They have
+reproducible separating examples in
+[`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
+The same Strong AMX bytes execute successfully under two native models that
+obey the documented callback interface: an all-zero model returns score `0`,
+while the legal Ninjask witness returns `−1`. Thus the program and VM do not
+determine a score until the native battle-state model is supplied; observing a
+finite set of paths cannot quantify over the missing state space.
+
+The binary ambiguity is equally concrete. In the stripped main image,
+`0x45ec` is `str r0, [r4, #4]` after `r4` receives a function return. In
+`Battle.cro`, code offset `0x1e80` is `str r1, [r0, #4]` with an incoming
+argument. Neither store is a relocation patch site. Each instruction is
+compatible with an `ai_bit` write and with an unrelated field at the same
+displacement. Without object/type provenance, a candidate inventory cannot be
+promoted to a complete writer set.
+
 Two stronger results would require new proof work if they are desired as
 separate theorems:
 

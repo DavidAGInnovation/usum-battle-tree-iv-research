@@ -1,0 +1,36 @@
+{
+  "artifact": "constructive separation of the two residual proof obligations",
+  "amx_semantic_separation": {
+    "same_program": "member 10 (Strong), SHA-256 1468b610633916472e9b7227ba5a815853564e925bc2fed2757274368316e0f6",
+    "contract_models": [
+      {
+        "name": "all-zero",
+        "native_return_rule": "every AI_CMD returns 0",
+        "result": {"score": 0, "pokechange_enable": 0}
+      },
+      {
+        "name": "legal-ninjask-strong-witness",
+        "native_return_rule": "ROM-derived Ninjask/move/item predicates in ai-score-witnesses.json",
+        "result": {"score": -1, "pokechange_enable": 0}
+      }
+    ],
+    "conclusion": "The AMX bytes and VM do not determine one score without a native-state model; a concrete path trace cannot be promoted to an all-state symbolic theorem by observation alone."
+  },
+  "writer_identity_separation": {
+    "main_code": {
+      "sha256": "b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09",
+      "offset": "0x45ec",
+      "instruction": "str r0, [r4, #4]",
+      "preceding_pointer_origin": "r4 receives the return value of bl 0x1ff914",
+      "relocation_at_store": false
+    },
+    "battle_cro": {
+      "file": "Battle.cro",
+      "code_offset": "0x1e80",
+      "instruction": "str r1, [r0, #4]",
+      "preceding_pointer_origin": "incoming r0 argument",
+      "relocation_at_store": false
+    },
+    "conclusion": "Each instruction is compatible with an ai_bit write and with an unrelated field at the same displacement. The stripped main image supplies no relocation/object-type fact that distinguishes those interpretations; therefore the complete aliased/copied writer theorem cannot be derived from these inputs alone."
+  }
+}
