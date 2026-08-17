@@ -498,3 +498,53 @@ mask-writer inventory is complete for the retail build. Recovering the original
 already reconstructed map, but neither is a remaining proof obligation for its
 numeric assignments. Dynamic watchpoints/logging are useful corroboration, but
 observations alone still do not quantify over untraced inputs and paths.
+
+## Decisive results for the former proof boundary
+
+The four open items do not all have the same status. Two admit direct
+counterexamples, one is an artifact-recovery negative, and one remains a
+whole-binary analysis obligation.
+
+### The static audit is not value-complete
+
+This is disproved as a claim about the current audit. The recovered native
+dispatcher returns values from live battle state: `CMDFUNC_IF_RND_UNDER`
+compares a fresh 0--255 random draw with its argument, `CMDFUNC_IF_HP_UNDER`
+reads the active HP ratio, and `CMDFUNC_GET_MAX_WAZA_POWER_INCLUDE_AFFINITY`
+computes a state-dependent maximum power. The Pawn host reads
+`p_Score`/`p_PokeChangeEnable` only after execution. Therefore two legal live
+states can take different branches and produce different scores while having
+the same decoded opcode graph. Branch-opcode coverage is proven; a concrete
+score/action theorem for every state is not.
+
+### A strict Strong/Expert difficulty ladder is disproved
+
+The native command sets are not nested. Strong uses commands absent from Basic
+(`28`, `45`, `81`, `96`, `97`), while Basic uses 42 commands absent from
+Strong. Expert and Basic are also mutually non-subsuming. Thus “Strong” or
+“Expert” as a strict structural superset of Basic is false. A behavioral claim
+such as “always chooses a better action” still has no defined capability
+relation and cannot be evaluated until one is specified.
+
+### The original `BattleAi.gaix` bytes are absent from the supplied artifacts
+
+The complete archived Git object database contains zero objects named
+`BattleAi.gaix`; the encrypted source archive's visible paths contain zero
+such files; and the retail RomFS has no matching `BattleAi`, `btl_ai`, or
+`.gaix` path. The retail GARC and the C++ `GetArcDataIndex` switch still force
+the numeric map, but the generated source file bytes cannot be recovered from
+these inputs. A direct `datIdx` observation would require an emulator or
+debugger hook at the archive-load call.
+
+### “One mask for every special trainer/mode” is disproved at source scope
+
+The source contains explicit, mutually different masks: ordinary trainers use
+`0x107`; Royal selects `0x125`; Ultra Beast and special wild paths use
+`0x007`; ordinary wild Double uses `0x008`; intrusion replaces the mask with
+`0x040`; reinforcement replaces it with `0x00f`; and the Battle Festival
+helper can deliberately reduce non-boss trainers to Basic only. This falsifies
+the universal same-mask claim. What remains open is narrower: proving that the
+stripped retail binary has no additional aliased, copied, or indirect writers
+beyond that source inventory. That requires a relocation-aware whole-binary
+data-flow audit; the current artifacts do not make that completeness theorem
+available by inspection alone.
