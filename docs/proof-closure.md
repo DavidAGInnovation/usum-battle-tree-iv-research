@@ -65,8 +65,17 @@ separate theorems:
    relocation and alias analysis, followed by an exhaustive read/write proof
    for the AI-mask field. The scanner now records local register provenance
    and parses CRO relocations, but the stripped main `.code` has no CRO/CRS
-   relocation table and the remaining interprocedural register/object data
-   flow is therefore not recoverable from these inputs alone.
+   relocation table. The missing interprocedural register/object data flow is
+   not directly present as metadata; it can still be reconstructed by a
+   complete binary lift, source-to-binary matching, or runtime instrumentation.
+
+The ROM and source are therefore sufficient inputs in principle, but they are
+not a shortcut to the theorem. The ROM supplies code bytes and some runtime
+type-name strings; the source supplies the candidate layouts and writer
+semantics. Closing the theorem still requires recovering function boundaries,
+following ARM/Thumb calls and aliases across the whole image, mapping every
+candidate pointer to an object type, and validating the result against the
+retail runtime or a reproducible unstripped build.
 
 ## Formal behavioral relation and the remaining evidence boundary
 

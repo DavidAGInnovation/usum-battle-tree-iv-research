@@ -105,8 +105,10 @@ counts are recorded in
 This is stronger relocation-aware evidence, not a complete direct/indirect/
 aliased/copy writer proof: the stripped ExeFS `.code` has no CRO/CRS relocation
 table, and CRO relocations still do not identify C++ object types or
-interprocedural register aliases. The remaining binary theorem is precisely
-the whole-program field-sensitive lift described in
+interprocedural register aliases. This is an analysis-status boundary, not a
+claim that the ROM and source are useless or information-theoretically
+insufficient. The remaining binary theorem is precisely the whole-program
+field-sensitive lift described in
 [`proof-closure.md`](proof-closure.md).
 Concrete examples showing why a displacement candidate cannot be promoted to
 an `ai_bit` writer without object provenance are preserved in
