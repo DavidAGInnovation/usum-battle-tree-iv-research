@@ -536,6 +536,12 @@ the numeric map, but the generated source file bytes cannot be recovered from
 these inputs. A direct `datIdx` observation would require an emulator or
 debugger hook at the archive-load call.
 
+The logically equivalent enum header has been reconstructed at
+[`recovered/BattleAi.gaix`](../recovered/BattleAi.gaix). It preserves the
+retail member indices and the identifiers consumed by `btl_AiScript.cpp`; it
+is an equivalent reconstruction, not a byte-identical recovery of the missing
+generated file.
+
 ### “One mask for every special trainer/mode” is disproved at source scope
 
 The source contains explicit, mutually different masks: ordinary trainers use

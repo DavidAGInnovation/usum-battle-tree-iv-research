@@ -1,0 +1,30 @@
+//==========================================================
+/**
+ * @brief GF-Archive file index definition.
+ * @file BattleAi.gaix
+ * @version 4.0
+ * @note Reconstructed from the retail AMX archive and archived Battle AI
+ *       project/tool ordering; the original generated file bytes were not
+ *       present in the supplied source archive or ROM filesystem.
+ */
+//==========================================================
+
+#ifndef __GARC_BATTLEAI_GAIX__
+#define __GARC_BATTLEAI_GAIX__
+
+enum {
+  GARC_BattleAI_btl_ai_allowance_AMX = 0,
+  GARC_BattleAI_btl_ai_band_AMX = 1,
+  GARC_BattleAI_btl_ai_basic_AMX = 2,
+  GARC_BattleAI_btl_ai_double_AMX = 3,
+  GARC_BattleAI_btl_ai_expert_AMX = 4,
+  GARC_BattleAI_btl_ai_intrude_AMX = 5,
+  GARC_BattleAI_btl_ai_item_AMX = 6,
+  GARC_BattleAI_btl_ai_moving_AMX = 7,
+  GARC_BattleAI_btl_ai_pokechange_AMX = 8,
+  GARC_BattleAI_btl_ai_royal_AMX = 9,
+  GARC_BattleAI_btl_ai_strong_AMX = 10,
+  GARC_BattleAI_DATA_NUM = 11,
+};
+
+#endif  // __GARC_BATTLEAI_GAIX__
