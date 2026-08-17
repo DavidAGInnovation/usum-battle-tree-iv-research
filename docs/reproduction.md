@@ -131,9 +131,12 @@ python3 scripts/audit-retail-ai-mask-writers.py \
 ```
 
 The sweep is intentionally an over-approximation of literal stores using the
-two source-layout displacements `0x4` and `0x1c`. It records candidates and
-stack-base stores; it does not classify aliases or copied structures as
-`ai_bit` writers.
+two source-layout displacements `0x4` and `0x1c`. It records candidates,
+relocation sites, and a conservative local register-provenance class for each
+candidate. The provenance pass can mark stack-relative and relocation-derived
+bases, but it does not identify C++ object types or classify interprocedural
+aliases and copied structures as `ai_bit` writers. The committed summary of
+the full retail run is [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).
 
 The final disposition of the former proof-boundary items is recorded in
 [proof-closure.md](proof-closure.md).

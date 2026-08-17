@@ -14,11 +14,11 @@ universal proof.
 
 | Former item | Verdict | Evidence and exact scope |
 | --- | --- | --- |
-| The existing branch-opcode audit is a value-complete symbolic execution of every condition, score, and threshold branch. | **Disproved as a characterization of the audit.** | The recovered native dispatcher makes branch results depend on live state: `CMDFUNC_IF_RND_UNDER` draws a fresh random byte, `CMDFUNC_IF_HP_UNDER` reads the active HP ratio, and `CMDFUNC_GET_MAX_WAZA_POWER_INCLUDE_AFFINITY` computes a state-dependent value. The host reads `p_Score` and `p_PokeChangeEnable` only after the Pawn program returns. Thus opcode reachability does not determine one score/action for every legal state. The audit proves branch-opcode coverage and literal extraction, not a value-complete all-state theorem. |
+| The existing branch-opcode audit is a value-complete symbolic execution of every condition, score, and threshold branch. | **Disproved as a characterization of the audit; the stronger all-state theorem remains unproved.** | The recovered native dispatcher makes branch results depend on live state: `CMDFUNC_IF_RND_UNDER` draws a fresh random byte, `CMDFUNC_IF_HP_UNDER` reads the active HP ratio, and `CMDFUNC_GET_MAX_WAZA_POWER_INCLUDE_AFFINITY` computes a state-dependent value. The host reads `p_Score` and `p_PokeChangeEnable` only after the Pawn program returns. The exact retail VM now executes the extracted members and validates both score counterexamples (runtime identities are in [`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json)), but concrete traces do not quantify over every native-state valuation. Opcode reachability and selected concrete paths are proven; a value-complete all-state symbolic theorem is not. |
 | Strong or Expert is monotonically more capable than Basic. | **Disproved for score dominance over legal retail states; strict structural dominance is also disproved.** | Let `Q(s)` be the native-command IDs used by script `s`. The structural claim `Q(Basic) ⊆ Q(Strong)` or `Q(Basic) ⊆ Q(Expert)` is false in both cases. Define `F_s(σ,c,r)` as the returned script score and switch-enable result for legal live state `σ`, candidate `c`, and random trace `r`; the universal score theorem would require `∀σ,c,r: F_Strong ≥ F_Basic` (and analogously for Expert). The ROM-derived Ninjask records and exact AMX VM runs in [`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json) provide legal witnesses with Basic `0` and Strong `−1`, and Basic `0` and Expert `−1`. Therefore both universal score-dominance claims are false. An action-dominance claim remains a separate relation because it additionally requires a utility function and the judge's tie/randomness policy. |
 | The original generated `BattleAi.gaix` bytes can be recovered from the supplied source and ROM. | **Disproved for these inputs; equivalent reconstruction proved.** | The complete archived Git object database has zero `BattleAi.gaix` objects, the source archive has no path with that name, and the retail RomFS has no generated `.gaix` file. The retail GARC, archived project ordering, archiver sort rule, and C++ index switch force the numeric map. The source-compatible header is reconstructed at [`recovered/BattleAi.gaix`](../recovered/BattleAi.gaix). It is logically equivalent, not byte-identical. A runtime `datIdx` trace would be corroboration only, not a remaining numeric-map proof obligation. |
 | Every special trainer uses one AI mask in every mode and phase. | **Disproved at source scope.** | The source has explicit alternatives: ordinary `0x107`, Royal `0x125`, special-wild `0x007`, wild Double `0x008`, intrusion `0x040`, reinforcement `0x00f`, and Battle Festival Basic-only reductions. Therefore the universal same-mask statement is false. |
-| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Not established; relocation metadata is now parsed and validated, but the alias/data-flow proof is still unavailable.** | The source has two layouts: `BSP_TRAINER_DATA::CORE_DATA::ai_bit` at `+0x4` and `MainModule::TRAINER_DATA::ai_bit` at `+0x1c`. On the exact extracted build, `scripts/audit-retail-ai-mask-writers.py` finds 12,498 ARM / 4,336 Thumb `.code` candidates at `+0x4`, 2,286 ARM / 1,125 Thumb `.code` candidates at `+0x1c`, and 7,313 `+0x4` / 2,265 `+0x1c` candidates across the 132 CRO code segments. The upgraded scanner parses all 132 CRO headers: 45,221 import and 56,581 internal relocation records, all 101,802 recognized as `R_ARM_ABS32`, with 58,255 targeting executable segments and zero malformed entries. None of the literal candidate stores is itself a relocation patch site. This makes the CRO scan relocation-aware, but it does not identify the pointee of a register, recover aliases/copies, or add relocation metadata to the stripped ExeFS `.code`; no candidate can be promoted to (or excluded from) `ai_bit` without a whole-binary field-sensitive data-flow proof. |
+| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Not established; the local provenance pass strengthens the negative result but does not close the alias/data-flow proof.** | The source has two layouts: `BSP_TRAINER_DATA::CORE_DATA::ai_bit` at `+0x4` and `MainModule::TRAINER_DATA::ai_bit` at `+0x1c`. On the exact extracted build, the scanner finds 14,784 ARM / 5,461 Thumb `.code` candidates and 9,578 ARM candidates across the 132 CRO code segments. The CRO tables contain 101,802 `R_ARM_ABS32` records, 58,255 executable targets, and zero malformed entries. The conservative local pass classifies 47 bases as relocation-derived, 7,387 as stack-relative, and 22,389 as unknown (full summary: [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json)). None of these classifications identifies a C++ object type, resolves an interprocedural alias/copy, or supplies relocation metadata for the stripped ExeFS `.code`; complete retail writer coverage therefore remains unproved. |
 
 ## What is closed, and what is not being claimed
 
@@ -36,17 +36,17 @@ separate theorems:
 
 1. A value-complete VM/native symbolic execution would still be needed to
    enumerate every score/threshold branch and prove a positive theorem about
-   all states. It is no longer needed to classify the two monotonicity claims:
-   the ROM-derived legal witnesses execute the exact Basic/Strong and
-   Basic/Expert paths and give `0` versus `−1`. The witness disproves each
-   universal score-dominance theorem, while leaving the broader branch-complete
-   execution audit as a separate descriptive task.
+   all states. The exact retail VM now validates the ROM-derived legal
+   Basic/Strong and Basic/Expert paths (each gives `0` versus `−1`), so it is
+   no longer needed to classify the two monotonicity claims. The witness
+   disproves each universal score-dominance theorem, while the broader
+   branch-complete execution audit remains a separate descriptive task.
 2. Retail writer completeness would need a whole-program ARM/CRO lift with
    relocation and alias analysis, followed by an exhaustive read/write proof
-   for the AI-mask field. The new scanner parses CRO relocations and records
-   their segment provenance, but the stripped main `.code` has no CRO/CRS
-   relocation table and the remaining register/object data-flow is therefore
-   not recoverable from these inputs alone.
+   for the AI-mask field. The scanner now records local register provenance
+   and parses CRO relocations, but the stripped main `.code` has no CRO/CRS
+   relocation table and the remaining interprocedural register/object data
+   flow is therefore not recoverable from these inputs alone.
 
 ## Formal behavioral relation and the remaining evidence boundary
 

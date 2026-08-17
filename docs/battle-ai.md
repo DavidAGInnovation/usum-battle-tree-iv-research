@@ -89,11 +89,16 @@ resolving the CRO relocations and object type. The scanner now parses all 132
 CRO relocation tables: 45,221 import and 56,581 internal records, all 101,802
 recognized as `R_ARM_ABS32`, with 58,255 executable-segment targets and no
 malformed entries. None of the literal candidate stores is itself a relocation
-patch site. This is a relocation-aware candidate inventory, not a complete
-direct/indirect/aliased/copy writer proof: the stripped ExeFS `.code` has no
-CRO/CRS relocation table, and CRO relocations still do not identify C++ object
-types or register aliases. The remaining binary theorem is precisely the
-whole-program field-sensitive lift described in [`proof-closure.md`](proof-closure.md).
+patch site. A conservative local register-provenance pass classifies the
+29,823 candidates as relocation-derived, stack-relative, or unknown; this run
+found 47, 7,387, and 22,389 respectively. The exact counts are recorded in
+[`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).
+This is stronger relocation-aware evidence, not a complete direct/indirect/
+aliased/copy writer proof: the stripped ExeFS `.code` has no CRO/CRS relocation
+table, and CRO relocations still do not identify C++ object types or
+interprocedural register aliases. The remaining binary theorem is precisely
+the whole-program field-sensitive lift described in
+[`proof-closure.md`](proof-closure.md).
 
 ## Runtime flow
 
@@ -412,15 +417,21 @@ derive the concrete score from the live battle state.
 
 The recovered `amx.c` was compiled with the extracted retail members and the
 `AI_CMD` callback interface. With a zero-return callback, members 02 (Basic),
-04 (Expert), and 10 (Strong) all return successfully with score zero. With a
-second deterministic callback that supplies synthetic random/HP/query values,
-the same members return Basic `-10`, Expert `0`, and Strong `+1` (seed `1`).
-This is useful evidence that native results and random draws actually flow
-through the live AMX body into `p_Score`; it is not a legal battle-state
-counterexample because the callback does not instantiate the retail handler's
-object graph or enforce cross-command state correlations. Consequently it
-validates the execution path while leaving the all-`σ` score/action theorem
-unproved.
+04 (Expert), and 10 (Strong) all return successfully with score zero. The
+same smoke run returns normally for all eleven archive members (the small
+allowance helper at member 07 returns its documented `+1` zero-callback
+adjustment). The
+same exact VM then executes the two ROM-derived legal witnesses: member 02
+returns `0` against both vectors, member 10 returns `−1` for the Strong vector,
+and member 04 returns `−1` for the Expert vector. The member hashes, native
+call counts, and callback vectors are preserved in
+[`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json).
+This is now a reproducible concrete execution and a legal counterexample to
+both score-dominance claims. It still is not a value-complete symbolic
+execution: the callback does not enumerate every native-state valuation or
+prove that all queried fields are mutually realizable in every legal battle
+object graph. The all-`σ` positive score/action theorem therefore remains
+unproved even though the two universal dominance claims are disproved.
 
 The IDs resolve through `tr_ai_cmd.h`; for example, Basic and Expert use the
 HP/status/type/field/ability/reserve families, Double adds partner and shared

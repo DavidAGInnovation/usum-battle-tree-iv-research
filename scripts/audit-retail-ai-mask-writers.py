@@ -11,9 +11,11 @@ candidates in the extracted CRO code segments and in the raw ExeFS ``.code``
 section. It never silently classifies a candidate as an AI-mask writer.
 
 The output is evidence for the boundary of a whole-binary data-flow proof,
-not that proof itself.  Relocations, aliases, copied structures, and the
-ARM/Thumb function graph still have to be resolved before a writer can be
-declared (or ruled out) as an ``ai_bit`` writer.
+not that proof itself.  The CRO pass records relocation-backed literal loads
+and a deliberately local register-provenance class; aliases, copied
+structures, and the ARM/Thumb interprocedural function graph still have to be
+resolved before a writer can be declared (or ruled out) as an ``ai_bit``
+writer.
 """
 
 from __future__ import annotations
@@ -37,6 +39,7 @@ from capstone.arm import (
     ARM_INS_STRHT,
     ARM_INS_STRT,
     ARM_OP_MEM,
+    ARM_REG_PC,
     ARM_REG_SP,
 )
 
@@ -169,6 +172,15 @@ def cro_metadata(data: bytes) -> dict[str, object]:
         for row in relocations
         if row["target_file_offset"] is not None
     }
+    relocations_by_file_offset = {
+        int(row["target_file_offset"]): {
+            "type": row["type"],
+            "referred_segment": row["referred_segment"],
+            "addend": row["addend"],
+        }
+        for row in relocations
+        if row["target_file_offset"] is not None
+    }
     return {
         "code_offset": code_offset,
         "code_size": code_size,
@@ -184,6 +196,7 @@ def cro_metadata(data: bytes) -> dict[str, object]:
         "invalid_relocation_count": invalid_relocations,
         # Internal use by the scanner; omitted before JSON serialization.
         "_relocation_file_offsets": relocation_file_offsets,
+        "_relocations_by_file_offset": relocations_by_file_offset,
     }
 
 
@@ -205,6 +218,7 @@ def scan(
     limit: int | None = None,
     code_file_offset: int = 0,
     relocation_file_offsets: set[int] | None = None,
+    relocations_by_file_offset: dict[int, dict[str, object]] | None = None,
 ) -> list[dict[str, object]]:
     md = Cs(CS_ARCH_ARM, mode)
     md.detail = True
@@ -213,7 +227,89 @@ def scan(
     # rest of the candidate sweep silently disappear.
     md.skipdata = True
     rows: list[dict[str, object]] = []
-    for ins in md.disasm(code, 0):
+    instructions = list(md.disasm(code, 0))
+
+    def reg_name(reg: int) -> str:
+        return md.reg_name(reg).lower()
+
+    def provenance(index: int, base: int) -> dict[str, object]:
+        """Track only local ARM register copies and literal relocations.
+
+        This intentionally stops at calls/branches and treats unknown loads,
+        globals, and incoming arguments as opaque.  It is a sound *classifier*
+        for the evidence boundary, not an alias analysis: ``arg0`` and a
+        relocation-derived pointer still do not identify a C++ object type.
+        """
+        start = max(0, index - 96)
+        # Incoming argument facts are sound only when the local window starts
+        # at the image boundary.  At an arbitrary interior instruction the
+        # preceding prologue/call may have reassigned every register, so start
+        # with no facts and report ``unknown`` instead of guessing.
+        state: dict[str, dict[str, object]] = (
+            {f"r{i}": {"kind": "function-arg", "arg": i} for i in range(4)}
+            if start == 0 else {}
+        )
+        for j in range(start, index + 1):
+            ins = instructions[j]
+            if ins.id == 0:  # Capstone skipdata pseudo-instruction.
+                continue
+            mnemonic = ins.mnemonic.lower()
+            ops = ins.operands
+            if j < index and (mnemonic in {"b", "bl", "bx", "blx", "pop"}
+                              or mnemonic.startswith("b.")):
+                # The target may be outside this local window; discard all
+                # register facts instead of inventing a cross-block alias.
+                state = {}
+                continue
+            if mnemonic in {"mov", "movs"} and len(ops) >= 2 and ops[0].type == 1:
+                dst = reg_name(ops[0].reg)
+                src = reg_name(ops[1].reg) if ops[1].type == 1 else None
+                if src is not None and src in state:
+                    state[dst] = {**state[src], "via": f"{mnemonic} {src}"}
+                else:
+                    state.pop(dst, None)
+                continue
+            if mnemonic in {"add", "adds", "sub", "subs"} and len(ops) >= 3 and ops[0].type == 1 and ops[1].type == 1:
+                dst, src = reg_name(ops[0].reg), reg_name(ops[1].reg)
+                if src in state and ops[2].type == 2:
+                    state[dst] = {**state[src], "via": f"{mnemonic} {ops[2].imm}"}
+                else:
+                    state.pop(dst, None)
+                continue
+            if mnemonic in {"ldr", "ldrb", "ldrh"} and len(ops) >= 2 and ops[0].type == 1 and ops[1].type == 3:
+                dst = reg_name(ops[0].reg)
+                mem = ops[1].mem
+                if mem.base == ARM_REG_PC:  # ARM PC; literal pool load.
+                    literal = ins.address + 8 + mem.disp
+                    file_offset = code_file_offset + literal
+                    rel = (relocations_by_file_offset or {}).get(file_offset)
+                    if rel is not None:
+                        state[dst] = {
+                            "kind": "relocation-derived",
+                            "literal_file_offset": hex(file_offset),
+                            **rel,
+                        }
+                    else:
+                        state.pop(dst, None)
+                elif reg_name(mem.base) in state:
+                    state[dst] = {
+                        "kind": "memory-derived",
+                        "base": reg_name(mem.base),
+                        "displacement": hex(mem.disp),
+                    }
+                else:
+                    state.pop(dst, None)
+                continue
+            # A write to a register from any other instruction invalidates its
+            # local fact.  Keep this conservative and avoid modelling flags,
+            # register lists, or compiler-specific idioms here.
+            if ops and ops[0].type == 1 and mnemonic not in {"str", "strb", "strh", "strex", "strexb", "strexh"}:
+                state.pop(reg_name(ops[0].reg), None)
+        if base == ARM_REG_SP:
+            return {"kind": "stack-pointer"}
+        return state.get(reg_name(base), {"kind": "unknown"})
+
+    for index, ins in enumerate(instructions):
         if ins.id not in STORE_IDS or len(ins.operands) < 2:
             continue
         mem = ins.operands[1]
@@ -233,6 +329,7 @@ def scan(
                     relocation_file_offsets is not None
                     and code_file_offset + ins.address in relocation_file_offsets
                 ),
+                "base_provenance": provenance(index, mem.mem.base),
             }
         )
         if limit is not None and len(rows) >= limit:
@@ -279,8 +376,10 @@ def main() -> None:
             limit=args.limit,
             code_file_offset=int(metadata["code_offset"]),
             relocation_file_offsets=set(metadata["_relocation_file_offsets"]),
+            relocations_by_file_offset=dict(metadata["_relocations_by_file_offset"]),
         )
         metadata.pop("_relocation_file_offsets", None)
+        metadata.pop("_relocations_by_file_offset", None)
         rows.append(
             {
                 "module": name,
@@ -301,8 +400,17 @@ def main() -> None:
 
     result = {
         "fields": {name: hex(offset) for name, offset in FIELDS.items()},
-        "mode": "relocation-aware candidate enumeration; not alias-complete",
+        "mode": "relocation-aware local provenance classification; not alias-complete",
         "main_code_relocations": "unavailable: ExeFS .code is a stripped mapped image, not a CRO",
+        "provenance_counts": dict(
+            sorted(
+                Counter(
+                    hit["base_provenance"]["kind"]
+                    for module in rows
+                    for hit in module["hits"]
+                ).items()
+            )
+        ),
         "modules": rows,
     }
     text = json.dumps(result, indent=2, sort_keys=True) + "\n"

@@ -1,0 +1,26 @@
+{
+  "artifact": "relocation-aware local register-provenance audit",
+  "inputs": {
+    "main_code_sha256": "b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09",
+    "main_code_size": 5914624,
+    "cro_count": 132,
+    "candidate_offsets": ["0x4", "0x1c"]
+  },
+  "candidate_counts": {
+    "main_code_arm": 14784,
+    "main_code_thumb": 5461,
+    "cro_arm": 9578
+  },
+  "provenance_counts": {
+    "relocation-derived": 47,
+    "stack-pointer": 7387,
+    "unknown": 22389
+  },
+  "cro_relocations": {
+    "import_and_internal": 101802,
+    "type_counts": {"R_ARM_ABS32": 101802},
+    "executable_targets": 58255,
+    "invalid": 0
+  },
+  "verdict": "The local pass classifies register bases but does not recover C++ object identity, interprocedural aliases, copied structs, or stripped-main-code relocations. It therefore strengthens the negative evidence and does not establish complete retail ai_bit writer coverage."
+}

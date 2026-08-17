@@ -1,5 +1,38 @@
 {
   "artifact": "retail AMX bodies executed by the recovered Pawn VM",
+  "runtime_validation": {
+    "vm": "Game Freak amx.c/amx.h recovered from the supplied source archive; AMX_FLAG_NTVREG callback bound to AI_CMD",
+    "members": {
+      "02": {
+        "sha256": "d9b3d4aab82b77d3947606835a5909719c24f0208aad7ede3090cffda7a2dc2d",
+        "zero_callback": {"err": 0, "score": 0, "change": 0, "native_calls": 17},
+        "strong_vector": {"err": 0, "score": 0, "change": 0, "native_calls": 21},
+        "expert_vector": {"err": 0, "score": 0, "change": 0, "native_calls": 19}
+      },
+      "04": {
+        "sha256": "bc196375a0430d7385de550a60dc358564339e3d80a62a9f656544a298b5ec86",
+        "expert_vector": {"err": 0, "score": -1, "change": 0, "native_calls": 14}
+      },
+      "10": {
+        "sha256": "1468b610633916472e9b7227ba5a815853564e925bc2fed2757274368316e0f6",
+        "strong_vector": {"err": 0, "score": -1, "change": 0, "native_calls": 18}
+      }
+    },
+    "all_members_zero_callback": {
+      "00": {"err": 0, "score": 0, "change": 0, "native_calls": 3},
+      "01": {"err": 0, "score": 0, "change": 0, "native_calls": 3},
+      "02": {"err": 0, "score": 0, "change": 0, "native_calls": 17},
+      "03": {"err": 0, "score": 0, "change": 0, "native_calls": 15},
+      "04": {"err": 0, "score": 0, "change": 0, "native_calls": 9},
+      "05": {"err": 0, "score": 0, "change": 0, "native_calls": 3},
+      "06": {"err": 0, "score": 0, "change": 0, "native_calls": 1},
+      "07": {"err": 0, "score": 1, "change": 0, "native_calls": 3},
+      "08": {"err": 0, "score": 0, "change": 0, "native_calls": 24},
+      "09": {"err": 0, "score": 0, "change": 0, "native_calls": 19},
+      "10": {"err": 0, "score": 0, "change": 0, "native_calls": 18}
+    },
+    "scope": "Concrete execution validation and legal counterexamples; this is not a universal symbolic execution of every native-state valuation."
+  },
   "rom_evidence": {
     "species": 291,
     "species_name": "Ninjask",
