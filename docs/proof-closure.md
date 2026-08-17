@@ -18,7 +18,23 @@ universal proof.
 | Strong or Expert is monotonically more capable than Basic. | **Disproved for score dominance over legal retail states; strict structural dominance is also disproved.** | Let `Q(s)` be the native-command IDs used by script `s`. The structural claim `Q(Basic) ⊆ Q(Strong)` or `Q(Basic) ⊆ Q(Expert)` is false in both cases. Define `F_s(σ,c,r)` as the returned script score and switch-enable result for legal live state `σ`, candidate `c`, and random trace `r`; the universal score theorem would require `∀σ,c,r: F_Strong ≥ F_Basic` (and analogously for Expert). The ROM-derived Ninjask records and exact AMX VM runs in [`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json) provide legal witnesses with Basic `0` and Strong `−1`, and Basic `0` and Expert `−1`. Therefore both universal score-dominance claims are false. An action-dominance claim remains a separate relation because it additionally requires a utility function and the judge's tie/randomness policy. |
 | The original generated `BattleAi.gaix` bytes can be recovered from the supplied source and ROM. | **Disproved for these inputs; equivalent reconstruction proved.** | The complete archived Git object database has zero `BattleAi.gaix` objects, the source archive has no path with that name, and the retail RomFS has no generated `.gaix` file. The retail GARC, archived project ordering, archiver sort rule, and C++ index switch force the numeric map. The source-compatible header is reconstructed at [`recovered/BattleAi.gaix`](../recovered/BattleAi.gaix). It is logically equivalent, not byte-identical. A runtime `datIdx` trace would be corroboration only, not a remaining numeric-map proof obligation. |
 | Every special trainer uses one AI mask in every mode and phase. | **Disproved at source scope.** | The source has explicit alternatives: ordinary `0x107`, Royal setup `0x127` with an effective Royal selector `0x125`, special-wild `0x007`, wild Double `0x008`, intrusion `0x040`, reinforcement `0x00f`, and Battle Festival Basic-only reductions. Therefore the universal same-mask statement is false. |
-| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Direct source-mapped writers are now confirmed; complete aliased/copied coverage remains unproved.** | The scanner now recognizes scalar, double-word, and register-list stores. It finds 72,720 total field-offset candidates: 27,709 ARM and 22,673 Thumb `.code` candidates plus 22,338 ARM candidates across the 132 CRO code segments. It identifies two high-confidence direct writers in the retail `.code`: `0x58260` (`stm r5,{r4,r7}`) writes `0x107`/`0x10f` at `+0x4`, matching `BattleInst::SetVsTrainer`/`SetAiBit`; `0x59370` (`str r1,[r2,#4]`) writes literal `0x127`, matching `SetVsTrainerRoyal`. The CRO tables contain 101,802 `R_ARM_ABS32` records, 58,255 executable targets, and zero malformed entries. The expanded pass still leaves 47,930 candidates without an object identity and cannot resolve interprocedural aliases, copied structs, or stripped-main-code relocations (full summary: [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json)); complete writer coverage therefore remains unproved. |
+| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Direct source-mapped writers are now confirmed; complete aliased/copied coverage remains unproved.** | The scanner now recognizes scalar, double-word, and register-list stores and tracks immediate constants. It finds 72,720 total field-offset candidates: 27,709 ARM and 22,673 Thumb `.code` candidates plus 22,338 ARM candidates across the 132 CRO code segments. It identifies three high-confidence direct writers in the retail `.code`: `0x58260` (`stm r5,{r4,r7}`) and `0x582d4` (`str r7,[r5,#4]`) write `0x107`/`0x10f` at `+0x4` on the two `BattleInst::SetVsTrainer`/`SetAiBit` branches; `0x59370` (`str r1,[r2,#4]`) writes literal `0x127`, matching `SetVsTrainerRoyal`. The scan has 337 mask-valued candidates in total (321 immediate, 14 literal-pool, and 2 computed); those values are dominated by same-offset `0x7/0x8/0xf` collisions, so only the three `0x10f`/`0x127` stores are source-mapped. The CRO tables contain 101,802 `R_ARM_ABS32` records, 58,255 executable targets, and zero malformed entries. The expanded pass still leaves 46,925 candidates with unknown base provenance; the other non-mapped rows have only local register/constant classifications, not C++ object identity. It cannot resolve interprocedural aliases, copied structs, or stripped-main-code relocations (full summary: [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json)); complete writer coverage therefore remains unproved. |
+
+Of the 14 Thumb-sweep mask constants, 12 are a repeated data pattern with no
+Thumb prologue or call target, and one (`0x3d3600`) lies inside an ARM function
+reached by ARM branches/calls. The remaining `0x688` instruction is real Thumb
+code that writes `8` at `+0x1c`, but its object identity is not recovered and
+it does not match any source-level `ai_bit` writer; it remains an unresolved
+same-offset collision. The remaining ARM mask-valued candidate is a stack
+temporary. None of these residual rows is promoted to an object writer.
+
+The source inventory also identifies three `MainModule` writers at `+0x1c`:
+aggregate initialization in `trainerParam_Init`, zeroing in
+`trainerParam_StoreCore`, and the `BSP_TRAINER_DATA::GetAIBit()` copy in
+`trainerParam_StoreNPCTrainer`. Their retail instructions are not uniquely
+mapped yet because the same displacement occurs throughout unrelated object
+layouts; they are recorded explicitly in the provenance artifact rather than
+silently treated as absent.
 
 ## What is closed, and what is not being claimed
 
@@ -43,7 +59,8 @@ determine a score until the native battle-state model is supplied; observing a
 finite set of paths cannot quantify over the missing state space.
 
 The binary ambiguity is equally concrete. The expanded pass now confirms the
-two direct source-mapped writers at `.code:0x58260` and `.code:0x59370`, but in
+three direct source-mapped writers at `.code:0x58260`, `.code:0x582d4`, and
+`.code:0x59370`, but in
 the same image `0x45ec` is `str r0, [r4, #4]` after `r4` receives a function
 return. In `Battle.cro`, code offset `0x1e80` is `str r1, [r0, #4]` with an
 incoming argument. Neither ambiguous store is a relocation patch site. Each

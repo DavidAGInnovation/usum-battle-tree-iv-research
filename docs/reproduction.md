@@ -132,10 +132,11 @@ python3 scripts/audit-retail-ai-mask-writers.py \
 
 The sweep is intentionally an over-approximation of scalar, double-word, and
 register-list stores using the two source-layout displacements `0x4` and
-`0x1c`. It records candidates,
+`0x1c`, while tracking local immediate and literal-pool constants. It records candidates,
 relocation sites, scalar/double-word/register-list store forms, and a
 conservative local register-provenance class for each candidate. It now
-identifies the two direct source-mapped writers in the retail `.code`, but it
+identifies the three direct source-mapped writers in the retail `.code`
+(`0x58260`, `0x582d4`, and `0x59370`), but it
 does not identify C++ object types or classify interprocedural aliases and
 copied structures as `ai_bit` writers. The committed summary of
 the full retail run is [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).

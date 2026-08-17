@@ -94,14 +94,27 @@ malformed entries. None of the candidate stores is itself a relocation
 patch site. The expanded pass recognizes scalar, double-word, and register-list
 stores. It classifies 72,720 candidates in total; 27,709 ARM and 22,673 Thumb
 `.code` candidates plus 22,338 ARM candidates across the 132 CRO segments.
-It also confirms two direct source-mapped writers in the main image:
-`0x58260` (`stm r5,{r4,r7}`) writes the ordinary `0x107`/Double `0x10f` mask at
-`+0x4`, and `0x59370` (`str r1,[r2,#4]`) writes Royal `0x127`. The remaining
-base classifications are 5,171 function-argument, 2,153 literal-constant,
-564 memory-derived, 5,035 relocation-derived, 11,867 stack-relative, and
-47,930 unknown; the exact
+It also confirms three direct source-mapped writers in the main image:
+`0x58260` (`stm r5,{r4,r7}`) and `0x582d4` (`str r7,[r5,#4]`) write the
+ordinary `0x107`/Double `0x10f` mask at `+0x4` on the two `SetVsTrainer`
+branches, while `0x59370` (`str r1,[r2,#4]`) writes Royal `0x127`. The
+remaining base classifications are 5,467 function-argument, 612
+immediate-constant, 2,182 literal-constant, 631 memory-derived, 5,036
+relocation-derived, 11,867 stack-relative, and 46,925 unknown; the exact
 counts are recorded in
 [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).
+The scan reports 337 mask-valued candidates: 321 immediate values, 14
+literal-pool values, and 2 computed values. Most are same-offset collisions
+with `0x7`, `0x8`, or `0xf`; only the three `0x10f`/`0x127` stores are mapped
+to the source. Of the 14 Thumb constants, 12 are repeated data, one is an ARM
+code overlap, and `0x688` is real Thumb code whose object identity remains
+unresolved. The remaining ARM mask-valued candidate is a stack temporary;
+none of these residual rows is promoted to an object writer.
+At the `MainModule::TRAINER_DATA` layout, the source separately specifies
+aggregate initialization, `trainerParam_StoreCore` zeroing, and
+`trainerParam_StoreNPCTrainer` copying `GetAIBit()` into `+0x1c`; those three
+source writers remain present in the inventory but are not uniquely mapped to
+retail offsets yet.
 This is stronger relocation-aware evidence, not a complete direct/indirect/
 aliased/copy writer proof: the stripped ExeFS `.code` has no CRO/CRS relocation
 table, and CRO relocations still do not identify C++ object types or

@@ -13,12 +13,13 @@
     "all_store_forms": 72720
   },
   "provenance_counts": {
-    "function-arg": 5171,
-    "literal-constant": 2153,
-    "memory-derived": 564,
-    "relocation-derived": 5035,
+    "function-arg": 5467,
+    "immediate-constant": 612,
+    "literal-constant": 2182,
+    "memory-derived": 631,
+    "relocation-derived": 5036,
     "stack-pointer": 11867,
-    "unknown": 47930
+    "unknown": 46925
   },
   "store_kind_counts": {
     "double-high": 3956,
@@ -26,7 +27,60 @@
     "register-list": 38481,
     "scalar": 29823
   },
-  "composite_mask_constant_candidates": 15,
+  "mask_constant_candidates": 337,
+  "mask_constant_candidates_by_value": {
+    "0x7": 87,
+    "0x8": 210,
+    "0xf": 28,
+    "0x40": 8,
+    "0x10f": 3,
+    "0x127": 1
+  },
+  "mask_constant_candidates_by_value_provenance": {
+    "computed-constant": 2,
+    "immediate-constant": 321,
+    "literal-constant": 14
+  },
+  "additional_candidate_disposition": {
+    "main_thumb_constant_candidates": 14,
+    "main_thumb_constant_candidates_status": "12 disproved as code writers; 1 disproved as a Thumb writer; 1 remains an unresolved same-offset collision",
+    "main_thumb_constant_candidates_basis": "Offsets 0x510af4, 0x511510, 0x511f0c, 0x512928, 0x513310, 0x513d2c, 0x514770, 0x51518c, 0x515bf4, 0x516690, 0x51707c, and 0x517a90 decode to the same repeated data pattern under Thumb (stm r0!, {r0,r1,r2,r3,r5,r7}, surrounded by movs/ands zero padding); the same bytes decode as data-like ARM and have no recovered Thumb prologue or call target. Offset 0x3d3600 lies inside an ARM-executable function reached by ARM branches/calls, so its Thumb decode is not a Thumb writer. Offset 0x688 is real Thumb code that writes 8 at +0x1c, but its object identity is not recovered and it does not match any source-level ai_bit writer; it remains a collision candidate rather than proof of an AI-mask write.",
+    "main_arm_stack_constant_candidates": 1,
+    "main_arm_stack_constant_candidates_status": "not_an_object_writer",
+    "main_arm_stack_constant_candidates_basis": "The 0x29b56c store uses sp as its base and writes a local temporary, not either heap/object argument."
+  },
+  "source_writer_inventory": [
+    {
+      "source": "BattleInst::SetAiBit / SetVsTrainer",
+      "field": "BSP_TRAINER_DATA::CORE_DATA::ai_bit (+0x4)",
+      "binary_status": "mapped",
+      "binary_offsets": ["0x58260", "0x582d4"]
+    },
+    {
+      "source": "BattleInst::SetVsTrainerRoyal",
+      "field": "BSP_TRAINER_DATA::CORE_DATA::ai_bit (+0x4)",
+      "binary_status": "mapped",
+      "binary_offsets": ["0x59370"]
+    },
+    {
+      "source": "MainModule::trainerParam_Init",
+      "field": "MainModule::TRAINER_DATA::ai_bit (+0x1c)",
+      "binary_status": "aggregate-initialization-writer-not-uniquely-mapped",
+      "binary_offsets": []
+    },
+    {
+      "source": "MainModule::trainerParam_StoreCore",
+      "field": "MainModule::TRAINER_DATA::ai_bit (+0x1c)",
+      "binary_status": "direct-zero-writer-not-uniquely-mapped",
+      "binary_offsets": []
+    },
+    {
+      "source": "MainModule::trainerParam_StoreNPCTrainer",
+      "field": "MainModule::TRAINER_DATA::ai_bit (+0x1c)",
+      "binary_status": "copy-writer-not-uniquely-mapped",
+      "binary_offsets": []
+    }
+  ],
   "high_confidence_direct_writers": [
     {
       "image": ".code",
@@ -37,7 +91,24 @@
       "source_mapping": "BattleInst::SetVsTrainer / SetAiBit",
       "source_file": "Field/FieldStatic/source/BattleInst/BattleInst.cpp",
       "source_lines": "81-88, 620-638",
+      "function_start": "0x5821c",
+      "function_size": 252,
+      "direct_call_targets": ["0x3906b8", "0x331424", "0x25e600"],
       "basis": "r7 is loaded from retail literal 0x107 and conditionally becomes 0x10f; register-list store writes r4 at +0x0 and r7 at +0x4"
+    },
+    {
+      "image": ".code",
+      "offset": "0x582d4",
+      "instruction": "str r7, [r5, #4]",
+      "field_displacement": "0x4",
+      "mask_value": ["0x107", "0x10f"],
+      "source_mapping": "BattleInst::SetVsTrainer / SetAiBit",
+      "source_file": "Field/FieldStatic/source/BattleInst/BattleInst.cpp",
+      "source_lines": "81-88, 620-638",
+      "function_start": "0x5821c",
+      "function_size": 252,
+      "direct_call_targets": ["0x3906b8", "0x331424", "0x25e600"],
+      "basis": "the sibling branch in the same recovered function preserves the literal 0x107 and conditional 0x10f selector before the scalar store to the third argument"
     },
     {
       "image": ".code",
@@ -48,6 +119,9 @@
       "source_mapping": "BattleInst::SetVsTrainerRoyal",
       "source_file": "Field/FieldStatic/source/BattleInst/BattleInst.cpp",
       "source_lines": "2160-2166",
+      "function_start": "0x59354",
+      "function_size": 116,
+      "direct_call_targets": ["0x331424", "0x25e600"],
       "basis": "r1 is loaded from a retail literal 0x127 and r2 is the second function argument, matching BSP_TRAINER_DATA::SetAIBit"
     }
   ],
@@ -57,5 +131,5 @@
     "executable_targets": 58255,
     "invalid": 0
   },
-  "verdict": "The expanded pass now recognizes scalar, double-word, and register-list stores and confirms the two source-mapped direct writers above. It still does not recover C++ object identity for 47,930 candidates, interprocedural aliases, copied structs, or stripped-main-code relocations; complete aliased/copy writer coverage is therefore not established."
+  "verdict": "The expanded pass now recognizes scalar, double-word, and register-list stores, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 337 mask-valued candidates, but 321 are immediate-value collisions (mostly 0x7/0x8/0xf), 14 are literal-pool values, and only the three 0x10f/0x127 stores are source-mapped. It still leaves 46,925 rows with unknown base provenance; the other non-mapped rows have only local register/constant classifications, not C++ object identity. Interprocedural aliases, copied structs, and stripped-main-code relocations remain unresolved, so complete aliased/copy writer coverage is not established."
 }

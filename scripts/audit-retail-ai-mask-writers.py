@@ -277,18 +277,30 @@ def scan(
                 # callee-saved registers used by compiler-generated structs.
                 state = {name: value for name, value in state.items() if name not in {"r0", "r1", "r2", "r3", "r12", "lr"}}
                 continue
-            if j < index and mnemonic in {"b", "bx", "pop"}:
+            if j < index and mnemonic in {"b", "bx"}:
                 # Conditional branches preserve register facts on the local
                 # fall-through path.  Unconditional transfers/calls may leave
                 # the local block, so discard facts rather than inventing a
                 # cross-block alias.
                 state = {}
                 continue
+            if j < index and mnemonic == "pop":
+                # A linear sweep can encounter a return block before a
+                # conditional sibling that shares the same prologue. Keep the
+                # facts here as an over-approximation so that sibling stores
+                # are not lost; the resulting rows remain candidates until
+                # object identity is established.
+                continue
             if (mnemonic in {"mov", "movs"} or (mnemonic.startswith("mov") and mnemonic not in {"movw", "movt", "mvn", "mvns"})) and len(ops) >= 2 and ops[0].type == 1:
                 dst = reg_name(ops[0].reg)
                 src = reg_name(ops[1].reg) if ops[1].type == 1 else None
                 if src is not None and src in state:
                     state[dst] = {**state[src], "via": f"{mnemonic} {src}"}
+                elif ops[1].type == 2:
+                    state[dst] = {
+                        "kind": "immediate-constant",
+                        "value": ops[1].imm & 0xFFFFFFFF,
+                    }
                 else:
                     state.pop(dst, None)
                 continue
@@ -474,6 +486,24 @@ def main() -> None:
                     field: sum(x["field"] == field for x in hits) for field in FIELDS
                 },
                 "ai_mask_constant_candidates": sum(bool(x["ai_mask_constant"]) for x in hits),
+                "ai_mask_constant_by_value": dict(
+                    sorted(
+                        Counter(
+                            hex(int(x["value_provenance"]["value"]))
+                            for x in hits
+                            if x["ai_mask_constant"]
+                        ).items()
+                    )
+                ),
+                "ai_mask_constant_by_provenance": dict(
+                    sorted(
+                        Counter(
+                            x["value_provenance"]["kind"]
+                            for x in hits
+                            if x["ai_mask_constant"]
+                        ).items()
+                    )
+                ),
                 "truncated": args.limit is not None and len(hits) >= args.limit,
             }
         )
@@ -505,6 +535,24 @@ def main() -> None:
                     field: sum(x["field"] == field for x in hits) for field in FIELDS
                 },
                 "ai_mask_constant_candidates": sum(bool(x["ai_mask_constant"]) for x in hits),
+                "ai_mask_constant_by_value": dict(
+                    sorted(
+                        Counter(
+                            hex(int(x["value_provenance"]["value"]))
+                            for x in hits
+                            if x["ai_mask_constant"]
+                        ).items()
+                    )
+                ),
+                "ai_mask_constant_by_provenance": dict(
+                    sorted(
+                        Counter(
+                            x["value_provenance"]["kind"]
+                            for x in hits
+                            if x["ai_mask_constant"]
+                        ).items()
+                    )
+                ),
                 "truncated": args.limit is not None and len(hits) >= args.limit,
             }
         )
@@ -525,6 +573,32 @@ def main() -> None:
         "ai_mask_constant_candidate_count": sum(
             bool(hit["ai_mask_constant"]) for module in rows for hit in module["hits"]
         ),
+        "ai_mask_constant_by_value": dict(
+            sorted(
+                Counter(
+                    hex(int(hit["value_provenance"]["value"]))
+                    for module in rows
+                    for hit in module["hits"]
+                    if hit["ai_mask_constant"]
+                ).items()
+            )
+        ),
+        "ai_mask_constant_by_provenance": dict(
+            sorted(
+                Counter(
+                    hit["value_provenance"]["kind"]
+                    for module in rows
+                    for hit in module["hits"]
+                    if hit["ai_mask_constant"]
+                ).items()
+            )
+        ),
+        "candidate_counts": {
+            "main_code_arm": rows[0]["hit_count"],
+            "main_code_thumb": rows[1]["hit_count"],
+            "cro_arm": sum(row["hit_count"] for row in rows[2:]),
+            "all_store_forms": sum(row["hit_count"] for row in rows),
+        },
         "store_kind_counts": dict(
             sorted(
                 Counter(
