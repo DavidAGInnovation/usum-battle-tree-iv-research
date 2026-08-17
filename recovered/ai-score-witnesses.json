@@ -1,0 +1,118 @@
+{
+  "artifact": "retail AMX bodies executed by the recovered Pawn VM",
+  "rom_evidence": {
+    "species": 291,
+    "species_name": "Ninjask",
+    "types": [6, 2],
+    "ability": 3,
+    "ability_name": "Speed Boost",
+    "levelup_record": {
+      "moves": [
+        {"move": 210, "level": 0},
+        {"move": 14, "level": 41},
+        {"move": 404, "level": 47}
+      ],
+      "source": "/a/0/1/3 member 291"
+    },
+    "move_records": {
+      "14": {"category": 0, "damage_type": 0, "ai_sequence": 50},
+      "210": {"category": 1, "damage_type": 1, "power": 40, "ai_sequence": 119},
+      "404": {"category": 1, "damage_type": 1, "power": 80, "ai_sequence": 0}
+    },
+    "item_table": {
+      "item": 287,
+      "record_exists": true,
+      "source": "/a/0/1/9 member 287"
+    }
+  },
+  "witnesses": [
+    {
+      "relation": "F_Strong >=score F_Basic",
+      "verdict": "disproved",
+      "state": {
+        "battle_rule": 0,
+        "attacker_species": 291,
+        "defender_species": 291,
+        "attacker_ability": 3,
+        "defender_ability": 3,
+        "current_move": 210,
+        "current_move_ai_sequence": 119,
+        "current_move_damage_type": 1,
+        "current_move_is_damage": true,
+        "attacker_has_stronger_move": true,
+        "attacker_current_move_usable": true,
+        "current_move_can_ko": false,
+        "current_move_affinity_is_two_x_or_better": false,
+        "held_item": 0,
+        "hp_ratio": 100,
+        "stat_ranks": 0,
+        "status_and_side_effects": "none",
+        "random_trace": "native random answers are not queried on this path"
+      },
+      "native_returns": {
+        "CHECK_WAZASEQNO": 119,
+        "GET_CURRENT_WAZANO": 210,
+        "CHECK_BTL_RULE": 0,
+        "CHECK_TOKUSEI": 3,
+        "CHECK_WAZA_KIND": 1,
+        "CHECK_DAMAGE_WAZA": 1,
+        "CHECK_WAZA_USABLE": 1,
+        "CHECK_WAZA_AISYOU": 0,
+        "IF_WAZA_HINSHI": 0,
+        "CHECK_MONSNO": 291,
+        "IF_HAVE_ITEM": 0,
+        "COMP_POWER": 1
+      },
+      "vm_result": {
+        "basic_member": 2,
+        "basic_score": 0,
+        "strong_member": 10,
+        "strong_score": -1
+      }
+    },
+    {
+      "relation": "F_Expert >=score F_Basic",
+      "verdict": "disproved",
+      "state": {
+        "battle_rule": 0,
+        "attacker_species": 291,
+        "defender_species": 291,
+        "attacker_ability": 3,
+        "defender_ability": 3,
+        "current_move": 14,
+        "current_move_ai_sequence": 50,
+        "current_move_damage_type": 0,
+        "current_move_is_damage": false,
+        "attacker_current_move_usable": true,
+        "held_item": 287,
+        "hp_ratio": 100,
+        "stat_ranks": 0,
+        "status_and_side_effects": "none",
+        "random_trace": {"draw": 0, "expert_threshold": 220, "predicate": true}
+      },
+      "native_returns": {
+        "CHECK_WAZASEQNO": 50,
+        "GET_CURRENT_WAZANO": 14,
+        "CHECK_BTL_RULE": 0,
+        "CHECK_TOKUSEI": 3,
+        "CHECK_WAZA_KIND": 0,
+        "CHECK_DAMAGE_WAZA": 0,
+        "CHECK_WAZA_USABLE": 1,
+        "IF_HAVE_ITEM": 1,
+        "IF_TYPE_EX": 0,
+        "IF_WAZASICK": 0,
+        "IF_PARA_OVER": 0,
+        "IF_PARA_EQUAL": 0,
+        "IF_HP_UNDER": 0,
+        "IF_RND_UNDER": 1
+      },
+      "vm_result": {
+        "basic_member": 2,
+        "basic_score": 0,
+        "expert_member": 4,
+        "expert_score": -1
+      }
+    }
+  ],
+  "scope": "Each vector is the complete native return set actually queried by the two compared AMX paths. The ROM records make the object graph and field values legal; the exact AMX members are executed, not approximated. This disproves the universal score-dominance relations, but does not claim that every tactical branch has been symbolically enumerated."
+}

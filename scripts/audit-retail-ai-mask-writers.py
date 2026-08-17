@@ -19,6 +19,7 @@ declared (or ruled out) as an ``ai_bit`` writer.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import struct
@@ -70,7 +71,123 @@ def u32(data: bytes, offset: int) -> int:
     return struct.unpack_from("<I", data, offset)[0]
 
 
-def cro_code(path: Path) -> tuple[str, bytes]:
+def cro_metadata(data: bytes) -> dict[str, object]:
+    """Decode the relocation-bearing parts of a CRO header.
+
+    CRO segment offsets encode the segment index in their low nibble and the
+    byte offset within that segment in the remaining bits.  Keeping the raw
+    relocation sites alongside the candidate scan makes it possible to tell
+    whether a store is in a relocatable code word, without pretending that a
+    relocation alone identifies a C++ object or field.
+    """
+
+    def pair(offset: int) -> tuple[int, int]:
+        return struct.unpack_from("<II", data, offset)
+
+    if len(data) < 0x138 or data[0x80:0x84] != b"CRO0":
+        raise ValueError("invalid CRO header")
+    segment_offset, segment_count = pair(0xC8)
+    segments: list[dict[str, object]] = []
+    for index in range(segment_count):
+        offset, size, segment_type = struct.unpack_from(
+            "<III", data, segment_offset + index * 12
+        )
+        segments.append(
+            {
+                "index": index,
+                "offset": offset,
+                "size": size,
+                "type": segment_type,
+            }
+        )
+
+    relocations: list[dict[str, object]] = []
+    relocation_types: Counter[str] = Counter()
+    code_relocations = 0
+    invalid_relocations = 0
+    relocation_tables = (
+        ("import", 0xF8, 0xFC),
+        ("internal", 0x128, 0x12C),
+        ("unknown", 0x130, 0x134),
+    )
+    type_names = {
+        0: "R_ARM_NONE",
+        2: "R_ARM_ABS32",
+        3: "R_ARM_REL32",
+        10: "R_ARM_THM_PC22",
+        28: "R_ARM_CALL",
+        29: "R_ARM_JUMP24",
+        38: "R_ARM_TARGET1",
+        42: "R_ARM_PREL31",
+    }
+    for table_name, offset_field, count_field in relocation_tables:
+        table_offset, table_count = pair(offset_field)
+        for index in range(table_count):
+            entry_offset = table_offset + index * 12
+            if entry_offset + 12 > len(data):
+                invalid_relocations += 1
+                continue
+            output, reloc_type, target_segment, flags, padding, addend = struct.unpack_from(
+                "<IBBBB I", data, entry_offset
+            )
+            segment_index = output & 0xF
+            segment_byte_offset = output >> 4
+            valid_target = segment_index < len(segments)
+            target_file_offset = None
+            target_in_code = False
+            if valid_target:
+                segment = segments[segment_index]
+                if segment_byte_offset < int(segment["size"]):
+                    target_file_offset = int(segment["offset"]) + segment_byte_offset
+                    target_in_code = int(segment["type"]) == 0
+                    if target_in_code:
+                        code_relocations += 1
+                else:
+                    invalid_relocations += 1
+            else:
+                invalid_relocations += 1
+            type_name = type_names.get(reloc_type, f"R_ARM_{reloc_type}")
+            relocation_types[type_name] += 1
+            relocations.append(
+                {
+                    "table": table_name,
+                    "index": index,
+                    "output": hex(output),
+                    "segment": segment_index,
+                    "segment_offset": hex(segment_byte_offset),
+                    "type": type_name,
+                    "referred_segment": target_segment,
+                    "addend": hex(addend),
+                    "target_file_offset": target_file_offset,
+                    "target_in_code": target_in_code,
+                }
+            )
+
+    code_offset, code_size = pair(0xB0)
+    relocation_file_offsets = {
+        int(row["target_file_offset"])
+        for row in relocations
+        if row["target_file_offset"] is not None
+    }
+    return {
+        "code_offset": code_offset,
+        "code_size": code_size,
+        "data_offset": u32(data, 0xB8),
+        "data_size": u32(data, 0xBC),
+        "segment_count": segment_count,
+        "segments": segments,
+        "relocation_counts": {
+            name: u32(data, count_field) for name, _, count_field in relocation_tables
+        },
+        "relocation_type_counts": dict(sorted(relocation_types.items())),
+        "code_relocation_count": code_relocations,
+        "invalid_relocation_count": invalid_relocations,
+        # Internal use by the scanner; omitted before JSON serialization.
+        "_relocation_file_offsets": relocation_file_offsets,
+    }
+
+
+def cro_code(path: Path) -> tuple[str, bytes, dict[str, object]]:
     data = path.read_bytes()
     if data[0x80:0x84] != b"CRO0":
         raise ValueError(f"{path}: missing CRO0 header")
@@ -78,10 +195,17 @@ def cro_code(path: Path) -> tuple[str, bytes]:
     end = data.find(b"\0", name_offset)
     name = data[name_offset:end].decode("ascii", "replace")
     offset, size = u32(data, 0xB0), u32(data, 0xB4)
-    return name, data[offset : offset + size]
+    return name, data[offset : offset + size], cro_metadata(data)
 
 
-def scan(code: bytes, mode: int, *, limit: int | None = None) -> list[dict[str, object]]:
+def scan(
+    code: bytes,
+    mode: int,
+    *,
+    limit: int | None = None,
+    code_file_offset: int = 0,
+    relocation_file_offsets: set[int] | None = None,
+) -> list[dict[str, object]]:
     md = Cs(CS_ARCH_ARM, mode)
     md.detail = True
     # The main ExeFS section is a stripped mixed code/data image.  Continue
@@ -105,6 +229,10 @@ def scan(code: bytes, mode: int, *, limit: int | None = None) -> list[dict[str, 
                 "operands": ins.op_str,
                 "stack_base": mem.mem.base == ARM_REG_SP,
                 "bytes": ins.bytes.hex(),
+                "relocation_at_instruction": (
+                    relocation_file_offsets is not None
+                    and code_file_offset + ins.address in relocation_file_offsets
+                ),
             }
         )
         if limit is not None and len(rows) >= limit:
@@ -144,8 +272,15 @@ def main() -> None:
         )
 
     for path in sorted(args.cro_dir.glob("*.cro")):
-        name, cro_text = cro_code(path)
-        hits = scan(cro_text, CS_MODE_ARM, limit=args.limit)
+        name, cro_text, metadata = cro_code(path)
+        hits = scan(
+            cro_text,
+            CS_MODE_ARM,
+            limit=args.limit,
+            code_file_offset=int(metadata["code_offset"]),
+            relocation_file_offsets=set(metadata["_relocation_file_offsets"]),
+        )
+        metadata.pop("_relocation_file_offsets", None)
         rows.append(
             {
                 "module": name,
@@ -154,6 +289,7 @@ def main() -> None:
                 "file_sha256": sha256(path.read_bytes()),
                 "code_size": len(cro_text),
                 "hits": hits,
+                "cro_metadata": metadata,
                 "hit_count": len(hits),
                 "stack_base_hits": sum(bool(x["stack_base"]) for x in hits),
                 "field_counts": {
@@ -165,7 +301,8 @@ def main() -> None:
 
     result = {
         "fields": {name: hex(offset) for name, offset in FIELDS.items()},
-        "mode": "candidate enumeration; not alias-complete",
+        "mode": "relocation-aware candidate enumeration; not alias-complete",
+        "main_code_relocations": "unavailable: ExeFS .code is a stripped mapped image, not a CRO",
         "modules": rows,
     }
     text = json.dumps(result, indent=2, sort_keys=True) + "\n"

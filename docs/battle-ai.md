@@ -20,11 +20,11 @@ This is not one scalar “AI level”. It enables three move-scoring programs an
 one switching program. The engine runs every enabled program in the relevant
 judge, adds their returned scores, and chooses the highest-scoring action. The
 source labels `BASIC` (basic), `STRONG` (攻撃型AI, attack-oriented), and
-`EXPERT` (expert) establish their intended roles, but do not prove that Expert
-is a strict superset of Strong or that either is always “smarter”. A strict
-command-set interpretation is disproved below; a behavioral comparison is
-defined separately as a quantified score/action relation rather than left as
-an informal difficulty label.
+`EXPERT` (expert) establish their intended roles, but do not make either one a
+strict superset of Basic. The command-set interpretation is disproved below,
+and the stronger score-dominance claims are disproved by legal ROM-derived
+counterexamples in [`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json).
+An action comparison remains a separate utility-and-tie-policy question.
 
 The current Battle Tree evidence also does not show a trainer-ID-specific AI
 upgrade. `SetVsTrainer` applies the same base mask to the trainer data and has
@@ -85,11 +85,15 @@ The displacement is not an object identity: it is also common in stack frames
 and unrelated C++ structures. For example, `Battle.cro` contributes literal
 candidates at both offsets, including an initializer-like pair and a loop over
 an array-of-structures; neither can be called an `ai_bit` writer without
-resolving the CRO relocations and object type. This is therefore a complete
-candidate inventory for the stated literal pattern, not a complete
-direct/indirect/aliased/copy writer proof. The remaining binary theorem is
-precisely the relocation-aware field-sensitive lift described in
-[`proof-closure.md`](proof-closure.md).
+resolving the CRO relocations and object type. The scanner now parses all 132
+CRO relocation tables: 45,221 import and 56,581 internal records, all 101,802
+recognized as `R_ARM_ABS32`, with 58,255 executable-segment targets and no
+malformed entries. None of the literal candidate stores is itself a relocation
+patch site. This is a relocation-aware candidate inventory, not a complete
+direct/indirect/aliased/copy writer proof: the stripped ExeFS `.code` has no
+CRO/CRS relocation table, and CRO relocations still do not identify C++ object
+types or register aliases. The remaining binary theorem is precisely the
+whole-program field-sensitive lift described in [`proof-closure.md`](proof-closure.md).
 
 ## Runtime flow
 
@@ -508,18 +512,16 @@ s1 >=score s0  iff  for every (σ,c,r), F_s1(σ,c,r) >= F_s0(σ,c,r)
 
 An action-dominance claim additionally needs a utility function over actions
 and the tie/randomness policy used by the judges. The recovered native
-dispatcher and Pawn VM are sufficient to execute a chosen state, but a
-complete legal-state model and an all-state symbolic proof have not been
-constructed. A direct VM probe with a synthetic native callback confirms that
-the extracted Basic, Strong, and Expert bodies execute and that changing
-native/random returns changes their scores; it is execution-path validation,
-not a legal-state witness for `>=score` or `>=action`. A stronger contract-level
-check is now available: a callback vector satisfying the native return
-contracts yields Basic `0` and Strong `−1` (Expert `0`) on the exact retail
-members. Thus Strong score dominance is disproved over that abstraction. The
-Expert ordering and the quantified legal-retail-state theorems remain open
-until an equivalent witness or an all-state model ties the values to reachable
-battle object graphs.
+dispatcher and Pawn VM first validated execution with synthetic callbacks. The
+stronger result is now a legal retail-state counterexample: the ROM's Ninjask
+records provide the species, ability, learnable current/stronger moves, AI
+sequence numbers, and damage types. With those values instantiated, the exact
+members return Basic `0` and Strong `−1`, and a second legal state returns
+Basic `0` and Expert `−1` (full vectors are in
+[`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json)).
+Therefore both universal score-dominance claims are disproved. The separate
+action-dominance question still requires an explicit utility function and the
+judge's tie/randomness policy.
 
 ## What is proven, and what is not
 
@@ -553,9 +555,9 @@ they are not an additional unresolved list.
   execution path is validated but no universal score/action theorem is
   claimed.
 - That Strong or Expert is monotonically more capable than Basic. The native
-  command sets are not nested, which disproves strict structural dominance.
-  Behavioral score dominance is now defined above; it remains a quantified
-  theorem requiring a legal-state model, not an undefined label.
+  command sets are not nested, and the ROM-derived legal-state witnesses now
+  disprove both universal score-dominance relations. A positive all-state
+  branch/value theorem remains a separate, stronger analysis goal.
 - The original generated `BattleAi.gaix` file bytes and a direct retail
   `datIdx` trace have not been recovered. The numeric map itself is established
   by the archived project/tool ordering plus the retail member inventory above.
@@ -582,9 +584,9 @@ The complete closure ledger, including the precise verdict for each former
 open item and the two stronger theorems that are intentionally out of scope,
 is maintained in [proof-closure.md](proof-closure.md).
 
-The four open items do not all have the same status. Two admit direct
-counterexamples, one is an artifact-recovery negative, and one remains a
-whole-binary analysis obligation.
+The four former open items do not all have the same status. The structural and
+behavioral ordering claims admit direct counterexamples, one is an
+artifact-recovery negative, and one remains a whole-binary analysis obligation.
 
 ### The static audit is not value-complete
 
@@ -603,11 +605,11 @@ score/action theorem for every state is not.
 The native command sets are not nested. Strong uses commands absent from Basic
 (`28`, `45`, `81`, `96`, `97`), while Basic uses 42 commands absent from
 Strong. Expert and Basic are also mutually non-subsuming. Thus “Strong” or
-“Expert” as a strict structural superset of Basic is false. A behavioral score
-relation is now explicit (`F_s(σ,c,r)` quantified over legal states,
-candidates, and random traces), but it is not established by command sets or
-by a synthetic callback. An action relation additionally requires a utility
-function and tie policy.
+“Expert” as a strict structural superset of Basic is false. The behavioral score
+relation is explicit (`F_s(σ,c,r)` quantified over legal states, candidates,
+and random traces), and the two legal-state witnesses disprove both
+`F_Strong >=score F_Basic` and `F_Expert >=score F_Basic`. An action relation
+additionally requires a utility function and tie policy.
 
 ### The original `BattleAi.gaix` bytes are absent from the supplied artifacts
 
@@ -634,6 +636,7 @@ The source contains explicit, mutually different masks: ordinary trainers use
 helper can deliberately reduce non-boss trainers to Basic only. This falsifies
 the universal same-mask claim. What remains open is narrower: proving that the
 stripped retail binary has no additional aliased, copied, or indirect writers
-beyond that source inventory. That requires a relocation-aware whole-binary
-data-flow audit; the current artifacts do not make that completeness theorem
-available by inspection alone.
+beyond that source inventory. The CRO relocation tables are now parsed and
+validated by the scanner, but the main `.code` image has no relocation table
+and no field-sensitive whole-program data-flow proof is available from these
+inputs alone.
