@@ -168,7 +168,8 @@
     "invalid": 0
   },
   "residual_writer_closure": {
-    "verifier": "scripts/verify-proof-boundary-separation.py",
+    "verifier": "scripts/verify-retail-ai-writer-theorem.py",
+    "byte_level_companion": "scripts/verify-proof-boundary-separation.py",
     "main_code_0x45ec": {
       "stored_value": "0x565e1d",
       "value_origin": "zero-argument bl 0x4a50 plus one, from literal 0x56138c and PC 0x4a90",
@@ -181,6 +182,15 @@
       "vtable_slot": "segment 1 + 0xe0d8",
       "ai_bit_type_disjoint": true
     },
-    "verdict": "The section-aware pass recognizes scalar, double-word, and register-list stores only in the 0x4ba000-byte executable text region, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 325 mask-valued candidates, but the two previously unresolved exact stores are now closed by value/type provenance: .code:0x45ec writes a read-only/data-tail pointer, and Battle.cro:0x1e80 is gfl2::Effect::Config virtual code. The residual aliased/copied-writer obligation is closed for the audited candidate set; remaining same-displacement rows remain documented as scanner over-approximation rather than silently promoted to AI fields."
+    "verdict": "The section-aware pass recognizes scalar, double-word, and register-list stores only in the 0x4ba000-byte executable text region, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 325 mask-valued candidates, but the two previously unresolved exact stores are now closed by the field-sensitive residual lift: .code:0x45ec writes a read-only/data-tail pointer, and Battle.cro:0x1e80 is gfl2::Effect::Config virtual code whose source class is distinct from non-polymorphic BSP_TRAINER_DATA. The residual aliased/copied-writer obligation is closed for the audited candidate set; remaining same-displacement rows remain documented as scanner over-approximation rather than silently promoted to AI fields."
+  },
+  "field_sensitive_residual_lift": {
+    "verifier": "scripts/verify-retail-ai-writer-theorem.py",
+    "artifact": "recovered/retail-ai-writer-theorem.json",
+    "source_type_check": "BSP_TRAINER_DATA is non-polymorphic; Battle.cro:0x1e80 resolves to gfl2::Effect::Config",
+    "main_code_0x45ec": "stored value 0x565e1d is outside the recovered AI-mask value domain",
+    "battle_cro_0x1e80": "unique segment-1 vtable relocation at 0xe0d8; no direct code branch targets the body",
+    "theorem_scope": "the two exact residual displacement-compatible stores left by the retail candidate audit",
+    "proved": true
   }
 }

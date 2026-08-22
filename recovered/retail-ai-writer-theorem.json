@@ -1,0 +1,74 @@
+{
+  "artifact": "field-sensitive residual lift for retail ai_bit writer theorem",
+  "battle_cro_residual": {
+    "ai_bit_type_disjoint": true,
+    "code_offset": "0x180",
+    "direct_branch_references": [],
+    "file": "Battle.cro",
+    "instruction": "str r1, [r0, #4]",
+    "relocation_reference_count": 1,
+    "sha256": "334ab92012b8dd9179ba27e0faeeb6d1fd21113e13812ec065e68309dae8396c",
+    "vtable": {
+      "offset": "0xe0c8",
+      "rtti_name": "N4gfl26Effect6ConfigE",
+      "segment": 1,
+      "source_type": "gfl2::Effect::Config",
+      "target_code_offset": "0x1e80",
+      "typeinfo_offset": "0xadd0",
+      "virtual_slot_index": 2,
+      "virtual_slot_offset": "0xe0d8"
+    }
+  },
+  "inputs": {
+    "main_code_sha256": "b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09",
+    "battle_cro_sha256": "334ab92012b8dd9179ba27e0faeeb6d1fd21113e13812ec065e68309dae8396c",
+    "source_root": "momiji_git_program.zip (password supplied separately)"
+  },
+  "main_code_residual": {
+    "ai_bit_field_write_present": false,
+    "ai_bit_value_disjoint": true,
+    "function_start": "0x45bc",
+    "instructions": {
+      "0x45d0": {"bytes": "cfec07eb", "mnemonic": "bl", "operands": "#0x1ff914"},
+      "0x45d4": {"bytes": "0040a0e1", "mnemonic": "mov", "operands": "r4, r0"},
+      "0x45e0": {"bytes": "1a0100eb", "mnemonic": "bl", "operands": "#0x4a50"},
+      "0x45e4": {"bytes": "010080e2", "mnemonic": "add", "operands": "r0, r0, #1"},
+      "0x45ec": {"bytes": "040084e5", "mnemonic": "str", "operands": "r0, [r4, #4]"},
+      "0x45f8": {"bytes": "0c0084e5", "mnemonic": "str", "operands": "r0, [r4, #0xc]"}
+    },
+    "receiver_origin": {
+      "call": "bl 0x1ff914",
+      "global_pointer": "0x6d3c20",
+      "literal_at": "0x1ff91c"
+    },
+    "value_provenance": {
+      "call": "bl 0x4a50 with r1=0",
+      "literal_offset": "0x4a94",
+      "literal_value": "0x56138c",
+      "pc_add": "0x4a90",
+      "computed_pointer": "0x565e1c",
+      "stored_value": "0x565e1d",
+      "region": "retail .code read-only/data tail"
+    }
+  },
+  "source_type_evidence": {
+    "bsp_trainer_data_polymorphic": false,
+    "source_writer_evidence": {
+      "core_ai_bit_field": "u32               ai_bit;",
+      "core_zero": "dst->ai_bit = 0;",
+      "deserialize_copy": "mCore.ai_bit          = serializedData->ai_bit;",
+      "fes_selector": "dst->SetAIBit(ai_bit);",
+      "npc_copy": "dst->ai_bit       = trData->GetAIBit();"
+    }
+  },
+  "theorem": {
+    "basis": [
+      ".code:0x45ec has fixed pointer value provenance and no +0x1c store in its function",
+      "Battle.cro:0x1e80 is a unique RTTI-backed virtual slot for gfl2::Effect::Config",
+      "BSP_TRAINER_DATA is non-polymorphic in the archived source"
+    ],
+    "proved": true,
+    "scope": "the two exact residual displacement-compatible stores left by the retail candidate audit",
+    "statement": "Neither residual store can write BSP_TRAINER_DATA::CORE_DATA::ai_bit; the only source-mapped direct stores remain the three SetAIBit inlines."
+  }
+}

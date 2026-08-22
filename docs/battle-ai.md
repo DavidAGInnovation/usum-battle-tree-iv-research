@@ -124,7 +124,11 @@ that survived those local checks are now closed by
 `.code:0x45ec` stores the read-only/data-tail pointer `0x565e1d`, and
 `Battle.cro:0x1e80` is the third virtual slot of RTTI
 `N4gfl26Effect6ConfigE` (`gfl2::Effect::Config`). They are not AI-mask
-writers.
+writers. The field-sensitive residual lift, including the source
+non-polymorphism check, is reproduced by
+[`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py)
+and recorded in
+[`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json).
 At the `MainModule::TRAINER_DATA` layout, the source separately specifies
 aggregate initialization, `trainerParam_StoreCore` zeroing, and
 `trainerParam_StoreNPCTrainer` copying `GetAIBit()` into `+0x1c`. The source
@@ -683,6 +687,8 @@ helper can deliberately reduce non-boss trainers to Basic only. This falsifies
 the universal same-mask claim. The residual binary question is now closed for
 the audited candidate set: `.code:0x45ec` stores a read-only/data-tail pointer,
 and `Battle.cro:0x1e80` resolves through its CRO vtable to
-`gfl2::Effect::Config`, not `BSP_TRAINER_DATA`. The CRO relocation tables and
-the exact main-image pointer construction are checked by
-[`scripts/verify-proof-boundary-separation.py`](../scripts/verify-proof-boundary-separation.py).
+`gfl2::Effect::Config`, not `BSP_TRAINER_DATA`. The CRO relocation tables,
+exact main-image pointer construction, and source type boundary are checked by
+[`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py)
+and recorded in
+[`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json).

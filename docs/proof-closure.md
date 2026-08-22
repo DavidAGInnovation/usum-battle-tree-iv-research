@@ -6,10 +6,10 @@ artifact-recovery negative (where the requested bytes are absent), and a
 stronger theorem that is outside the evidence currently analyzed. This
 iteration also gives the two stronger claims precise definitions, runs the
 retail-ROM candidate writer sweep, executes the retail AMX bodies through the
-recovered Pawn VM interface, and closes the two residual writer stores with
-value/type provenance. The broad scanner remains an over-approximation and the
-native callback remains a model boundary; neither is presented as more than
-the evidence supports.
+recovered Pawn VM interface, and closes the two residual writer stores with a
+field-sensitive ARM/CRO lift. The broad scanner remains an over-approximation
+for unrelated same-displacement fields and the native callback remains a model
+boundary; neither is presented as more than the evidence supports.
 
 ## Final disposition
 
@@ -21,6 +21,9 @@ the evidence supports.
 | Every special trainer uses one AI mask in every mode and phase. | **Disproved at source scope.** | The source has explicit alternatives: ordinary `0x107`, Royal setup `0x127` with an effective Royal selector `0x125`, special-wild `0x007`, wild Double `0x008`, intrusion `0x040`, reinforcement `0x00f`, and Battle Festival Basic-only reductions. Therefore the universal same-mask statement is false. |
 | The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Closed for the audited candidate set.** | The section-aware scanner uses the retail ExHeader text boundary `0x4ba000` and recognizes scalar, double-word, and register-list stores while tracking immediate constants. It finds 67,645 total executable-region candidates: 25,604 ARM and 19,703 Thumb `.code` candidates plus 22,338 ARM candidates across the 132 CRO code segments. It identifies the three high-confidence direct writers in the retail `.code`: `0x58260` (`stm r5,{r4,r7}`) and `0x582d4` (`str r7,[r5,#4]`) write `0x107`/`0x10f` at `+0x4` on the `BattleInst::SetVsTrainer`/`SetAiBit` branches; `0x59370` (`str r1,[r2,#4]`) writes `0x127`, matching `SetVsTrainerRoyal`. The previously unresolved exact stores are now field-sensitive: `.code:0x45ec` stores the read-only/data-tail pointer `0x565e1d` produced by `bl 0x4a50`, while `Battle.cro:0x1e80` is the third virtual slot of RTTI `N4gfl26Effect6ConfigE` (`gfl2::Effect::Config`), not `BSP_TRAINER_DATA`. The full byte-level evidence and verifier are in [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json) and [`scripts/verify-proof-boundary-separation.py`](../scripts/verify-proof-boundary-separation.py). The scanner remains an over-approximation for the other same-displacement collisions; this closure does not claim that every unrelated object field is an AI field. |
 
+The table's residual-store conclusion is independently reproduced by the
+field-sensitive verifier and artifact [`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py) and [`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json). The earlier byte-level companion remains useful for the raw instruction and relocation checks.
+
 After applying the ExHeader text boundary, only two Thumb-sweep mask constants
 remain. One (`0x3d3600`) lies inside an ARM function reached by ARM
 branches/calls, so its Thumb decode is not a Thumb writer. The remaining
@@ -31,9 +34,11 @@ pointer at `+0x0`, while `CORE_DATA` has `tr_id` at `+0x0` and `ai_bit` at
 `+0x4`. Thus `0x688` is disproved as either source-defined `ai_bit` writer.
 The remaining ARM mask-valued candidate is a stack temporary. The two exact
 stores that previously remained outside those local disproofs are now closed
-by [`verify-proof-boundary-separation.py`](../scripts/verify-proof-boundary-separation.py):
+by [`verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py):
 one is a read-only/data-tail pointer and the other is an RTTI-resolved effect
-configuration virtual method.
+configuration virtual method. The verifier also checks that the source
+`BSP_TRAINER_DATA` declaration is non-polymorphic, so the effect vtable slot
+cannot be an aliased trainer-data method.
 
 The source inventory also identifies three `MainModule` writers at `+0x1c`:
 aggregate initialization in `trainerParam_Init`, zeroing in
@@ -57,7 +62,9 @@ is simply not proved by the present artifacts.
 
 The native-state caveat and the former binary ambiguity are not merely missing
 documentation. They have reproducible evidence in
-[`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
+[`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json)
+and the field-sensitive theorem artifact
+[`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json).
 The same Strong AMX bytes execute successfully under two native models that
 obey the documented callback interface: an all-zero model returns score `0`,
 while the legal Ninjask witness returns `−1`. Thus the program and VM do not
@@ -86,9 +93,10 @@ separate theorems:
    branch-complete execution audit remains a separate descriptive task.
 2. A whole-program ARM/CRO lift would still be useful for naming every
    over-approximate same-displacement collision, but it is no longer a
-   blocking obligation for the audited AI-mask candidate set: the only two
-   exact stores that survived the prior structural pass now have disjoint
-   value/type provenance. The verifier records the CRO relocations and the
+   blocking obligation for the audited AI-mask candidate set: the bounded
+   field-sensitive lift now proves that the only two exact stores that
+   survived the prior structural pass have disjoint value/type provenance.
+   The verifier records the CRO relocations, source non-polymorphism, and the
    main-image pointer construction without pretending that a displacement
    alone identifies a field.
 

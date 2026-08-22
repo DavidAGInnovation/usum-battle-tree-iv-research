@@ -165,6 +165,22 @@ candidate instruction itself has no relocation. These checks close the two
 formerly unresolved stores; displacement alone is still not treated as a type
 proof for unrelated over-approximate rows.
 
+The field-sensitive residual theorem is reproduced with the source tree as an
+additional input:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-retail-ai-writer-theorem.py \
+  /tmp/usum-retail-battle-ai/code.bin \
+  /path/to/extracted-cros \
+  --source-root /path/to/extracted-source
+```
+
+This verifier checks the exact main-image value construction, the unique
+`Battle.cro` relocation and RTTI type, the absence of direct branches to the
+residual CRO body, and the non-polymorphic `BSP_TRAINER_DATA` source
+declaration. Its proved result is recorded in
+[`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json).
+
 The section-aware pass also leaves one real Thumb same-offset collision at
 `.code:0x688`. Verify its surrounding object behavior with:
 

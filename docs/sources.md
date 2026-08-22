@@ -105,7 +105,9 @@ The final proof-status ledger for the Battle-AI claims is in
 [proof-closure.md](proof-closure.md). It records which claims are disproved,
 which artifact-recovery result is negative, and which stronger native-state
 theorem remains outside the present analysis; the audited retail writer
-candidate set is closed by the residual provenance verifier.
+candidate set is closed by the field-sensitive residual provenance verifier
+[`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py)
+and artifact [`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json).
 
 The control-flow coverage check is reproducible with
 `scripts/audit-battle-ai-flow.py`. It consumes the numbered `.lst` files
