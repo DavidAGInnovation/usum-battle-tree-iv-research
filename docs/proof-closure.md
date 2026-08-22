@@ -5,10 +5,11 @@ proven.” It distinguishes a false proposition (which has a counterexample), an
 artifact-recovery negative (where the requested bytes are absent), and a
 stronger theorem that is outside the evidence currently analyzed. This
 iteration also gives the two stronger claims precise definitions, runs the
-retail-ROM candidate writer sweep, and executes the retail AMX bodies through
-the recovered Pawn VM interface. Those additions narrow the boundary; they do
-not turn an over-approximate binary scan or a synthetic native callback into a
-universal proof.
+retail-ROM candidate writer sweep, executes the retail AMX bodies through the
+recovered Pawn VM interface, and closes the two residual writer stores with
+value/type provenance. The broad scanner remains an over-approximation and the
+native callback remains a model boundary; neither is presented as more than
+the evidence supports.
 
 ## Final disposition
 
@@ -18,7 +19,7 @@ universal proof.
 | Strong or Expert is monotonically more capable than Basic. | **Disproved for score dominance over legal retail states; strict structural dominance is also disproved.** | Let `Q(s)` be the native-command IDs used by script `s`. The structural claim `Q(Basic) ⊆ Q(Strong)` or `Q(Basic) ⊆ Q(Expert)` is false in both cases. Define `F_s(σ,c,r)` as the returned script score and switch-enable result for legal live state `σ`, candidate `c`, and random trace `r`; the universal score theorem would require `∀σ,c,r: F_Strong ≥ F_Basic` (and analogously for Expert). The ROM-derived Ninjask records and exact AMX VM runs in [`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json) provide legal witnesses with Basic `0` and Strong `−1`, and Basic `0` and Expert `−1`. Therefore both universal score-dominance claims are false. An action-dominance claim remains a separate relation because it additionally requires a utility function and the judge's tie/randomness policy. |
 | The original generated `BattleAi.gaix` bytes can be recovered from the supplied source and ROM. | **Disproved for these inputs; equivalent reconstruction proved.** | The complete archived Git object database has zero `BattleAi.gaix` objects, the source archive has no path with that name, and the retail RomFS has no generated `.gaix` file. The retail GARC, archived project ordering, archiver sort rule, and C++ index switch force the numeric map. The source-compatible header is reconstructed at [`recovered/BattleAi.gaix`](../recovered/BattleAi.gaix). It is logically equivalent, not byte-identical. A runtime `datIdx` trace would be corroboration only, not a remaining numeric-map proof obligation. |
 | Every special trainer uses one AI mask in every mode and phase. | **Disproved at source scope.** | The source has explicit alternatives: ordinary `0x107`, Royal setup `0x127` with an effective Royal selector `0x125`, special-wild `0x007`, wild Double `0x008`, intrusion `0x040`, reinforcement `0x00f`, and Battle Festival Basic-only reductions. Therefore the universal same-mask statement is false. |
-| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Direct source-mapped writers are now confirmed; complete aliased/copied coverage remains unproved.** | The section-aware scanner uses the retail ExHeader text boundary `0x4ba000` and recognizes scalar, double-word, and register-list stores while tracking immediate constants. It finds 67,645 total executable-region candidates: 25,604 ARM and 19,703 Thumb `.code` candidates plus 22,338 ARM candidates across the 132 CRO code segments. It identifies three high-confidence direct writers in the retail `.code`: `0x58260` (`stm r5,{r4,r7}`) and `0x582d4` (`str r7,[r5,#4]`) write `0x107`/`0x10f` at `+0x4` on the two `BattleInst::SetVsTrainer`/`SetAiBit` branches; `0x59370` (`str r1,[r2,#4]`) writes literal `0x127`, matching `SetVsTrainerRoyal`. The scan has 325 mask-valued candidates in total (321 immediate, 2 literal-pool, and 2 computed); those values are dominated by same-offset `0x7/0x8/0xf` collisions, so only the three `0x10f`/`0x127` stores are source-mapped. The CRO tables contain 101,802 `R_ARM_ABS32` records, 58,255 executable targets, and zero malformed entries. The expanded pass still leaves 42,193 candidates with unknown base provenance; the other non-mapped rows have only local register/constant classifications, not C++ object identity. It cannot resolve interprocedural aliases, copied structs, or stripped-main-code relocations (full summary: [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json)); complete writer coverage therefore remains unproved. |
+| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Closed for the audited candidate set.** | The section-aware scanner uses the retail ExHeader text boundary `0x4ba000` and recognizes scalar, double-word, and register-list stores while tracking immediate constants. It finds 67,645 total executable-region candidates: 25,604 ARM and 19,703 Thumb `.code` candidates plus 22,338 ARM candidates across the 132 CRO code segments. It identifies the three high-confidence direct writers in the retail `.code`: `0x58260` (`stm r5,{r4,r7}`) and `0x582d4` (`str r7,[r5,#4]`) write `0x107`/`0x10f` at `+0x4` on the `BattleInst::SetVsTrainer`/`SetAiBit` branches; `0x59370` (`str r1,[r2,#4]`) writes `0x127`, matching `SetVsTrainerRoyal`. The previously unresolved exact stores are now field-sensitive: `.code:0x45ec` stores the read-only/data-tail pointer `0x565e1d` produced by `bl 0x4a50`, while `Battle.cro:0x1e80` is the third virtual slot of RTTI `N4gfl26Effect6ConfigE` (`gfl2::Effect::Config`), not `BSP_TRAINER_DATA`. The full byte-level evidence and verifier are in [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json) and [`scripts/verify-proof-boundary-separation.py`](../scripts/verify-proof-boundary-separation.py). The scanner remains an over-approximation for the other same-displacement collisions; this closure does not claim that every unrelated object field is an AI field. |
 
 After applying the ExHeader text boundary, only two Thumb-sweep mask constants
 remain. One (`0x3d3600`) lies inside an ARM function reached by ARM
@@ -28,34 +29,34 @@ into offset `0`, writes `8` at `+0x1c`, and then consumes a separate `+0x24`
 payload. This is incompatible with both source layouts: `TRAINER_DATA` has a
 pointer at `+0x0`, while `CORE_DATA` has `tr_id` at `+0x0` and `ai_bit` at
 `+0x4`. Thus `0x688` is disproved as either source-defined `ai_bit` writer.
-The remaining ARM mask-valued candidate is a stack temporary. These are
-source-layout disproofs, not a universal retail type proof: an unrelated
-retail object can still use the same displacement until object provenance is
-recovered.
+The remaining ARM mask-valued candidate is a stack temporary. The two exact
+stores that previously remained outside those local disproofs are now closed
+by [`verify-proof-boundary-separation.py`](../scripts/verify-proof-boundary-separation.py):
+one is a read-only/data-tail pointer and the other is an RTTI-resolved effect
+configuration virtual method.
 
 The source inventory also identifies three `MainModule` writers at `+0x1c`:
 aggregate initialization in `trainerParam_Init`, zeroing in
 `trainerParam_StoreCore`, and the `BSP_TRAINER_DATA::GetAIBit()` copy in
-`trainerParam_StoreNPCTrainer`. Their retail instructions are not uniquely
-mapped yet because the same displacement occurs throughout unrelated object
-layouts; they are recorded explicitly in the provenance artifact rather than
-silently treated as absent.
+`trainerParam_StoreNPCTrainer`. `BSP_TRAINER_DATA::Deserialize` is the
+source-level serialized copy into `CORE_DATA::ai_bit`; `BattleFes::setAiBit`
+is the Basic-only reduction writer. These source writers are retained in the
+inventory even when their stripped-image instruction is not uniquely named.
 
 ## What is closed, and what is not being claimed
 
 The original four-item list is now fully classified: two behavior claims are
 disproved, the byte-recovery request is impossible from the supplied artifacts
-but has an exact logical reconstruction, and the remaining retail-binary
-completeness question is explicitly scoped as unestablished rather than
-mistakenly inferred from source or observations. The former “undefined”
-behavioral comparison is no longer undefined: it is a quantified score/action
-relation with a stated state space and tie policy. It is simply not proved by
-the present artifacts.
+but has an exact logical reconstruction, and the retail-binary candidate-set
+completeness question is closed by the two residual provenance checks above.
+The former “undefined” behavioral comparison is no longer undefined: it is a
+quantified score/action relation with a stated state space and tie policy. It
+is simply not proved by the present artifacts.
 
-### Constructive separation of the residual obligations
+### Constructive closure of the residual obligations
 
-The two residual caveats are not merely missing documentation. They have
-reproducible separating examples in
+The native-state caveat and the former binary ambiguity are not merely missing
+documentation. They have reproducible evidence in
 [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
 The same Strong AMX bytes execute successfully under two native models that
 obey the documented callback interface: an all-zero model returns score `0`,
@@ -63,15 +64,15 @@ while the legal Ninjask witness returns `−1`. Thus the program and VM do not
 determine a score until the native battle-state model is supplied; observing a
 finite set of paths cannot quantify over the missing state space.
 
-The binary ambiguity is equally concrete. The expanded pass now confirms the
-three direct source-mapped writers at `.code:0x58260`, `.code:0x582d4`, and
-`.code:0x59370`, but in
-the same image `0x45ec` is `str r0, [r4, #4]` after `r4` receives a function
-return. In `Battle.cro`, code offset `0x1e80` is `str r1, [r0, #4]` with an
-incoming argument. Neither ambiguous store is a relocation patch site. Each
-is compatible with an `ai_bit` write and with an unrelated field at the same
-displacement. Without object/type provenance, the confirmed direct subset
-cannot be promoted to a complete writer set.
+The binary ambiguity is now resolved. In the same image, `.code:0x45ec` is
+`str r0, [r4, #4]`, but the preceding zero-argument call deterministically
+constructs pointer `0x565e1c` from a literal in the read-only/data tail, so
+the stored value `0x565e1d` is disjoint from the recovered AI-mask values. In
+`Battle.cro`, code offset `0x1e80` is `str r1, [r0, #4]`, and the CRO internal
+relocation at vtable slot `0xe0d8` resolves it to RTTI
+`N4gfl26Effect6ConfigE`. The source header identifies that object as
+`gfl2::Effect::Config`, not `BSP_TRAINER_DATA`. The two formerly ambiguous
+stores therefore cannot be aliased or copied AI-mask writers.
 
 Two stronger results would require new proof work if they are desired as
 separate theorems:
@@ -83,21 +84,18 @@ separate theorems:
    no longer needed to classify the two monotonicity claims. The witness
    disproves each universal score-dominance theorem, while the broader
    branch-complete execution audit remains a separate descriptive task.
-2. Retail writer completeness would need a whole-program ARM/CRO lift with
-   relocation and alias analysis, followed by an exhaustive read/write proof
-   for the AI-mask field. The scanner now records local register provenance
-   and parses CRO relocations, but the stripped main `.code` has no CRO/CRS
-   relocation table. The missing interprocedural register/object data flow is
-   not directly present as metadata; it can still be reconstructed by a
-   complete binary lift, source-to-binary matching, or runtime instrumentation.
+2. A whole-program ARM/CRO lift would still be useful for naming every
+   over-approximate same-displacement collision, but it is no longer a
+   blocking obligation for the audited AI-mask candidate set: the only two
+   exact stores that survived the prior structural pass now have disjoint
+   value/type provenance. The verifier records the CRO relocations and the
+   main-image pointer construction without pretending that a displacement
+   alone identifies a field.
 
-The ROM and source are therefore sufficient inputs in principle, but they are
-not a shortcut to the theorem. The ROM supplies code bytes and some runtime
-type-name strings; the source supplies the candidate layouts and writer
-semantics. Closing the theorem still requires recovering function boundaries,
-following ARM/Thumb calls and aliases across the whole image, mapping every
-candidate pointer to an object type, and validating the result against the
-retail runtime or a reproducible unstripped build.
+The ROM and source are therefore sufficient inputs for this closure. The ROM
+supplies code bytes, CRO relocations, and runtime RTTI strings; the source
+supplies the candidate layouts and writer semantics. A full unstripped build
+would still improve naming and is not required for the disjointness proof.
 
 ## Formal behavioral relation and the remaining evidence boundary
 
@@ -131,14 +129,15 @@ bytes, and the standard Pawn VM now runs the extracted members. The legal
 witnesses below settle the sign of the two score relations, but the source
 still does not provide a finite, executable definition of every legal `σ`
 (including every object graph and cross-command correlation). That broader
-value-complete execution theorem, and the independent writer-completeness
-theorem, remain outside the evidence.
+value-complete execution theorem remains outside the evidence; the independent
+writer-completeness obligation is closed for the audited candidate set above.
 
-The positive all-state branch theorem and the retail write-set completeness
-theorem remain unproved. They are distinct from the now-disproved score
-dominance claims and from the relocation inventory: a counterexample closes a
-universal ordering claim, but it does not symbolically enumerate every other
-reachable path or prove that no aliased writer exists.
+The positive all-state branch theorem remains unproved. It is distinct from
+the now-disproved score dominance claims and from the relocation inventory: a
+counterexample closes a universal ordering claim, but it does not symbolically
+enumerate every other reachable path. The retail write-set theorem is instead
+closed within the explicitly audited candidate scope by the value/type
+provenance checks recorded above.
 
 ### Contract-level score counterexample
 

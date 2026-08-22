@@ -137,20 +137,20 @@ register-list stores using the two source-layout displacements `0x4` and
 `0x4ba000` text bound comes from the retail NCCH ExHeader and excludes the raw
 ExeFS `.code` read-only/data tail from the executable sweep. It records candidates,
 relocation sites, scalar/double-word/register-list store forms, and a
-conservative local register-provenance class for each candidate. It now
-identifies the three direct source-mapped writers in the retail `.code`
-(`0x58260`, `0x582d4`, and `0x59370`), but it
-does not identify C++ object types or classify interprocedural aliases and
-copied structures as `ai_bit` writers. The committed summary of
+conservative local register-provenance class for each candidate. It identifies
+the three direct source-mapped writers in the retail `.code` (`0x58260`,
+`0x582d4`, and `0x59370`); the companion residual verifier adds the
+field-sensitive value/RTTI checks for the two exact stores that survived the
+local sweep. The committed summary of
 the full retail run is [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).
 
 The final disposition of the former proof-boundary items is recorded in
 [proof-closure.md](proof-closure.md).
-The constructive separating examples for the remaining native-state and
-object-provenance boundaries are in
+The native-state separating example and the closed residual writer provenance
+are in
 [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
 
-Verify the two concrete object-identity examples with:
+Verify the two concrete residual-store provenance examples with:
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-proof-boundary-separation.py \
@@ -158,9 +158,12 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-proof-boundary-separation.py \
   /path/to/extracted-cros
 ```
 
-The verifier checks the exact bytes and confirms that the `Battle.cro` store
-has no relocation at the instruction; it deliberately does not assign a C++
-object type from the displacement alone.
+The verifier checks the exact bytes, proves that `.code:0x45ec` stores a
+read-only/data-tail pointer, and resolves `Battle.cro:0x1e80` through its CRO
+vtable relocation to RTTI `N4gfl26Effect6ConfigE`. It also confirms that the
+candidate instruction itself has no relocation. These checks close the two
+formerly unresolved stores; displacement alone is still not treated as a type
+proof for unrelated over-approximate rows.
 
 The section-aware pass also leaves one real Thumb same-offset collision at
 `.code:0x688`. Verify its surrounding object behavior with:

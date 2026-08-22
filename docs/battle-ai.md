@@ -87,8 +87,7 @@ above it found:
 The displacement is not an object identity: it is also common in stack frames
 and unrelated C++ structures. For example, `Battle.cro` contributes candidate
 stores at both offsets, including an initializer-like pair and a loop over
-an array-of-structures; neither can be called an `ai_bit` writer without
-resolving the CRO relocations and object type. The scanner now parses all 132
+an array-of-structures. The scanner now parses all 132
 CRO relocation tables: 45,221 import and 56,581 internal records, all 101,802
 recognized as `R_ARM_ABS32`, with 58,255 executable-segment targets and no
 malformed entries. None of the candidate stores is itself a relocation
@@ -119,25 +118,19 @@ separate `+0x24` payload. That behavior is incompatible with both recovered
 source layouts: `MainModule::TRAINER_DATA` has a pointer at `+0x0`, while
 `BSP_TRAINER_DATA::CORE_DATA` has `tr_id` at `+0x0` and `ai_bit` at `+0x4`.
 It is therefore disproved as either source-defined `ai_bit` writer. The
-remaining ARM mask-valued candidate is a stack temporary. These refinements
-remove the residual candidates that could be identified from their instruction
-context, but an unrelated retail object using the same displacement still
-cannot be excluded without whole-program object provenance.
+remaining ARM mask-valued candidate is a stack temporary. The two exact stores
+that survived those local checks are now closed by
+[`scripts/verify-proof-boundary-separation.py`](../scripts/verify-proof-boundary-separation.py):
+`.code:0x45ec` stores the read-only/data-tail pointer `0x565e1d`, and
+`Battle.cro:0x1e80` is the third virtual slot of RTTI
+`N4gfl26Effect6ConfigE` (`gfl2::Effect::Config`). They are not AI-mask
+writers.
 At the `MainModule::TRAINER_DATA` layout, the source separately specifies
 aggregate initialization, `trainerParam_StoreCore` zeroing, and
-`trainerParam_StoreNPCTrainer` copying `GetAIBit()` into `+0x1c`; those three
-source writers remain present in the inventory but are not uniquely mapped to
-retail offsets yet.
-This is stronger relocation-aware evidence, not a complete direct/indirect/
-aliased/copy writer proof: the stripped ExeFS `.code` has no CRO/CRS relocation
-table, and CRO relocations still do not identify C++ object types or
-interprocedural register aliases. This is an analysis-status boundary, not a
-claim that the ROM and source are useless or information-theoretically
-insufficient. The remaining binary theorem is precisely the whole-program
-field-sensitive lift described in
-[`proof-closure.md`](proof-closure.md).
-Concrete examples showing why a displacement candidate cannot be promoted to
-an `ai_bit` writer without object provenance are preserved in
+`trainerParam_StoreNPCTrainer` copying `GetAIBit()` into `+0x1c`. The source
+inventory also includes the serialized `BSP_TRAINER_DATA::Deserialize` copy and
+the `BattleFes::setAiBit` Basic-only reduction. The residual writer closure is
+preserved in
 [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
 
 ## Runtime flow
@@ -193,9 +186,9 @@ AI object is constructed.
 
 This closes the source-level question about special trainers: there is no
 ordinary trainer-ID-specific upgrade, while non-Tree modes and phase changes
-are explicitly allowed to use different masks. It does **not** establish that
-no compiler-generated or retail-only writer exists outside the supplied source
-snapshot.
+are explicitly allowed to use different masks. The residual retail stores
+identified by the candidate sweep are separately closed by value/type
+provenance in [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
 
 ## What each enabled component does
 
@@ -613,9 +606,10 @@ they are not an additional unresolved list.
   `datIdx` trace have not been recovered. The numeric map itself is established
   by the archived project/tool ordering plus the retail member inventory above.
 - Retail-binary completeness of the mask-writer set. The matching retail
-  `.code` section has now been extracted and hash-verified, but the complete
-  binary audit of direct, indirect, aliased, and copied writes has not yet been
-  performed. At source scope, the universal claim that every special trainer
+  `.code` section has now been extracted and hash-verified. The three direct
+  source-mapped stores are confirmed, and the two formerly unresolved exact
+  stores are closed by value/type provenance in the verifier and closure
+  artifact. At source scope, the universal claim that every special trainer
   uses one mask is disproved by the explicit Royal, wild, record-fight,
   intrusion, and reinforcement branches listed above.
 
@@ -637,7 +631,8 @@ is maintained in [proof-closure.md](proof-closure.md).
 
 The four former open items do not all have the same status. The structural and
 behavioral ordering claims admit direct counterexamples, one is an
-artifact-recovery negative, and one remains a whole-binary analysis obligation.
+artifact-recovery negative, and the audited retail writer candidate set is now
+closed by binary value/type provenance.
 
 ### The static audit is not value-complete
 
@@ -685,9 +680,9 @@ The source contains explicit, mutually different masks: ordinary trainers use
 `0x007`; ordinary wild Double uses `0x008`; intrusion replaces the mask with
 `0x040`; reinforcement replaces it with `0x00f`; and the Battle Festival
 helper can deliberately reduce non-boss trainers to Basic only. This falsifies
-the universal same-mask claim. What remains open is narrower: proving that the
-stripped retail binary has no additional aliased, copied, or indirect writers
-beyond that source inventory. The CRO relocation tables are now parsed and
-validated by the scanner, but the main `.code` image has no relocation table
-and no field-sensitive whole-program data-flow proof is available from these
-inputs alone.
+the universal same-mask claim. The residual binary question is now closed for
+the audited candidate set: `.code:0x45ec` stores a read-only/data-tail pointer,
+and `Battle.cro:0x1e80` resolves through its CRO vtable to
+`gfl2::Effect::Config`, not `BSP_TRAINER_DATA`. The CRO relocation tables and
+the exact main-image pointer construction are checked by
+[`scripts/verify-proof-boundary-separation.py`](../scripts/verify-proof-boundary-separation.py).

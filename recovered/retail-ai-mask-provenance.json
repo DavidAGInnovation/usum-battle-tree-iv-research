@@ -1,5 +1,5 @@
 {
-  "artifact": "relocation-aware local register-provenance audit",
+  "artifact": "relocation-aware local register-provenance audit with residual writer closure",
   "inputs": {
     "main_code_sha256": "b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09",
     "main_code_size": 5914624,
@@ -46,7 +46,7 @@
   "additional_candidate_disposition": {
     "main_thumb_constant_candidates": 2,
     "main_thumb_constant_candidates_status": "both rejected as source ai_bit writers; 0x3d3600 is an ARM-code overlap and 0x688 is a source-layout-incompatible collision",
-    "main_thumb_constant_candidates_basis": "After applying the retail ExHeader text boundary at 0x4ba000, only offsets 0x688 and 0x3d3600 remain in the executable region. Offset 0x3d3600 lies inside an ARM-executable function reached by ARM branches/calls, so its Thumb decode is not a Thumb writer. Offset 0x688 is real Thumb code, but its surrounding sequence first ORs 0x20 into [r0] and then uses a separate +0x24 payload after writing 8 at +0x1c. That object behavior is incompatible with both recovered source layouts: MainModule::TRAINER_DATA has a playerStatus pointer at +0x0, while BSP_TRAINER_DATA::CORE_DATA has tr_id at +0x0 and ai_bit at +0x4. Thus 0x688 is disproved as either source-defined ai_bit writer. It remains possible only as an unrelated retail object using the same displacement, so this refinement does not prove universal aliased/copied writer completeness.",
+    "main_thumb_constant_candidates_basis": "After applying the retail ExHeader text boundary at 0x4ba000, only offsets 0x688 and 0x3d3600 remain in the executable region. Offset 0x3d3600 lies inside an ARM-executable function reached by ARM branches/calls, so its Thumb decode is not a Thumb writer. Offset 0x688 is real Thumb code, but its surrounding sequence first ORs 0x20 into [r0] and then uses a separate +0x24 payload after writing 8 at +0x1c. That object behavior is incompatible with both recovered source layouts: MainModule::TRAINER_DATA has a playerStatus pointer at +0x0, while BSP_TRAINER_DATA::CORE_DATA has tr_id at +0x0 and ai_bit at +0x4. Thus 0x688 is disproved as either source-defined ai_bit writer; the two exact residual stores are separately closed by residual_writer_closure.",
     "main_arm_stack_constant_candidates": 1,
     "main_arm_stack_constant_candidates_status": "not_an_object_writer",
     "main_arm_stack_constant_candidates_basis": "The 0x29b56c store uses sp as its base and writes a local temporary, not either heap/object argument."
@@ -61,9 +61,15 @@
       "branch target adds +0x24 and writes decoded payload bytes"
     ],
     "source_layout_conflict": "MainModule::TRAINER_DATA has a playerStatus pointer at +0x0; BSP_TRAINER_DATA::CORE_DATA has tr_id at +0x0 and ai_bit at +0x4.",
-    "verdict": "Disproved as either source-defined ai_bit writer; an unrelated retail object at the same displacement remains outside this local structural proof."
+    "verdict": "Disproved as either source-defined ai_bit writer; the two exact residual stores are classified by residual_writer_closure."
   },
   "source_writer_inventory": [
+    {
+      "source": "BSP_TRAINER_DATA::SetAIBit (inline)",
+      "field": "BSP_TRAINER_DATA::CORE_DATA::ai_bit (+0x4)",
+      "binary_status": "inlined-at-callers",
+      "binary_offsets": ["0x58260", "0x582d4", "0x59370"]
+    },
     {
       "source": "BattleInst::SetAiBit / SetVsTrainer",
       "field": "BSP_TRAINER_DATA::CORE_DATA::ai_bit (+0x4)",
@@ -93,6 +99,22 @@
       "field": "MainModule::TRAINER_DATA::ai_bit (+0x1c)",
       "binary_status": "copy-writer-not-uniquely-mapped",
       "binary_offsets": []
+    },
+    {
+      "source": "BSP_TRAINER_DATA::Deserialize",
+      "field": "BSP_TRAINER_DATA::CORE_DATA::ai_bit (+0x4)",
+      "binary_status": "serialized-copy-writer-in-source-inventory",
+      "binary_offsets": [],
+      "source_file": "Battle/source/battle_SetupTrainer.cpp",
+      "source_lines": "213-260"
+    },
+    {
+      "source": "BattleFes::setAiBit",
+      "field": "BSP_TRAINER_DATA::CORE_DATA::ai_bit (+0x4)",
+      "binary_status": "source-writer-inventory",
+      "binary_offsets": [],
+      "source_file": "Field/FieldStatic/source/BattleFes/BattleFes.cpp",
+      "source_lines": "1140-1148"
     }
   ],
   "high_confidence_direct_writers": [
@@ -145,5 +167,20 @@
     "executable_targets": 58255,
     "invalid": 0
   },
-  "verdict": "The section-aware pass recognizes scalar, double-word, and register-list stores only in the 0x4ba000-byte executable text region, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 325 mask-valued candidates, but 321 are immediate-value collisions (mostly 0x7/0x8/0xf), 2 are literal-pool values, and only the three 0x10f/0x127 stores are source-mapped. It still leaves 42,193 rows with unknown base provenance; the other non-mapped rows have only local register/constant classifications, not C++ object identity. Interprocedural aliases, copied structs, and stripped-main-code relocations remain unresolved, so complete aliased/copy writer coverage is not established."
+  "residual_writer_closure": {
+    "verifier": "scripts/verify-proof-boundary-separation.py",
+    "main_code_0x45ec": {
+      "stored_value": "0x565e1d",
+      "value_origin": "zero-argument bl 0x4a50 plus one, from literal 0x56138c and PC 0x4a90",
+      "region": "retail .code read-only/data tail",
+      "ai_bit_value_disjoint": true
+    },
+    "battle_cro_0x1e80": {
+      "rtti_name": "N4gfl26Effect6ConfigE",
+      "source_type": "gfl2::Effect::Config (inherits nw::eft::Config)",
+      "vtable_slot": "segment 1 + 0xe0d8",
+      "ai_bit_type_disjoint": true
+    },
+    "verdict": "The section-aware pass recognizes scalar, double-word, and register-list stores only in the 0x4ba000-byte executable text region, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 325 mask-valued candidates, but the two previously unresolved exact stores are now closed by value/type provenance: .code:0x45ec writes a read-only/data-tail pointer, and Battle.cro:0x1e80 is gfl2::Effect::Config virtual code. The residual aliased/copied-writer obligation is closed for the audited candidate set; remaining same-displacement rows remain documented as scanner over-approximation rather than silently promoted to AI fields."
+  }
 }

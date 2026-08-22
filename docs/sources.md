@@ -103,8 +103,9 @@ bundle the ROM or source archive.
 
 The final proof-status ledger for the Battle-AI claims is in
 [proof-closure.md](proof-closure.md). It records which claims are disproved,
-which artifact-recovery result is negative, and which stronger whole-binary
-theorem is explicitly outside the present analysis.
+which artifact-recovery result is negative, and which stronger native-state
+theorem remains outside the present analysis; the audited retail writer
+candidate set is closed by the residual provenance verifier.
 
 The control-flow coverage check is reproducible with
 `scripts/audit-battle-ai-flow.py`. It consumes the numbered `.lst` files

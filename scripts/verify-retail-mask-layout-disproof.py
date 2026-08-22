@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Verify the structural disproof for the residual Thumb candidate at 0x688.
+"""Verify the structural disproof for the Thumb collision at 0x688.
 
-The check does not infer a C++ type from an offset.  It verifies the exact
-retail instruction sequence: the candidate's function treats offset 0 as a
-bitfield, stores 8 at +0x1c, and branches to a helper that consumes a +0x24
-payload.  That behavior is incompatible with the two recovered source
-layouts, whose offset-0 fields are respectively a pointer and ``tr_id``.
+The check verifies the exact retail instruction sequence: the candidate's
+function treats offset 0 as a bitfield, stores 8 at +0x1c, and branches to a
+helper that consumes a +0x24 payload.  That behavior is incompatible with the
+two recovered source layouts, whose offset-0 fields are respectively a pointer
+and ``tr_id``.  The separate residual-store verifier closes the two exact
+stores that survived this local layout check.
 """
 
 from __future__ import annotations
@@ -90,8 +91,8 @@ def main() -> None:
         },
         "verdict": (
             "0x688 is not a writer for either source-defined ai_bit layout; "
-            "an unrelated retail object at the same displacement remains a "
-            "separate whole-binary provenance question."
+            "the remaining exact displacement stores are classified by "
+            "verify-proof-boundary-separation.py."
         ),
     }
     print(json.dumps(result, indent=2, sort_keys=True))

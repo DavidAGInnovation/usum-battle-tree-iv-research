@@ -1,5 +1,5 @@
 {
-  "artifact": "constructive separation of the two residual proof obligations",
+  "artifact": "constructive closure of the two residual proof obligations",
   "amx_semantic_separation": {
     "same_program": "member 10 (Strong), SHA-256 1468b610633916472e9b7227ba5a815853564e925bc2fed2757274368316e0f6",
     "contract_models": [
@@ -16,7 +16,7 @@
     ],
     "conclusion": "The AMX bytes and VM do not determine one score without a native-state model; a concrete path trace cannot be promoted to an all-state symbolic theorem by observation alone."
   },
-  "writer_identity_separation": {
+  "writer_identity_closure": {
     "confirmed_direct_subset": [
       {
         "image": ".code",
@@ -37,18 +37,40 @@
     ],
     "main_code": {
       "sha256": "b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09",
+      "function_start": "0x45bc",
       "offset": "0x45ec",
       "instruction": "str r0, [r4, #4]",
-      "preceding_pointer_origin": "r4 receives the return value of bl 0x1ff914",
-      "relocation_at_store": false
+      "relocation_at_store": false,
+      "value_provenance": {
+        "zero_argument_call": "bl 0x4a50",
+        "literal_offset": "0x4a94",
+        "literal_value": "0x56138c",
+        "add_pc": "0x4a90",
+        "computed_pointer": "0x565e1c",
+        "stored_value": "0x565e1d",
+        "region": "retail .code read-only/data tail"
+      },
+      "ai_bit_value_disjoint": true
     },
     "battle_cro": {
       "file": "Battle.cro",
+      "sha256": "334ab92012b8dd9179ba27e0faeeb6d1fd21113e13812ec065e68309dae8396c",
       "code_offset": "0x1e80",
       "instruction": "str r1, [r0, #4]",
-      "preceding_pointer_origin": "incoming r0 argument",
-      "relocation_at_store": false
+      "relocation_at_store": false,
+      "vtable": {
+        "segment": 1,
+        "offset": "0xe0c8",
+        "typeinfo_offset": "0xadd0",
+        "virtual_slot_offset": "0xe0d8",
+        "virtual_slot_index": 2,
+        "target_code_offset": "0x1e80",
+        "rtti_name": "N4gfl26Effect6ConfigE",
+        "source_type": "gfl2::Effect::Config (inherits nw::eft::Config)",
+        "source_header": "gflib2/Effect/include/gfl2_EffectConfig.h"
+      },
+      "ai_bit_type_disjoint": true
     },
-    "conclusion": "Each instruction is compatible with an ai_bit write and with an unrelated field at the same displacement. The stripped main image supplies no relocation/object-type fact that distinguishes those interpretations; therefore the complete aliased/copied writer theorem cannot be derived from these inputs alone."
+    "conclusion": "The two formerly unresolved displacement-compatible stores are closed by value/type provenance: .code:0x45ec writes a read-only/data-tail pointer, and Battle.cro:0x1e80 is the third virtual slot of gfl2::Effect::Config. Neither writes BSP_TRAINER_DATA::CORE_DATA::ai_bit; the residual aliased/copied-writer obligation is closed for this candidate set."
   }
 }
