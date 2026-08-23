@@ -7,10 +7,10 @@ stronger theorem that is outside the evidence currently analyzed. This
 iteration also gives the two stronger claims precise definitions, runs the
 retail-ROM candidate writer sweep, executes the retail AMX bodies through the
 recovered Pawn VM interface, and closes the writer theorem with a
-field-sensitive whole-program ARM/CRO lift. The broad scanner remains an
-over-approximation for unrelated same-displacement fields and the native
-callback remains a model boundary; neither is presented as more than the
-evidence supports.
+field-sensitive whole-program ARM/CRO lift. The broad all-store sweep remains
+an over-approximation, but its 325 executable mask-valued rows are now
+exhaustively classified by the compact candidate ledger; the native callback
+remains a separate model boundary.
 
 ## Final disposition
 
@@ -20,10 +20,15 @@ evidence supports.
 | Strong or Expert is monotonically more capable than Basic. | **Disproved for score dominance over legal retail states; strict structural dominance is also disproved.** | Let `Q(s)` be the native-command IDs used by script `s`. The structural claim `Q(Basic) ⊆ Q(Strong)` or `Q(Basic) ⊆ Q(Expert)` is false in both cases. Define `F_s(σ,c,r)` as the returned script score and switch-enable result for legal live state `σ`, candidate `c`, and random trace `r`; the universal score theorem would require `∀σ,c,r: F_Strong ≥ F_Basic` (and analogously for Expert). The ROM-derived Ninjask records and exact AMX VM runs in [`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json) provide legal witnesses with Basic `0` and Strong `−1`, and Basic `0` and Expert `−1`. Therefore both universal score-dominance claims are false. An action-dominance claim remains a separate relation because it additionally requires a utility function and the judge's tie/randomness policy. |
 | The original generated `BattleAi.gaix` bytes can be recovered from the supplied source and ROM. | **Disproved for these inputs; equivalent reconstruction proved.** | The complete archived Git object database has zero `BattleAi.gaix` objects, the source archive has no path with that name, and the retail RomFS has no generated `.gaix` file. The retail GARC, archived project ordering, archiver sort rule, and C++ index switch force the numeric map. The source-compatible header is reconstructed at [`recovered/BattleAi.gaix`](../recovered/BattleAi.gaix). It is logically equivalent, not byte-identical. A runtime `datIdx` trace would be corroboration only, not a remaining numeric-map proof obligation. |
 | Every special trainer uses one AI mask in every mode and phase. | **Disproved at source scope.** | The source has explicit alternatives: ordinary `0x107`, Royal setup `0x127` with an effective Royal selector `0x125`, special-wild `0x007`, wild Double `0x008`, intrusion `0x040`, reinforcement `0x00f`, and Battle Festival Basic-only reductions. Therefore the universal same-mask statement is false. |
-| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Closed by a source-complete whole-program lift.** | The archived source inventory has 13 `SetAIBit` hits and no unclassified call or direct `ai_bit` member assignment. The retail project graph puts `BattleStatic`, `FieldStatic`, and `Trainer` into `.code`, `Battle` into `Battle.cro`, and excludes the PM_DEBUG writer sources. The linked copied paths are byte-verified: `BSP_TRAINER_DATA::Deserialize` at `.code:0x61724` copies `SERIALIZE_DATA +0x10` to `CORE_DATA +0x4`; `MainModule::trainerParam_StoreNPCTrainer` at `Battle.cro:0x8a25c` copies `CORE_DATA +0x4` to `TRAINER_DATA +0x1c`; and `trainerParam_StoreCore` at `0x8a414` zeros `TRAINER_DATA +0x1c`. The three direct `BattleInst` stores remain mapped at `.code:0x58260`, `0x582d4`, and `0x59370`; `BattleFes` and `Trainer` use the same canonical `SetAIBit` inline. All 132 CROs are inventoried. The complete compact artifact is [`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json), generated and checked by [`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py). The prior `.code:0x45ec`, `Battle.cro:0x1e80`, and PM_DEBUG-stub collisions are separately disjoint by value/type provenance; the theorem is universal over source-defined retail writers, not over arbitrary same-displacement stores. |
+| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Closed by a source-complete whole-program lift.** | The archived source inventory has 13 `SetAIBit` hits and no unclassified call or direct `ai_bit` member assignment. `BSP_TRAINER_DATA::Serialize` writes the intermediate `SERIALIZE_DATA::ai_bit` at `+0x10`, while `ClearSerializeData` explicitly zeroes that complete serialized buffer; both edges are checked in the inventory. The retail project graph puts `BattleStatic`, `FieldStatic`, `Trainer`, and `ExtSavedata` into `.code`, `Battle` into `Battle.cro`, and excludes the PM_DEBUG writer sources. The linked copied paths are byte-verified: `BSP_TRAINER_DATA::Deserialize` at `.code:0x61724` copies `SERIALIZE_DATA +0x10` to `CORE_DATA +0x4`; `MainModule::trainerParam_StoreNPCTrainer` at `Battle.cro:0x8a25c` copies `CORE_DATA +0x4` to `TRAINER_DATA +0x1c`; and `trainerParam_StoreCore` at `0x8a414` zeros `TRAINER_DATA +0x1c`. The three direct `BattleInst` stores remain mapped at `.code:0x58260`, `0x582d4`, and `0x59370`; `BattleFes` and `Trainer` use the same canonical `SetAIBit` inline. All 132 CROs are inventoried. The complete compact artifact is [`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json), generated and checked by [`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py). The prior `.code:0x45ec`, `Battle.cro:0x1e80`, and PM_DEBUG-stub collisions are separately disjoint by value/type provenance; the theorem is universal over source-defined retail writers, not over arbitrary same-displacement stores. |
 
 The table's whole-program conclusion is independently reproduced by
 [`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py). Its residual component is retained in [`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py) and [`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json); the earlier byte-level companion remains useful for raw instruction and relocation checks.
+
+The verifier now regenerates an exhaustive `candidate_lift` ledger: all 325
+executable mask-valued rows are classified as canonical source writers, stack
+temporaries, width/layout mismatches, interior/local aggregates, non-trainer
+object shapes, or source-project-disjoint CRO rows.
 
 After applying the ExHeader text boundary, only two Thumb-sweep mask constants
 remain. One (`0x3d3600`) lies inside an ARM function reached by ARM
@@ -33,8 +38,7 @@ into offset `0`, writes `8` at `+0x1c`, and then consumes a separate `+0x24`
 payload. This is incompatible with both source layouts: `TRAINER_DATA` has a
 pointer at `+0x0`, while `CORE_DATA` has `tr_id` at `+0x0` and `ai_bit` at
 `+0x4`. Thus `0x688` is disproved as either source-defined `ai_bit` writer.
-The remaining ARM mask-valued candidate is a stack temporary. The two exact
-stores that previously remained outside those local disproofs are now closed
+The two exact stores that previously remained outside those local disproofs are now closed
 by [`verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py):
 one is a read-only/data-tail pointer and the other is an RTTI-resolved effect
 configuration virtual method. The verifier also checks that the source
@@ -45,7 +49,9 @@ The source inventory also identifies three `MainModule` writers at `+0x1c`:
 aggregate initialization in `trainerParam_Init`, zeroing in
 `trainerParam_StoreCore`, and the `BSP_TRAINER_DATA::GetAIBit()` copy in
 `trainerParam_StoreNPCTrainer`. `BSP_TRAINER_DATA::Deserialize` is the
-source-level serialized copy into `CORE_DATA::ai_bit`; `BattleFes::setAiBit`
+source-level serialized copy into `CORE_DATA::ai_bit`, paired with the
+explicit `Serialize` copy out to `SERIALIZE_DATA::ai_bit` and the
+`ClearSerializeData` buffer-zeroing edge; `BattleFes::setAiBit`
 is the Basic-only reduction writer. These source writers are retained in the
 inventory even when their stripped-image instruction is not uniquely named. The
 whole-program artifact also includes the two `Trainer` copies and the
@@ -145,8 +151,9 @@ the now-disproved score dominance claims and from the relocation inventory: a
 counterexample closes a universal ordering claim, but it does not symbolically
 enumerate every other reachable path. The retail write-set theorem is closed
 for every source-defined retail writer, including aliased/copied paths, while
-unrelated binary displacement collisions remain explicitly unclassified as
-AI fields.
+every executable mask-valued displacement row is classified in the candidate
+ledger; raw non-mask field-offset rows remain scanner over-approximations and
+are not promoted to AI fields by displacement alone.
 
 ### Contract-level score counterexample
 

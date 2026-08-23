@@ -304,7 +304,7 @@ def verify_source(source_root: Path) -> dict[str, object]:
     if missing:
         raise ValueError(f"source writer evidence missing: {missing}")
     return {
-        "trainer_header": str(trainer),
+        "trainer_header": "niji_project/prog/Battle/include/Battle_SetupTrainer.h",
         "bsp_trainer_data_polymorphic": False,
         "source_writer_evidence": {name: needle for name, needle in required.items()},
     }

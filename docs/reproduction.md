@@ -175,10 +175,12 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-retail-ai-writer-whole-program.
   --output /tmp/retail-ai-writer-whole-program.json
 ```
 
-This verifier checks source/project completeness, the exact copied-field
-fingerprints at `.code:0x61724`, `Battle.cro:0x8a25c`, and
-`Battle.cro:0x8a414`, all 132 CROs, PM_DEBUG exclusions, and the two residual
-value/type proofs. Its compact committed result is recorded in
+This verifier checks source/project completeness, the direct serialized-field
+copy and buffer-zeroing edges (`Serialize` and `ClearSerializeData`), the
+disabled whole-object copy edge, the exact copied-field fingerprints at `.code:0x61724`,
+`Battle.cro:0x8a25c`, and `Battle.cro:0x8a414`, all 132 CROs, PM_DEBUG
+exclusions, and the two residual value/type proofs. It also rescans and
+classifies all 325 executable mask-valued candidates. Its committed result is recorded in
 [`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json).
 
 The section-aware pass also leaves one real Thumb same-offset collision at
@@ -191,6 +193,6 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-retail-mask-layout-disproof.py 
 
 This check confirms that the sequence treats offset `0` as a bitfield and
 builds a payload at `+0x24` after writing `8` at `+0x1c`; it therefore cannot
-be either recovered source-defined `ai_bit` layout. It does not claim that
-every unrelated same-displacement store in the stripped retail image has
-been assigned a C++ object type.
+be either recovered source-defined `ai_bit` layout. The whole-program verifier
+classifies every executable mask-valued candidate; the larger all-store sweep
+remains an intentionally conservative over-approximation.

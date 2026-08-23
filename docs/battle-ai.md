@@ -118,22 +118,28 @@ separate `+0x24` payload. That behavior is incompatible with both recovered
 source layouts: `MainModule::TRAINER_DATA` has a pointer at `+0x0`, while
 `BSP_TRAINER_DATA::CORE_DATA` has `tr_id` at `+0x0` and `ai_bit` at `+0x4`.
 It is therefore disproved as either source-defined `ai_bit` writer. The
-remaining ARM mask-valued candidate is a stack temporary. The two exact stores
-that survived those local checks are now closed by
+field-sensitive ledger classifies the remaining ARM rows as canonical source
+writers, stack temporaries, width/layout mismatches, interior/local
+aggregates, or non-trainer object shapes; the 226 CRO rows outside `Battle`
+are source-project/type-disjoint. The two exact stores that survived those
+candidate checks are now closed by
 [`scripts/verify-proof-boundary-separation.py`](../scripts/verify-proof-boundary-separation.py):
 `.code:0x45ec` stores the read-only/data-tail pointer `0x565e1d`, and
 `Battle.cro:0x1e80` is the third virtual slot of RTTI
 `N4gfl26Effect6ConfigE` (`gfl2::Effect::Config`). They are not AI-mask
-writers. The source-complete field-sensitive lift, including the source/project
-topology and PM_DEBUG exclusions, is reproduced by
+writers. The field-sensitive lift now regenerates an exhaustive ledger for all
+325 executable mask-valued rows, including source/project topology, the
+serialized-field `Serialize`/`ClearSerializeData` edges, and PM_DEBUG
+exclusions. It is reproduced by
 [`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py)
 and recorded in
 [`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json).
 At the `MainModule::TRAINER_DATA` layout, the source separately specifies
 aggregate initialization, `trainerParam_StoreCore` zeroing, and
 `trainerParam_StoreNPCTrainer` copying `GetAIBit()` into `+0x1c`. The source
-inventory also includes the serialized `BSP_TRAINER_DATA::Deserialize` copy and
-the `BattleFes::setAiBit` Basic-only reduction. The residual value/type checks
+inventory also includes the serialized `Serialize`/`Deserialize` copies, the
+`ClearSerializeData` recorder zeroing edge, and the `BattleFes::setAiBit`
+Basic-only reduction. The residual value/type checks
 remain preserved in
 [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
 

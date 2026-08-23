@@ -182,15 +182,35 @@
       "vtable_slot": "segment 1 + 0xe0d8",
       "ai_bit_type_disjoint": true
     },
-    "verdict": "The section-aware pass recognizes scalar, double-word, and register-list stores only in the 0x4ba000-byte executable text region, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 325 mask-valued candidates, but it is an over-approximation rather than the universal proof. The source-complete aliased/copied-writer theorem is supplied by scripts/verify-retail-ai-writer-whole-program.py and recovered/retail-ai-writer-whole-program.json; the residual stores .code:0x45ec and Battle.cro:0x1e80 remain closed by value/type provenance."
+    "verdict": "The section-aware pass recognizes scalar, double-word, and register-list stores only in the 0x4ba000-byte executable text region, tracks immediate constants, and confirms the three source-mapped direct writers above. It reports 325 mask-valued candidates as an over-approximation; scripts/verify-retail-ai-writer-whole-program.py then rescans and classifies every one in its candidate_lift ledger. The aliased/copied-writer theorem and the residual stores .code:0x45ec and Battle.cro:0x1e80 are closed by the field-sensitive artifact recovered/retail-ai-writer-whole-program.json."
   },
   "field_sensitive_residual_lift": {
     "verifier": "scripts/verify-retail-ai-writer-whole-program.py",
     "artifact": "recovered/retail-ai-writer-whole-program.json",
+    "candidate_ledger": {
+      "candidate_count": 325,
+      "all_candidates_classified": true,
+      "classification_counts": {
+        "canonical-source-writer": 3,
+        "cro-project-type-disjoint": 226,
+        "interior-or-local-aggregate": 30,
+        "nontrainer-object-shape": 15,
+        "stack-frame-temporary": 28,
+        "subword-layout-mismatch": 21,
+        "thumb-object-layout-disproof": 1,
+        "thumb-sweep-arm-code": 1
+      }
+    },
+    "source_serialized_edges": {
+      "serialize": "BSP_TRAINER_DATA::Serialize writes mCore.ai_bit to SERIALIZE_DATA::ai_bit (+0x10)",
+      "deserialize": "BSP_TRAINER_DATA::Deserialize copies SERIALIZE_DATA::ai_bit (+0x10) to CORE_DATA::ai_bit (+0x4)",
+      "clear": "BSP_TRAINER_DATA::ClearSerializeData MemClear zeroes the complete SERIALIZE_DATA buffer, including ai_bit (+0x10)",
+      "whole_object_copy": "sendData->base_data = *trData is under #if 0; enabled network path calls Serialize"
+    },
     "source_type_check": "BSP_TRAINER_DATA is non-polymorphic; Battle.cro:0x1e80 resolves to gfl2::Effect::Config",
     "main_code_0x45ec": "stored value 0x565e1d is outside the recovered AI-mask value domain",
     "battle_cro_0x1e80": "unique segment-1 vtable relocation at 0xe0d8; no direct code branch targets the body",
-    "theorem_scope": "all source-defined writers compiled into the retail .code and CRO modules, including aliased/copied paths; residual arbitrary displacement collisions are not promoted by displacement alone",
+    "theorem_scope": "all source-defined writers compiled into the retail .code and CRO modules, including the canonical CORE_DATA +0x4, SERIALIZE_DATA +0x10, and MainModule TRAINER_DATA +0x1c fields plus their aliased/copied paths; residual arbitrary displacement collisions are not promoted by displacement alone",
     "proved": true
   }
 }
