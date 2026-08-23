@@ -124,17 +124,17 @@ that survived those local checks are now closed by
 `.code:0x45ec` stores the read-only/data-tail pointer `0x565e1d`, and
 `Battle.cro:0x1e80` is the third virtual slot of RTTI
 `N4gfl26Effect6ConfigE` (`gfl2::Effect::Config`). They are not AI-mask
-writers. The field-sensitive residual lift, including the source
-non-polymorphism check, is reproduced by
-[`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py)
+writers. The source-complete field-sensitive lift, including the source/project
+topology and PM_DEBUG exclusions, is reproduced by
+[`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py)
 and recorded in
-[`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json).
+[`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json).
 At the `MainModule::TRAINER_DATA` layout, the source separately specifies
 aggregate initialization, `trainerParam_StoreCore` zeroing, and
 `trainerParam_StoreNPCTrainer` copying `GetAIBit()` into `+0x1c`. The source
 inventory also includes the serialized `BSP_TRAINER_DATA::Deserialize` copy and
-the `BattleFes::setAiBit` Basic-only reduction. The residual writer closure is
-preserved in
+the `BattleFes::setAiBit` Basic-only reduction. The residual value/type checks
+remain preserved in
 [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
 
 ## Runtime flow
@@ -635,8 +635,8 @@ is maintained in [proof-closure.md](proof-closure.md).
 
 The four former open items do not all have the same status. The structural and
 behavioral ordering claims admit direct counterexamples, one is an
-artifact-recovery negative, and the audited retail writer candidate set is now
-closed by binary value/type provenance.
+artifact-recovery negative, and the retail source-defined writer theorem is now
+closed by the source-complete field-sensitive lift.
 
 ### The static audit is not value-complete
 
@@ -684,11 +684,12 @@ The source contains explicit, mutually different masks: ordinary trainers use
 `0x007`; ordinary wild Double uses `0x008`; intrusion replaces the mask with
 `0x040`; reinforcement replaces it with `0x00f`; and the Battle Festival
 helper can deliberately reduce non-boss trainers to Basic only. This falsifies
-the universal same-mask claim. The residual binary question is now closed for
-the audited candidate set: `.code:0x45ec` stores a read-only/data-tail pointer,
-and `Battle.cro:0x1e80` resolves through its CRO vtable to
-`gfl2::Effect::Config`, not `BSP_TRAINER_DATA`. The CRO relocation tables,
-exact main-image pointer construction, and source type boundary are checked by
-[`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py)
+the universal same-mask claim. The source-defined writer theorem is closed for
+all retail aliases and copies: `.code:0x61724` verifies the serialized copy,
+`Battle.cro:0x8a25c` verifies the NPC copy, and `Battle.cro:0x8a414` verifies
+the player zeroing path. The residual binary stores `.code:0x45ec` and
+`Battle.cro:0x1e80` remain disjoint by value/type provenance. The full source,
+project, CRO, and relocation checks are in
+[`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py)
 and recorded in
-[`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json).
+[`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json).

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the field-sensitive closure of the retail ``ai_bit`` writer audit.
+"""Verify the residual component of the retail ``ai_bit`` writer theorem.
 
 The displacement scan intentionally over-approximates ARM stores.  This check
 does the interprocedural work for the two exact residual sites that survived
@@ -12,8 +12,11 @@ that scan:
   non-polymorphic class in the archived source, so this virtual slot cannot be
   an invocation on trainer data.
 
-This is deliberately a verifier for the audited residual set, not a claim
-that every same-displacement store in unrelated game objects is an AI field.
+This is deliberately a component verifier for the two residual sites.  The
+source-complete theorem, including aliased/copied writers and PM_DEBUG
+exclusions, is verified by ``verify-retail-ai-writer-whole-program.py``.
+This component does not claim that every same-displacement store in unrelated
+game objects is an AI field.
 """
 
 from __future__ import annotations

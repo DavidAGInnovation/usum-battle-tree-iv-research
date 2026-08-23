@@ -1,0 +1,81 @@
+{
+  "artifact": "field-sensitive whole-program lift for retail ai_bit writer theorem",
+  "inputs": {
+    "main_code_sha256": "b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09",
+    "battle_cro_sha256": "334ab92012b8dd9179ba27e0faeeb6d1fd21113e13812ec065e68309dae8396c",
+    "retail_text_boundary": "0x4ba000",
+    "source_commit": "3f7c94593424a6afddcd9f92a293a3786c9f6425"
+  },
+  "source_inventory": {
+    "all_set_aibit_hits": 13,
+    "unclassified_set_aibit_hits": [],
+    "unclassified_direct_member_assignments": [],
+    "field_layouts": [
+      {"field": "BSP_TRAINER_DATA::CORE_DATA::ai_bit", "offset": "0x4", "source": "niji_project/prog/Battle/include/Battle_SetupTrainer.h"},
+      {"field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit", "offset": "0x10", "source": "niji_project/prog/Battle/include/Battle_SetupTrainer.h"},
+      {"field": "MainModule::TRAINER_DATA::ai_bit", "offset": "0x1c", "source": "niji_project/prog/Battle/source/btl_mainmodule.h"},
+      {"field": "Trainer::TRAINER_DATA::aibit", "offset": "0x0c", "source": "niji_project/prog/Trainer/Trainer/include/tr_tool.h"}
+    ],
+    "writers": [
+      {"writer": "BSP_TRAINER_DATA::SetAIBit", "source": "niji_project/prog/Battle/include/Battle_SetupTrainer.h", "project": "niji_project/prog/Battle/BattleStatic.vcxproj", "module": ".code", "retail_compiled": true},
+      {"writer": "BSP_TRAINER_DATA::Deserialize", "source": "niji_project/prog/Battle/source/battle_SetupTrainer.cpp", "project": "niji_project/prog/Battle/BattleStatic.vcxproj", "module": ".code", "retail_compiled": true},
+      {"writer": "MainModule::trainerParam_Init", "source": "niji_project/prog/Battle/source/btl_mainmodule.cpp", "project": "niji_project/prog/Battle/Battle.vcxproj", "module": "Battle.cro", "retail_compiled": true},
+      {"writer": "MainModule::trainerParam_StoreCore", "source": "niji_project/prog/Battle/source/btl_mainmodule.cpp", "project": "niji_project/prog/Battle/Battle.vcxproj", "module": "Battle.cro", "retail_compiled": true},
+      {"writer": "MainModule::trainerParam_StoreNPCTrainer", "source": "niji_project/prog/Battle/source/btl_mainmodule.cpp", "project": "niji_project/prog/Battle/Battle.vcxproj", "module": "Battle.cro", "retail_compiled": true},
+      {"writer": "BattleInst::SetAiBit", "source": "niji_project/prog/Field/FieldStatic/source/BattleInst/BattleInst.cpp", "project": "niji_project/prog/Field/FieldStatic/FieldStatic.vcxproj", "module": ".code", "retail_compiled": true},
+      {"writer": "BattleInst::SetVsTrainerRoyal", "source": "niji_project/prog/Field/FieldStatic/source/BattleInst/BattleInst.cpp", "project": "niji_project/prog/Field/FieldStatic/FieldStatic.vcxproj", "module": ".code", "retail_compiled": true},
+      {"writer": "BattleFes::setAiBit", "source": "niji_project/prog/Field/FieldStatic/source/BattleFes/BattleFes.cpp", "project": "niji_project/prog/Field/FieldStatic/FieldStatic.vcxproj", "module": ".code", "retail_compiled": true},
+      {"writer": "Trainer::EncountTrainerPersonalDataMake", "source": "niji_project/prog/Trainer/Trainer/source/tr_tool.cpp", "project": "niji_project/prog/Trainer/Trainer/Trainer.vcxproj", "module": ".code", "retail_compiled": true},
+      {"writer": "Trainer::GetEncountTrainerData", "source": "niji_project/prog/Trainer/Trainer/source/tr_tool.cpp", "project": "niji_project/prog/Trainer/Trainer/Trainer.vcxproj", "module": ".code", "retail_compiled": true},
+      {"writer": "DebugBattle::SetAIBit (PM_DEBUG)", "source": "niji_project/prog/Debug/DebugBattle/source/DebugBattleProc.cpp", "project": "niji_project/prog/Debug/DebugBattle/DebugBattle.vcxproj", "module": "DebugBattle.cro (excluded from retail)", "retail_compiled": false},
+      {"writer": "StartMenu::SetAIBit (PM_DEBUG)", "source": "niji_project/prog/Debug/StartMenu/source/d_ariizumi.cpp", "project": "niji_project/prog/Debug/StartMenu/StartMenu.vcxproj", "module": ".code (excluded by PM_DEBUG)", "retail_compiled": false}
+    ]
+  },
+  "binary_fingerprints": {
+    "deserialize": {
+      "function": "BSP_TRAINER_DATA::Deserialize",
+      "offset": "0x61724",
+      "source_direction": "SERIALIZE_DATA +0x10 -> CORE_DATA +0x4",
+      "key_instructions": [
+        ["0x61740", "ldr r0, [r4, #0xc]"],
+        ["0x61744", "str r0, [r5]"],
+        ["0x61748", "ldr r0, [r4, #0x10]"],
+        ["0x6174c", "str r0, [r5, #4]"]
+      ]
+    },
+    "battle_cro_trainer_paths": [
+      {"function": "MainModule::trainerParam_StoreNPCTrainer", "offset": "0x8a25c", "source_direction": "BSP_TRAINER_DATA::CORE_DATA +0x4 -> MainModule::TRAINER_DATA +0x1c", "key_instructions": [["0x8a2a8", "ldr r0, [r5, #4]"], ["0x8a2ac", "str r0, [r4, #0x1c]"]]},
+      {"function": "MainModule::trainerParam_StorePlayer / trainerParam_StoreCore", "offset": "0x8a414", "source_direction": "player core initialization -> MainModule::TRAINER_DATA +0x1c = 0", "key_instructions": [["0x8a49c", "str r6, [r4, #0x1c]"]]}
+    ]
+  },
+  "retail_cro_inventory": {
+    "module_count": 132,
+    "pm_debug_exclusions": [
+      {"module": "DebugBattle.cro", "executable_code_size": "0xac", "generic_displacement_store": ["0x60: str r1, [r0, #4]"], "stored_value": "0x0", "mask_value_disjoint": true},
+      {"module": "BattleDebug.cro", "executable_code_size": "0xac", "generic_displacement_store": ["0x60: str r1, [r0, #4]"], "stored_value": "0x0", "mask_value_disjoint": true}
+    ]
+  },
+  "candidate_scan_context": {
+    "status": "prior displacement scan retained as an over-approximation only",
+    "field_offsets": {"BSP_TRAINER_DATA::CORE_DATA::ai_bit": "0x4", "MainModule::TRAINER_DATA::ai_bit": "0x1c"},
+    "not_used_as_universal_proof": true
+  },
+  "residual_disproofs": {
+    "source_type_evidence": {"bsp_trainer_data_polymorphic": false},
+    "main_code_0x45ec": {"stored_value": "0x565e1d", "region": "retail .code read-only/data tail", "ai_bit_field_write_present": false},
+    "battle_cro_0x1e80": {"rtti_name": "N4gfl26Effect6ConfigE", "source_type": "gfl2::Effect::Config", "ai_bit_type_disjoint": true}
+  },
+  "theorem": {
+    "proved": true,
+    "scope": "all source-defined ai_bit writers compiled into the retail .code and CRO modules, including aliases and copied structures",
+    "statement": "Every retail source-defined writer reaches one of the recovered canonical fields (BSP_TRAINER_DATA::CORE_DATA +0x4 or MainModule::TRAINER_DATA +0x1c), while the audited residual mask-valued collisions are disjoint by value/type provenance. Arbitrary same-displacement stores are not promoted to AI fields, and no PM_DEBUG-only writer is present in the retail image.",
+    "unresolved_source_writers": [],
+    "unclassified_binary_candidate_claim": false,
+    "basis": [
+      "The complete archived source inventory has no unclassified SetAIBit call or direct ai_bit member assignment.",
+      "The linked BattleStatic Deserialize, Battle CRO copied/zeroing paths, and canonical SetAIBit inline are verified byte-for-byte.",
+      "FieldStatic and Trainer are retail static-library projects; DebugBattle and StartMenu writer sources are PM_DEBUG-only.",
+      "The two prior residual displacement-compatible stores are independently closed by value/type provenance."
+    ]
+  }
+}

@@ -139,14 +139,13 @@ ExeFS `.code` read-only/data tail from the executable sweep. It records candidat
 relocation sites, scalar/double-word/register-list store forms, and a
 conservative local register-provenance class for each candidate. It identifies
 the three direct source-mapped writers in the retail `.code` (`0x58260`,
-`0x582d4`, and `0x59370`); the companion residual verifier adds the
-field-sensitive value/RTTI checks for the two exact stores that survived the
-local sweep. The committed summary of
+`0x582d4`, and `0x59370`). The source-complete verifier then lifts all
+aliased/copied writers and PM_DEBUG exclusions. The committed summary of
 the full retail run is [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).
 
 The final disposition of the former proof-boundary items is recorded in
 [proof-closure.md](proof-closure.md).
-The native-state separating example and the closed residual writer provenance
+The native-state separating example and the closed writer provenance
 are in
 [`recovered/proof-boundary-separation.json`](../recovered/proof-boundary-separation.json).
 
@@ -165,21 +164,22 @@ candidate instruction itself has no relocation. These checks close the two
 formerly unresolved stores; displacement alone is still not treated as a type
 proof for unrelated over-approximate rows.
 
-The field-sensitive residual theorem is reproduced with the source tree as an
-additional input:
+The field-sensitive whole-program theorem is reproduced with the source tree
+and the complete extracted CRO set as additional inputs:
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-retail-ai-writer-theorem.py \
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-retail-ai-writer-whole-program.py \
   /tmp/usum-retail-battle-ai/code.bin \
   /path/to/extracted-cros \
-  --source-root /path/to/extracted-source
+  --source-root /path/to/extracted-source \
+  --output /tmp/retail-ai-writer-whole-program.json
 ```
 
-This verifier checks the exact main-image value construction, the unique
-`Battle.cro` relocation and RTTI type, the absence of direct branches to the
-residual CRO body, and the non-polymorphic `BSP_TRAINER_DATA` source
-declaration. Its proved result is recorded in
-[`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json).
+This verifier checks source/project completeness, the exact copied-field
+fingerprints at `.code:0x61724`, `Battle.cro:0x8a25c`, and
+`Battle.cro:0x8a414`, all 132 CROs, PM_DEBUG exclusions, and the two residual
+value/type proofs. Its compact committed result is recorded in
+[`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json).
 
 The section-aware pass also leaves one real Thumb same-offset collision at
 `.code:0x688`. Verify its surrounding object behavior with:
