@@ -1,5 +1,16 @@
 # Battle-AI proof closure
 
+## Re-audit status (2026-08-25)
+
+The earlier `proved: true` result in
+[`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json)
+was generated before the recorder/network aggregate-flow inventory was added.
+The current verifier now fails closed on those additional `BATTLE_REC_DATA`,
+`BATTLE_REC_UPLOAD_DATA`, file/network-buffer, and aggregate-assignment paths.
+Until the current verifier is rerun against the exact source commit and retail
+binary/CRO inputs and the artifact is regenerated, the universal writer row
+below must be treated as provisional rather than final proof.
+
 This ledger closes the four items that were previously reported as “not yet
 proven.” It distinguishes a false proposition (which has a counterexample), an
 artifact-recovery negative (where the requested bytes are absent), and a
@@ -20,7 +31,7 @@ remains a separate model boundary.
 | Strong or Expert is monotonically more capable than Basic. | **Disproved for score dominance over legal retail states; strict structural dominance is also disproved.** | Let `Q(s)` be the native-command IDs used by script `s`. The structural claim `Q(Basic) ⊆ Q(Strong)` or `Q(Basic) ⊆ Q(Expert)` is false in both cases. Define `F_s(σ,c,r)` as the returned script score and switch-enable result for legal live state `σ`, candidate `c`, and random trace `r`; the universal score theorem would require `∀σ,c,r: F_Strong ≥ F_Basic` (and analogously for Expert). The ROM-derived Ninjask records and exact AMX VM runs in [`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json) provide legal witnesses with Basic `0` and Strong `−1`, and Basic `0` and Expert `−1`. Therefore both universal score-dominance claims are false. An action-dominance claim remains a separate relation because it additionally requires a utility function and the judge's tie/randomness policy. |
 | The original generated `BattleAi.gaix` bytes can be recovered from the supplied source and ROM. | **Disproved for these inputs; equivalent reconstruction proved.** | The complete archived Git object database has zero `BattleAi.gaix` objects, the source archive has no path with that name, and the retail RomFS has no generated `.gaix` file. The retail GARC, archived project ordering, archiver sort rule, and C++ index switch force the numeric map. The source-compatible header is reconstructed at [`recovered/BattleAi.gaix`](../recovered/BattleAi.gaix). It is logically equivalent, not byte-identical. A runtime `datIdx` trace would be corroboration only, not a remaining numeric-map proof obligation. |
 | Every special trainer uses one AI mask in every mode and phase. | **Disproved at source scope.** | The source has explicit alternatives: ordinary `0x107`, Royal setup `0x127` with an effective Royal selector `0x125`, special-wild `0x007`, wild Double `0x008`, intrusion `0x040`, reinforcement `0x00f`, and Battle Festival Basic-only reductions. Therefore the universal same-mask statement is false. |
-| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Closed by a source-complete whole-program lift.** | The archived source inventory has 13 `SetAIBit` hits and no unclassified call or direct `ai_bit` member assignment. `BSP_TRAINER_DATA::Serialize` writes the intermediate `SERIALIZE_DATA::ai_bit` at `+0x10`, while `ClearSerializeData` explicitly zeroes that complete serialized buffer; both edges are checked in the inventory. The retail project graph puts `BattleStatic`, `FieldStatic`, `Trainer`, and `ExtSavedata` into `.code`, `Battle` into `Battle.cro`, and excludes the PM_DEBUG writer sources. The linked copied paths are byte-verified: `BSP_TRAINER_DATA::Deserialize` at `.code:0x61724` copies `SERIALIZE_DATA +0x10` to `CORE_DATA +0x4`; `MainModule::trainerParam_StoreNPCTrainer` at `Battle.cro:0x8a25c` copies `CORE_DATA +0x4` to `TRAINER_DATA +0x1c`; and `trainerParam_StoreCore` at `0x8a414` zeros `TRAINER_DATA +0x1c`. The three direct `BattleInst` stores remain mapped at `.code:0x58260`, `0x582d4`, and `0x59370`; `BattleFes` and `Trainer` use the same canonical `SetAIBit` inline. All 132 CROs are inventoried. The complete compact artifact is [`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json), generated and checked by [`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py). The prior `.code:0x45ec`, `Battle.cro:0x1e80`, and PM_DEBUG-stub collisions are separately disjoint by value/type provenance; the theorem is universal over source-defined retail writers, not over arbitrary same-displacement stores. |
+| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Pending aggregate-flow re-verification.** | The earlier source inventory has 13 `SetAIBit` hits and no unclassified call or direct `ai_bit` member assignment. It also byte-verifies `Deserialize` at `.code:0x61724`, the two `MainModule` copies/zeroing paths at `Battle.cro:0x8a25c` and `0x8a414`, the three direct `BattleInst` stores, all 132 CROs, and the residual value/type disproofs. The current verifier additionally inventories recorder/network `BATTLE_REC_DATA` and `BATTLE_REC_UPLOAD_DATA` copies, file/network ingress, buffer zeroing, setter copies, and aggregate assignment. The old committed artifact does not contain that new manifest; the universal theorem cannot be marked proved until the current verifier passes on the exact source commit and retail binary/CRO inputs and regenerates the artifact. |
 
 The table's whole-program conclusion is independently reproduced by
 [`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py). Its residual component is retained in [`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py) and [`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json); the earlier byte-level companion remains useful for raw instruction and relocation checks.
@@ -62,8 +73,9 @@ definition.
 
 The original four-item list is now fully classified: two behavior claims are
 disproved, the byte-recovery request is impossible from the supplied artifacts
-but has an exact logical reconstruction, and the retail-binary writer theorem
-is closed by the source-complete lift and residual provenance checks above.
+but has an exact logical reconstruction, and the direct/residual writer
+obligations are closed. The universal writer theorem remains pending the
+aggregate-flow rerun described above.
 The former “undefined” behavioral comparison is no longer undefined: it is a
 quantified score/action relation with a stated state space and tie policy. It
 is simply not proved by the present artifacts.
@@ -144,16 +156,17 @@ witnesses below settle the sign of the two score relations, but the source
 still does not provide a finite, executable definition of every legal `σ`
 (including every object graph and cross-command correlation). That broader
 value-complete execution theorem remains outside the evidence; the independent
-writer-completeness obligation is closed by the whole-program lift above.
+writer-completeness obligation is covered by the current whole-program lift,
+but its aggregate-flow extension still requires a successful rerun.
 
 The positive all-state branch theorem remains unproved. It is distinct from
 the now-disproved score dominance claims and from the relocation inventory: a
 counterexample closes a universal ordering claim, but it does not symbolically
-enumerate every other reachable path. The retail write-set theorem is closed
-for every source-defined retail writer, including aliased/copied paths, while
-every executable mask-valued displacement row is classified in the candidate
-ledger; raw non-mask field-offset rows remain scanner over-approximations and
-are not promoted to AI fields by displacement alone.
+enumerate every other reachable path. The direct retail write-set and every
+executable mask-valued displacement row are classified in the existing
+candidate ledger; the universal source-defined writer theorem remains pending
+the aggregate-flow rerun. Raw non-mask field-offset rows remain scanner
+over-approximations and are not promoted to AI fields by displacement alone.
 
 ### Contract-level score counterexample
 
