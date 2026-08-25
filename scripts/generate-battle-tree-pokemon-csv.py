@@ -475,7 +475,12 @@ def build_rows(
         trainer_ids = sorted(trainer_by_set.get(index, []))
         trainer_labels = trainer_tier_labels(trainer_ids, trainer_metadata)
         class_labels = sorted({trainer_class_label(trainer_id) for trainer_id in trainer_ids})
-        tier_label = " / ".join(trainer_labels) if trainer_labels else "No trainer reference"
+        if not trainer_ids:
+            tier_label = "No trainer reference"
+        elif len(trainer_ids) == 1:
+            tier_label = trainer_labels[0]
+        else:
+            tier_label = "Multiple trainers"
         if index >= LEGAL_SET_COUNT:
             availability = "Agency tutorial"
             tier = tier_label
@@ -618,7 +623,7 @@ def main() -> None:
         "notes": [
             "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
             "The set record stores no IV field. Compact player/opponent IV values in the CSV mean the listed value applies to every stat; NPC values come from the selecting trainer ID and Battle Agency/rental construction uses 31.",
-            "The game has no per-set weak/strong flag. tier lists every decoded trainer name/category that references the set, grouping names that share a category; trainer_ids and trainer_id_classes retain the exact references and constructor classes.",
+            "The game has no per-set weak/strong flag. tier shows the decoded trainer name/category only when one trainer references the set; shared selections are labeled Multiple trainers. trainer_ids and trainer_id_classes retain the exact references and constructor classes.",
             "ability_slots shows English names in personal-data slot order; ability_rule groups duplicate slots into their effective 1/3-based selection probabilities.",
         ],
     }
