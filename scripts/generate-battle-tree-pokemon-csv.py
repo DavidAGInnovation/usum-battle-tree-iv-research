@@ -38,6 +38,7 @@ TRAINER_ROMFS_PATH = "/a/2/8/2"
 POKEMON_GARC_SHA256 = "ba5546094bdace0cd3a8bc52040b1e993c3e062c8763e58bf2ce7fce6775af75"
 TRAINER_GARC_SHA256 = "56e35c8f448283b17952557c500f6ee4a7e2f5cb37f8f9bcd2a0f8b90a7e90dc"
 SOURCE_SNAPSHOT_COMMIT = "3f7c94593424a6afddcd9f92a293a3786c9f6425"
+TRAINER_METADATA_DEFAULT = Path("data/battle-tree-trainer-ids.csv")
 LEGAL_SET_COUNT = 996
 ARCHIVE_SET_COUNT = 999
 
@@ -50,7 +51,6 @@ TUTORIAL_MOVES = {17: "Wing Attack", 40: "Poison Sting"}
 TUTORIAL_ITEMS = {155: "Oran Berry"}
 
 CSV_FIELDS = [
-    "tournament",
     "tier",
     "archive_index",
     "species",
@@ -235,6 +235,40 @@ def parse_trainer_members(members: list[bytes]) -> dict[int, list[int]]:
     return by_set
 
 
+def load_trainer_metadata(path: Path) -> dict[int, dict[str, str]]:
+    """Load the decoded retail trainer names and category labels."""
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    required = {"trainer_id", "english_name", "trainer_class"}
+    if not rows or not required.issubset(rows[0]):
+        raise ValueError(f"trainer metadata must contain {sorted(required)}: {path}")
+    metadata: dict[int, dict[str, str]] = {}
+    for row in rows:
+        trainer_id = int(row["trainer_id"])
+        if trainer_id in metadata:
+            raise ValueError(f"duplicate trainer ID {trainer_id} in {path}")
+        metadata[trainer_id] = {
+            "english_name": row["english_name"],
+            "trainer_class": row["trainer_class"],
+        }
+    if sorted(metadata) != list(range(210)):
+        raise ValueError(f"expected trainer metadata IDs 0-209 in {path}")
+    return metadata
+
+
+def trainer_tier_labels(
+    trainer_ids: Iterable[int], metadata: dict[int, dict[str, str]]
+) -> list[str]:
+    labels: list[str] = []
+    for trainer_id in trainer_ids:
+        try:
+            trainer = metadata[trainer_id]
+        except KeyError as exc:
+            raise ValueError(f"missing decoded metadata for trainer ID {trainer_id}") from exc
+        labels.append(f"{trainer['english_name']} ({trainer['trainer_class']})")
+    return labels
+
+
 def trainer_class_label(trainer_id: int) -> str:
     # These are the exact constructor-ID classes established in this repo's
     # retail audit.  They are not a claim that the set record stores a
@@ -354,6 +388,7 @@ def ev_values(mask: int) -> tuple[dict[str, int], str]:
 def build_rows(
     pokemon_members: list[bytes],
     trainer_by_set: dict[int, list[int]],
+    trainer_metadata: dict[int, dict[str, str]],
     table_rows: list[dict[str, object]],
     personal: dict[tuple[int, int], bytes],
 ) -> list[dict[str, object]]:
@@ -406,14 +441,15 @@ def build_rows(
         nature_label = nature_names.get(int(record["nature"]), f"Nature {record['nature']}")
         ev_fields, distribution = ev_values(int(record["ev_mask"]))
         trainer_ids = sorted(trainer_by_set.get(index, []))
+        trainer_labels = trainer_tier_labels(trainer_ids, trainer_metadata)
         class_labels = sorted({trainer_class_label(trainer_id) for trainer_id in trainer_ids})
         if index >= LEGAL_SET_COUNT:
             availability = "Battle Agency tutorial only"
-            tier = "Battle Agency tutorial only"
+            tier = " / ".join(trainer_labels) if trainer_labels else "Battle Agency tutorial only"
             opponent_ivs = "Not an NPC trainer set"
         else:
             availability = "Battle Tree NPC / Battle Agency"
-            tier = " / ".join(class_labels) if class_labels else "No trainer reference"
+            tier = " / ".join(trainer_labels) if trainer_labels else "No trainer reference"
             ivs = trainer_iv_values(trainer_ids)
             opponent_ivs = (
                 f"{','.join(str(value) for value in ivs)} in every stat (trainer-ID dependent)"
@@ -425,7 +461,6 @@ def build_rows(
         ability_values = tuple(personal_record[0x18:0x1B])
         friendship = 0 if "Frustration" in move_labels else 255
         row: dict[str, object] = {
-            "tournament": "Battle Tree",
             "tier": tier,
             "archive_index": index,
             "species": species_names[species_id],
@@ -466,6 +501,12 @@ def main() -> None:
     parser.add_argument("--trainer-garc", type=Path, help="extracted battle_tree_trainer GARC")
     parser.add_argument("--pokemon-html", type=Path, help="saved Bulbapedia Pokémon table HTML")
     parser.add_argument(
+        "--trainer-metadata",
+        type=Path,
+        default=TRAINER_METADATA_DEFAULT,
+        help="decoded retail trainer names/categories CSV",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("data/battle-tree-pokemon-builds.csv"),
@@ -500,7 +541,8 @@ def main() -> None:
         raise ValueError("--rom is required to read the exact personal-data archive")
     personal = personal_data(args.rom, records)
     trainer_by_set = parse_trainer_members(trainer_members)
-    rows = build_rows(pokemon_members, trainer_by_set, table_rows, personal)
+    trainer_metadata = load_trainer_metadata(args.trainer_metadata)
+    rows = build_rows(pokemon_members, trainer_by_set, trainer_metadata, table_rows, personal)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", newline="", encoding="utf-8") as handle:
@@ -517,6 +559,8 @@ def main() -> None:
         "trainer_romfs_path": TRAINER_ROMFS_PATH,
         "trainer_garc_sha256": sha256(trainer_payload),
         "expected_trainer_garc_sha256": TRAINER_GARC_SHA256,
+        "trainer_metadata_source": str(args.trainer_metadata),
+        "trainer_metadata_sha256": sha256(args.trainer_metadata.read_bytes()),
         "personal_romfs_path": "/a/0/1/7",
         "personal_record_size": 84,
         "personal_species_record_count": 976,
@@ -530,7 +574,7 @@ def main() -> None:
         "notes": [
             "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
             "The set record stores no IV field. NPC opponent IVs come from the selecting trainer ID; Battle Agency/rental construction uses 31 in every stat.",
-            "The game has no per-set weak/strong flag. tier records the trainer-ID constructor classes that reference each set; overlapping classes are retained.",
+            "The game has no per-set weak/strong flag. tier records the decoded trainer name/category labels that reference each set; trainer_id_classes retains the trainer-ID constructor classes.",
             "Ability slots are numeric personal-data IDs because the set record stores an ability index, not an English ability name.",
         ],
     }

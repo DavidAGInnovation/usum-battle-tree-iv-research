@@ -5,7 +5,7 @@ The machine-readable catalogue is [data/battle-tree-pokemon-builds.csv](../data/
 - records `0–995`: the 996 standard USUM/shared Battle Tree configurations;
 - records `996–998`: three Battle Agency tutorial configurations that are present in the retail archive but omitted from the public Battle Tree list.
 
-The public reference layout is the same compact build shape used by the [BW2 PWT rental-build CSV](https://raw.githubusercontent.com/DavidAGInnovation/bw2-pwt-research/main/data/rental-pokemon-builds.csv): species, form, item, four moves, nature, EV spread, and IV context. The USUM file adds provenance and constructor fields so that the game rules are not lost in a presentation-oriented table.
+The public reference layout is the same compact build shape used by the [BW2 PWT rental-build CSV](https://raw.githubusercontent.com/DavidAGInnovation/bw2-pwt-research/main/data/rental-pokemon-builds.csv): tier, species, form, item, four moves, nature, EV spread, and IV context. The tournament column is intentionally omitted. The USUM file adds provenance and constructor fields so that the game rules are not lost in a presentation-oriented table.
 
 ## What is authoritative
 
@@ -13,12 +13,15 @@ The set rows come from retail RomFS `/a/2/8/1`, the Battle Tree Pokémon GARC. T
 
 The generator independently checks all first 996 species IDs and EV masks against the [USUM Battle Tree Pokémon list](https://bulbapedia.bulbagarden.net/wiki/List_of_Battle_Tree_Pok%C3%A9mon). The table supplies English display names and the public build presentation; the retail archive supplies the exact IDs and archive order. The three tutorial records use the retail IDs plus fixed English names for the small set of records not listed on that page.
 
-The trainer references come from RomFS `/a/2/8/2`, the 210-record Battle Tree trainer GARC. A set can be referenced by multiple trainer-ID classes, so the CSV preserves all references rather than forcing a single difficulty label.
+The trainer references come from RomFS `/a/2/8/2`, the 210-record Battle Tree trainer GARC. Tier values use the decoded retail trainer name and category, for example `Florian (Youngster)` or `Cynthia (Pokémon Trainer)`. A set can be referenced by multiple trainers, so all `Name (Category)` labels are retained and separated by ` / ` rather than forcing a single difficulty label.
+
+One retail set record has no reference in the trainer archive; its Tier is explicitly `No trainer reference`.
 
 ## Field interpretation
 
-The first columns (`tournament` through `friendship`) are the reference-style build fields. The additional columns are:
+The first columns (`tier` through `friendship`) are the reference-style build fields. The additional columns are:
 
+- `tier`: decoded retail trainer name and category for every trainer that references the set;
 - `availability`: standard NPC/Battle Agency availability or tutorial-only availability;
 - `trainer_ids`: exact zero-based trainer archive IDs that reference the set;
 - `trainer_id_classes`: readable constructor classes for those IDs;
@@ -37,7 +40,7 @@ The constructor semantics are:
 - **Friendship:** the constructor sets `0` for a set containing Frustration and `255` otherwise. The current archive contains no Frustration set, so every row is `255`.
 - **Forms:** static form numbers are resolved through the personal-data form table; dynamic icon conventions are labelled explicitly (`School`, `Meteor`, Oricorio forms, Rotom forms, Lycanroc forms, and Alolan forms).
 
-There is no independent weak/strong flag in either the set record or trainer record. The `tier` column therefore reports every trainer-ID constructor class that can select a set, and `opponent_ivs` reports the resulting possible IV values. Overlapping classes are expected and are retained.
+There is no independent weak/strong flag in either the set record or trainer record. The readable `tier` column reports every trainer name/category that can select a set; `trainer_id_classes` and `opponent_ivs` retain the constructor classes and resulting possible IV values. Overlapping trainers are expected and are retained.
 
 ## Reproduction
 
@@ -46,7 +49,8 @@ The generator is [scripts/generate-battle-tree-pokemon-csv.py](../scripts/genera
 ```sh
 python scripts/generate-battle-tree-pokemon-csv.py \
   --rom "/path/to/Pokemon Ultra Sun (USA) Decrypted.3ds" \
-  --pokemon-html /path/to/battle-tree-pokemon.html
+  --pokemon-html /path/to/battle-tree-pokemon.html \
+  --trainer-metadata data/battle-tree-trainer-ids.csv
 ```
 
 The script verifies the expected archive member counts and SHA-256 values, the public species/order/EV cross-check, the personal-data aggregate layout, and deterministic CSV field order. The generated provenance record is [recovered/battle-tree-pokemon-provenance.json](../recovered/battle-tree-pokemon-provenance.json).

@@ -7,7 +7,7 @@
   "notes": [
     "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
     "The set record stores no IV field. NPC opponent IVs come from the selecting trainer ID; Battle Agency/rental construction uses 31 in every stat.",
-    "The game has no per-set weak/strong flag. tier records the trainer-ID constructor classes that reference each set; overlapping classes are retained.",
+    "The game has no per-set weak/strong flag. tier records the decoded trainer name/category labels that reference each set; trainer_id_classes retains the trainer-ID constructor classes.",
     "Ability slots are numeric personal-data IDs because the set record stores an ability index, not an English ability name."
   ],
   "personal_record_size": 84,
@@ -21,6 +21,8 @@
   "source_definition": "niji_project/prog/Field/FieldStatic/include/BattleInst/BattleInstData.h",
   "source_snapshot_commit": "3f7c94593424a6afddcd9f92a293a3786c9f6425",
   "trainer_garc_sha256": "56e35c8f448283b17952557c500f6ee4a7e2f5cb37f8f9bcd2a0f8b90a7e90dc",
+  "trainer_metadata_sha256": "33002539f9d0e29b26eaea4eee14fe6c84051c96b0f045f53535e31eca9c4526",
+  "trainer_metadata_source": "data/battle-tree-trainer-ids.csv",
   "trainer_romfs_path": "/a/2/8/2",
   "tutorial_only_indices": [
     996,
