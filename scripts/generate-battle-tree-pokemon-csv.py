@@ -475,13 +475,19 @@ def build_rows(
         trainer_ids = sorted(trainer_by_set.get(index, []))
         trainer_labels = trainer_tier_labels(trainer_ids, trainer_metadata)
         class_labels = sorted({trainer_class_label(trainer_id) for trainer_id in trainer_ids})
+        if len(trainer_labels) == 1:
+            tier_label = trainer_labels[0]
+        elif trainer_labels:
+            tier_label = "Multiple trainers"
+        else:
+            tier_label = "No trainer reference"
         if index >= LEGAL_SET_COUNT:
             availability = "Battle Agency tutorial only"
-            tier = " / ".join(trainer_labels) if trainer_labels else "Battle Agency tutorial only"
+            tier = tier_label
             opponent_ivs = "Not an NPC trainer set"
         else:
             availability = "Battle Tree NPC / Battle Agency"
-            tier = " / ".join(trainer_labels) if trainer_labels else "No trainer reference"
+            tier = tier_label
             ivs = trainer_iv_values(trainer_ids)
             opponent_ivs = (
                 f"{','.join(str(value) for value in ivs)} in every stat (trainer-ID dependent)"
@@ -617,7 +623,7 @@ def main() -> None:
         "notes": [
             "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
             "The set record stores no IV field. NPC opponent IVs come from the selecting trainer ID; Battle Agency/rental construction uses 31 in every stat.",
-            "The game has no per-set weak/strong flag. tier records the decoded trainer name/category labels that reference each set; trainer_id_classes retains the trainer-ID constructor classes.",
+            "The game has no per-set weak/strong flag. tier shows a decoded trainer name/category only for single-trainer sets; shared sets say Multiple trainers. trainer_ids and trainer_id_classes retain the complete references.",
             "ability_slots shows English names in personal-data slot order; ability_rule groups duplicate slots into their effective 1/3-based selection probabilities.",
         ],
     }

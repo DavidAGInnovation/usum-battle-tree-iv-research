@@ -13,7 +13,7 @@ The set rows come from retail RomFS `/a/2/8/1`, the Battle Tree Pokémon GARC. T
 
 The generator independently checks all first 996 species IDs and EV masks against the [USUM Battle Tree Pokémon list](https://bulbapedia.bulbagarden.net/wiki/List_of_Battle_Tree_Pok%C3%A9mon). The table supplies English display names and the public build presentation; the retail archive supplies the exact IDs and archive order. The three tutorial records use the retail IDs plus fixed English names for the small set of records not listed on that page.
 
-The trainer references come from RomFS `/a/2/8/2`, the 210-record Battle Tree trainer GARC. Tier values use the decoded retail trainer name and category, for example `Florian (Youngster)` or `Cynthia (Pokémon Trainer)`. A set can be referenced by multiple trainers, so all `Name (Category)` labels are retained and separated by ` / ` rather than forcing a single difficulty label.
+The trainer references come from RomFS `/a/2/8/2`, the 210-record Battle Tree trainer GARC. When exactly one trainer references a set, Tier shows that decoded trainer name and category, for example `Florian (Youngster)` or `Cynthia (Pokémon Trainer)`. Shared sets show `Multiple trainers` in Tier; the exact trainer IDs, categories, and IV classes remain in the provenance columns.
 
 One retail set record has no reference in the trainer archive; its Tier is explicitly `No trainer reference`.
 
@@ -21,7 +21,7 @@ One retail set record has no reference in the trainer archive; its Tier is expli
 
 The first columns (`tier` through `friendship`) are the reference-style build fields. The additional columns are:
 
-- `tier`: decoded retail trainer name and category for every trainer that references the set;
+- `tier`: the decoded trainer name/category when exactly one trainer references the set, otherwise `Multiple trainers`;
 - `availability`: standard NPC/Battle Agency availability or tutorial-only availability;
 - `trainer_ids`: exact zero-based trainer archive IDs that reference the set;
 - `trainer_id_classes`: readable constructor classes for those IDs;
@@ -40,7 +40,7 @@ The constructor semantics are:
 - **Friendship:** the constructor sets `0` for a set containing Frustration and `255` otherwise. The current archive contains no Frustration set, so every row is `255`.
 - **Forms:** static form numbers are resolved through the personal-data form table; dynamic icon conventions are labelled explicitly (`School`, `Meteor`, Oricorio forms, Rotom forms, Lycanroc forms, and Alolan forms).
 
-There is no independent weak/strong flag in either the set record or trainer record. The readable `tier` column reports every trainer name/category that can select a set; `trainer_id_classes` and `opponent_ivs` retain the constructor classes and resulting possible IV values. Overlapping trainers are expected and are retained.
+There is no independent weak/strong flag in either the set record or trainer record. Tier is deliberately concise: it names the trainer only when the set has one trainer reference, and otherwise says `Multiple trainers`. `trainer_ids`, `trainer_id_classes`, and `opponent_ivs` retain the complete selection and constructor details.
 
 ## Reproduction
 
