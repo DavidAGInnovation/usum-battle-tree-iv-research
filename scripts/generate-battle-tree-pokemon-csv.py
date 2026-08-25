@@ -275,14 +275,14 @@ def load_ability_names(path: Path) -> dict[int, str]:
 def trainer_tier_labels(
     trainer_ids: Iterable[int], metadata: dict[int, dict[str, str]]
 ) -> list[str]:
-    labels: list[str] = []
+    by_category: dict[str, list[str]] = {}
     for trainer_id in trainer_ids:
         try:
             trainer = metadata[trainer_id]
         except KeyError as exc:
             raise ValueError(f"missing decoded metadata for trainer ID {trainer_id}") from exc
-        labels.append(f"{trainer['english_name']} ({trainer['trainer_class']})")
-    return labels
+        by_category.setdefault(trainer["trainer_class"], []).append(trainer["english_name"])
+    return [f"{', '.join(names)} ({category})" for category, names in by_category.items()]
 
 
 def ability_labels(
@@ -475,12 +475,7 @@ def build_rows(
         trainer_ids = sorted(trainer_by_set.get(index, []))
         trainer_labels = trainer_tier_labels(trainer_ids, trainer_metadata)
         class_labels = sorted({trainer_class_label(trainer_id) for trainer_id in trainer_ids})
-        if len(trainer_labels) == 1:
-            tier_label = trainer_labels[0]
-        elif trainer_labels:
-            tier_label = "Multiple trainers"
-        else:
-            tier_label = "No trainer reference"
+        tier_label = " / ".join(trainer_labels) if trainer_labels else "No trainer reference"
         if index >= LEGAL_SET_COUNT:
             availability = "Agency tutorial"
             tier = tier_label
@@ -623,7 +618,7 @@ def main() -> None:
         "notes": [
             "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
             "The set record stores no IV field. Compact player/opponent IV values in the CSV mean the listed value applies to every stat; NPC values come from the selecting trainer ID and Battle Agency/rental construction uses 31.",
-            "The game has no per-set weak/strong flag. tier shows a decoded trainer name/category only for single-trainer sets; shared sets say Multiple trainers. trainer_ids and trainer_id_classes retain the complete references.",
+            "The game has no per-set weak/strong flag. tier lists every decoded trainer name/category that references the set, grouping names that share a category; trainer_ids and trainer_id_classes retain the exact references and constructor classes.",
             "ability_slots shows English names in personal-data slot order; ability_rule groups duplicate slots into their effective 1/3-based selection probabilities.",
         ],
     }
