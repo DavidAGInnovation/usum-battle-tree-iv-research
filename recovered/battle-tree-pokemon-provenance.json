@@ -1,0 +1,30 @@
+{
+  "archive_set_count": 999,
+  "csv_rows": 999,
+  "expected_pokemon_garc_sha256": "ba5546094bdace0cd3a8bc52040b1e993c3e062c8763e58bf2ce7fce6775af75",
+  "expected_trainer_garc_sha256": "56e35c8f448283b17952557c500f6ee4a7e2f5cb37f8f9bcd2a0f8b90a7e90dc",
+  "legal_set_count": 996,
+  "notes": [
+    "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
+    "The set record stores no IV field. NPC opponent IVs come from the selecting trainer ID; Battle Agency/rental construction uses 31 in every stat.",
+    "The game has no per-set weak/strong flag. tier records the trainer-ID constructor classes that reference each set; overlapping classes are retained.",
+    "Ability slots are numeric personal-data IDs because the set record stores an ability index, not an English ability name."
+  ],
+  "personal_record_size": 84,
+  "personal_romfs_path": "/a/0/1/7",
+  "personal_species_record_count": 976,
+  "pokemon_garc_sha256": "ba5546094bdace0cd3a8bc52040b1e993c3e062c8763e58bf2ce7fce6775af75",
+  "pokemon_romfs_path": "/a/2/8/1",
+  "pokemon_table_sha256": "e4f38749839e089b43c8b79c9c1132ba49b8406b8f41f62ba51f254a8eb8a78e",
+  "pokemon_table_source": "/tmp/battle-tree-pokemon.html",
+  "source_constructor": "niji_project/prog/Field/FieldStatic/source/BattleInst/BattleInstTool.cpp",
+  "source_definition": "niji_project/prog/Field/FieldStatic/include/BattleInst/BattleInstData.h",
+  "source_snapshot_commit": "3f7c94593424a6afddcd9f92a293a3786c9f6425",
+  "trainer_garc_sha256": "56e35c8f448283b17952557c500f6ee4a7e2f5cb37f8f9bcd2a0f8b90a7e90dc",
+  "trainer_romfs_path": "/a/2/8/2",
+  "tutorial_only_indices": [
+    996,
+    997,
+    998
+  ]
+}

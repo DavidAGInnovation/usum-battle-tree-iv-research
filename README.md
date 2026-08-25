@@ -36,6 +36,10 @@ table shows, for example, that Red and Blue use the internal Champion group,
 whereas Cynthia's Battle Tree record uses the normal/non-boss group despite
 her story role.
 
+## Complete Pokémon-build catalogue
+
+The retail archive-level catalogue is available as [data/battle-tree-pokemon-builds.csv](data/battle-tree-pokemon-builds.csv). It contains all 996 standard Battle Tree configurations plus the three Battle Agency tutorial records, with species/form, item, moves, exact constructor EVs, nature, IV context, ability and gender rules, friendship, and the trainer-ID classes that can select each set. The full field definitions, provenance, and reproduction command are in [docs/battle-tree-pokemon-data.md](docs/battle-tree-pokemon-data.md); the generator is [scripts/generate-battle-tree-pokemon-csv.py](scripts/generate-battle-tree-pokemon-csv.py).
+
 ## Scope
 
 - Game: Pokémon Ultra Sun, USA retail executable (`CTR-P-A2AA`), analyzed from a decrypted 3DS image.
