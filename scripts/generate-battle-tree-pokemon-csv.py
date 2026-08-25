@@ -80,9 +80,6 @@ CSV_FIELDS = [
     "trainer_id_classes",
     "ability_slots",
     "sex_vector",
-    "ev_mask",
-    "record_form_no",
-    "national_dex",
 ]
 
 
@@ -486,9 +483,6 @@ def build_rows(
             "trainer_id_classes": "; ".join(class_labels),
             "ability_slots": "/".join(str(value) for value in ability_values),
             "sex_vector": sex_vector,
-            "ev_mask": f"0x{int(record['ev_mask']):02x}",
-            "record_form_no": int(record["form"]),
-            "national_dex": species_id,
         }
         output.append(row)
     return output

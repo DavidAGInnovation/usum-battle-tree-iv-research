@@ -27,8 +27,8 @@ The first columns (`tier` through `friendship`) are the reference-style build fi
 - `trainer_id_classes`: readable constructor classes for those IDs;
 - `ability_slots`: the three numeric personal-data ability IDs in slot order;
 - `sex_vector`: the Gen VII personal-data sex byte;
-- `ev_mask` and `record_form_no`: the raw retail values;
-- `national_dex`: the numeric species ID used by the set record.
+
+The raw EV mask, form number, and National Dex ID are used internally for validation and name/form resolution but are intentionally omitted from the presentation CSV. The exported file keeps the expanded EV columns, readable form, and species name instead.
 
 The constructor semantics are:
 
