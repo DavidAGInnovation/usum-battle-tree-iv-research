@@ -3,8 +3,9 @@
 
 The extractor is intentionally read-only with respect to the ROM.  It writes a
 small, reviewable artifact directory containing the source GARC, its numbered
-members, a manifest, and the raw ExeFS ``.code`` section.  ``pyctr`` is the only
-non-standard dependency.
+members, a manifest, and the raw ExeFS ``.code`` section.  With
+``--cros-output`` it also extracts the 132 root-level retail CRO modules used
+by the whole-program verifier.  ``pyctr`` is the only non-standard dependency.
 
 The supplied ROM is already decrypted, so the zero-valued key material below is
 used together with ``assume_decrypted=True``.  This is not a key-recovery tool
@@ -156,6 +157,29 @@ def split_garc(garc: bytes, output: Path) -> list[dict[str, object]]:
     return members
 
 
+def extract_root_cros(romfs, output: Path) -> list[dict[str, object]]:
+    """Extract the root-level CRO modules used by the retail verifier."""
+    output.mkdir(parents=True, exist_ok=True)
+    root = romfs.get_info_from_path("/")
+    rows: list[dict[str, object]] = []
+    for name in sorted(root.contents):
+        if not name.endswith(".cro"):
+            continue
+        payload = romfs.open("/" + name).read()
+        path = output / name
+        path.write_bytes(payload)
+        rows.append(
+            {
+                "file": name,
+                "size": len(payload),
+                "sha256": sha256(payload),
+            }
+        )
+    if len(rows) != 132:
+        raise ValueError(f"expected 132 root CROs, found {len(rows)}")
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("rom", type=Path, help="decrypted .3ds image")
@@ -165,6 +189,11 @@ def main() -> None:
         default="/a/0/8/4",
         help="RomFS path of the Battle AI GARC (default: /a/0/8/4)",
     )
+    parser.add_argument(
+        "--cros-output",
+        type=Path,
+        help="also extract all 132 root-level retail CRO modules to this directory",
+    )
     args = parser.parse_args()
     if not args.rom.is_file():
         parser.error(f"ROM does not exist: {args.rom}")
@@ -173,9 +202,12 @@ def main() -> None:
     amx_dir.mkdir(exist_ok=True)
 
     handle, ncch, romfs, exefs = open_romfs_and_exefs(args.rom)
+    cros: list[dict[str, object]] = []
     try:
         garc = romfs.open(args.romfs_path).read()
         code = extract_exefs_code(exefs)
+        if args.cros_output is not None:
+            cros = extract_root_cros(romfs, args.cros_output)
     finally:
         romfs.close()
         ncch.close()
@@ -204,6 +236,12 @@ def main() -> None:
         },
         "members": members,
     }
+    if args.cros_output is not None:
+        manifest["cros"] = {
+            "directory": str(args.cros_output),
+            "count": len(cros),
+            "files": cros,
+        }
     (args.output / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     )

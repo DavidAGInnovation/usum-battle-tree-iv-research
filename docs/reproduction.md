@@ -14,18 +14,20 @@ CODE_BIN="/path/to/extracted/code.bin"
 ## Recover the retail AI archive and executable
 
 With a decrypted US `.3ds` image, the bundled extractor recovers the exact
-Battle AI GARC, all numbered AMX members, a JSON manifest, and the raw ExeFS
-`.code` section:
+Battle AI GARC, all numbered AMX members, all 132 root-level retail CRO
+modules, a JSON manifest, and the raw ExeFS `.code` section:
 
 ```sh
 python3 scripts/extract-retail-battle-ai.py \
   "/path/to/Pokemon Ultra Sun (USA) Decrypted.3ds" \
-  /tmp/usum-retail-battle-ai
+  /tmp/usum-retail-battle-ai \
+  --cros-output /tmp/usum-retail-battle-ai/cros
 ```
 
-The manifest records the source RomFS path, GARC/member hashes, and the
-`.code` hash. It is safe to keep the output outside the repository because
-the ROM and the extracted executable are copyrighted retail inputs.
+The manifest records the source RomFS path, GARC/member hashes, all CRO
+hashes, and the `.code` hash. It is safe to keep the output outside the
+repository because the ROM and the extracted executable are copyrighted retail
+inputs.
 
 The archive-index source file `BattleAi.gaix` is not present in the supplied
 snapshot. Its numeric map can nevertheless be checked against the archived

@@ -5236,6 +5236,239 @@
       }
     ]
   },
+  "source_aggregate_flow": {
+    "all_source_aggregate_writers_classified": true,
+    "edge_count": 25,
+    "edges": [
+      {
+        "edge": "serialized_buffer_zeroing",
+        "effect": "zeroes the complete SERIALIZE_DATA aggregate, including ai_bit (+0x10)",
+        "line": 264,
+        "project": "niji_project/prog/Battle/BattleStatic.vcxproj",
+        "source": "niji_project/prog/Battle/source/battle_SetupTrainer.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "gfl2::std::MemClear( serializedData, sizeof(BSP_TRAINER_DATA::SERIALIZE_DATA) );"
+      },
+      {
+        "edge": "recorder_full_record_memcpy",
+        "effect": "copies BATTLE_REC_DATA, whose upload.body.tr_data[] contains SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 957,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memcpy( recDataTemp , mBattleRecData,  sizeof(BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "recorder_full_record_memcpy",
+        "effect": "copies BATTLE_REC_DATA, whose upload.body.tr_data[] contains SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 969,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memcpy( mBattleRecData,recDataTemp, sizeof(BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "recorder_full_record_memcpy",
+        "effect": "copies BATTLE_REC_DATA, whose upload.body.tr_data[] contains SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 1019,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memcpy( recDataTemp , mBattleRecData,  sizeof(BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "recorder_full_record_memcpy",
+        "effect": "copies BATTLE_REC_DATA, whose upload.body.tr_data[] contains SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 1041,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memcpy(  mBattleRecData,recDataTemp, sizeof(BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "recorder_full_record_memcpy",
+        "effect": "copies BATTLE_REC_DATA, whose upload.body.tr_data[] contains SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 1078,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memcpy(  recDataTemp,mBattleRecData, sizeof(BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "recorder_full_record_memcpy",
+        "effect": "copies BATTLE_REC_DATA, whose upload.body.tr_data[] contains SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 1087,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memcpy(  mBattleRecData,recDataTemp, sizeof(BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "recorder_full_record_memcpy",
+        "effect": "copies BATTLE_REC_DATA, whose upload.body.tr_data[] contains SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 1296,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memcpy( mBattleRecData, recData,  sizeof(BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "recorder_upload_memcpy",
+        "effect": "copies BATTLE_REC_UPLOAD_DATA, including serialized trainer records",
+        "line": 791,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memcpy( &mBattleRecData->upload , upload , sizeof(BATTLE_REC_UPLOAD_DATA) );"
+      },
+      {
+        "edge": "recorder_file_read",
+        "effect": "external file read writes the complete BATTLE_REC_DATA aggregate",
+        "line": 388,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "result = GetSaveLoadResult( xess->ReadFile( EXTID_BATTLEVIDEO, index, mBattleRecData, sizeof( BATTLE_REC_DATA ) ) );"
+      },
+      {
+        "edge": "recorder_file_read",
+        "effect": "external file read writes the complete BATTLE_REC_DATA aggregate",
+        "line": 415,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "result = GetSaveLoadResult( xess->ReadFile( EXTID_BATTLEVIDEO, index, mBattleRecData, sizeof( BATTLE_REC_DATA ) ) );"
+      },
+      {
+        "edge": "upload_request_full_record_memcpy",
+        "effect": "network upload response copies a complete BATTLE_REC_DATA into the recorder object",
+        "line": 75,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoUploadRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "std::memcpy( m_requestParam.pBattleRecorderSaveData->GetBattleRecDataDirect() , m_requestParam.pUploadData , sizeof(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "upload_request_full_record_memcpy",
+        "effect": "network upload response copies a complete BATTLE_REC_DATA into the recorder object",
+        "line": 162,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoUploadRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "std::memcpy( m_requestParam.pBattleRecorderSaveData->GetBattleRecDataDirect() , m_requestParam.pUploadData , sizeof(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "delete_request_full_record_memcpy",
+        "effect": "delete/cancel response copies a complete BATTLE_REC_DATA into the recorder object",
+        "line": 155,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDeleteRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "std::memcpy( m_requestParam.pBattleRecorderSaveData->GetBattleRecDataDirect() , m_requestParam.pCancelData , sizeof(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "sync_request_full_record_memcpy",
+        "effect": "video-sync response copies a complete BATTLE_REC_DATA into the recorder object",
+        "line": 101,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoSyncRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "std::memcpy( m_requestParam.pBattleRecorderSaveData->GetBattleRecDataDirect() , &pSaveVideoData->sdCardData, sizeof(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_DATA) );"
+      },
+      {
+        "edge": "event_set_upload_copy",
+        "effect": "copies an upload aggregate containing serialized trainer records",
+        "line": 173,
+        "project": "niji_project/prog/NetStatic/NetEvent/NetEvent.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetEvent/source/BattleVideoPlayerEvent.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "pSaveData->SetBattleRecUploadData( &m_appParam.out.pActiveVideoData->sdCardData.upload );"
+      },
+      {
+        "edge": "upload_set_upload_copy",
+        "effect": "copies an upload aggregate containing serialized trainer records",
+        "line": 76,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoUploadRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "m_requestParam.pBattleRecorderSaveData->SetBattleRecUploadData( &m_requestParam.pUploadData->upload );"
+      },
+      {
+        "edge": "upload_set_upload_copy",
+        "effect": "copies an upload aggregate containing serialized trainer records",
+        "line": 163,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoUploadRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "m_requestParam.pBattleRecorderSaveData->SetBattleRecUploadData( &m_requestParam.pUploadData->upload );"
+      },
+      {
+        "edge": "delete_set_upload_copy",
+        "effect": "copies an upload aggregate containing serialized trainer records",
+        "line": 156,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDeleteRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "m_requestParam.pBattleRecorderSaveData->SetBattleRecUploadData( &m_requestParam.pCancelData->upload );"
+      },
+      {
+        "edge": "sync_set_upload_copy",
+        "effect": "copies an upload aggregate containing serialized trainer records",
+        "line": 102,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoSyncRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "m_requestParam.pBattleRecorderSaveData->SetBattleRecUploadData( &pSaveVideoData->sdCardData.upload );"
+      },
+      {
+        "edge": "video_upload_assignment",
+        "effect": "aggregate assignment copies serialized trainer records into VIDEO_DATA",
+        "line": 1551,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/BattleVideoPlayerVideoDataManager.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "pOutputVideoData->sdCardData.upload  = *pUploadData;"
+      },
+      {
+        "edge": "request_client_download_buffer_zero",
+        "effect": "zero-initializes the upload buffer, including serialized trainer ai_bit",
+        "line": 42,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoRequestClient.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "std::memset( m_pDownloadBuffer , 0 , sizeof(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA) );"
+      },
+      {
+        "edge": "download_buffer_zero",
+        "effect": "zero-initializes the downloaded upload buffer, including serialized trainer ai_bit",
+        "line": 211,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDownloadRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "::std::memset( m_requestParam.pClient->GetDownloadBufferPtr() , 0 , sizeof(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA) );"
+      },
+      {
+        "edge": "download_buffer_external_fill",
+        "effect": "external network download writes the upload buffer, including serialized trainer ai_bit",
+        "line": 212,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDownloadRequestSequence.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "if( dataStoreClient->DownloadData( dataId, m_requestParam.pClient->GetDownloadBufferPtr() , sizeof(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA) ) )"
+      },
+      {
+        "edge": "video_static_dummy_zero",
+        "effect": "static-duration aggregate is zero-initialized, including serialized trainer ai_bit",
+        "line": 1680,
+        "project": "niji_project/prog/NetStatic/NetAppLib/NetAppLib.vcxproj",
+        "source": "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/BattleVideoPlayerVideoDataManager.cpp",
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "text": "static ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA aDummyData[ 10 ];"
+      }
+    ],
+    "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+    "unclassified_edges": []
+  },
   "source_inventory": {
     "all_set_aibit_hits": 13,
     "direct_member_assignment_hits": [
@@ -5593,6 +5826,31 @@
     ]
   },
   "source_type_flow": {
+    "alias_flow_roots": [
+      "BattleSpot",
+      "BattleVideoPlayer",
+      "BattleVideoRecording",
+      "NetAppLib",
+      "NetEvent",
+      "NetLib"
+    ],
+    "alias_flow_source_files": [
+      "niji_project/prog/NetApp/BattleSpot/source/Frames/BattleSpotFrame_InternetAfterBattle.h",
+      "niji_project/prog/NetApp/BattleSpot/source/Frames/BattleSpotFrame_RatingAfterBattle.h",
+      "niji_project/prog/NetApp/BattleSpot/source/System/BattleSpotWork.cpp",
+      "niji_project/prog/NetStatic/NetAppLib/include/BattleVideoPlayer/BattleVideoPlayerVideoDataManager.h",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/BattleVideoPlayerVideoDataManager.cpp",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDeleteRequestSequence.cpp",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDeleteRequestSequence.h",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDownloadRequestSequence.cpp",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoRequestClient.cpp",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoRequestClient.h",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoResponseListener.h",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoSyncRequestSequence.cpp",
+      "niji_project/prog/NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoUploadRequestSequence.cpp",
+      "niji_project/prog/NetStatic/NetEvent/source/BattleVideoPlayerEvent.cpp",
+      "niji_project/prog/NetStatic/NetLib/source/NijiNetworkSystem.cpp"
+    ],
     "canonical_type_roots": [
       "Battle",
       "ExtSavedata",
@@ -5631,45 +5889,88 @@
     },
     "main_project": "niji_project/prog/Main/project/niji.vcxproj",
     "main_project_references": [
+      "Battle",
+      "BattleSpot",
       "BattleStatic",
+      "BattleVideoPlayer",
+      "BattleVideoRecording",
       "ExtSavedata",
       "FieldStatic",
+      "NetAppLib",
+      "NetEvent",
+      "NetLib",
       "Trainer"
     ],
     "serialized_edges": [
       {
         "edge": "Serialize_definition",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
         "line": 173,
+        "project": "niji_project/prog/Battle/BattleStatic.vcxproj",
         "source": "niji_project/prog/Battle/source/battle_SetupTrainer.cpp",
         "text": "void BSP_TRAINER_DATA::Serialize( BSP_TRAINER_DATA::SERIALIZE_DATA* serializedData ) const"
       },
       {
         "edge": "Serialize_network_call",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
         "line": 876,
+        "project": "niji_project/prog/Battle/Battle.vcxproj",
         "source": "niji_project/prog/Battle/source/btl_net.cpp",
         "text": "trData->Serialize( &sendData->base_data );"
       },
       {
         "edge": "Deserialize_definition",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
         "line": 213,
+        "project": "niji_project/prog/Battle/BattleStatic.vcxproj",
         "source": "niji_project/prog/Battle/source/battle_SetupTrainer.cpp",
         "text": "void BSP_TRAINER_DATA::Deserialize( const BSP_TRAINER_DATA::SERIALIZE_DATA* serializedData )"
       },
       {
         "edge": "Deserialize_network_call",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
         "line": 5511,
+        "project": "niji_project/prog/Battle/Battle.vcxproj",
         "source": "niji_project/prog/Battle/source/btl_mainmodule.cpp",
         "text": "trData->Deserialize( &trSendData->base_data );"
       },
       {
         "edge": "ClearSerializeData_definition",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
         "line": 262,
+        "project": "niji_project/prog/Battle/BattleStatic.vcxproj",
         "source": "niji_project/prog/Battle/source/battle_SetupTrainer.cpp",
         "text": "void BSP_TRAINER_DATA::ClearSerializeData( BSP_TRAINER_DATA::SERIALIZE_DATA* serializedData )"
       },
       {
+        "edge": "Serialize_recorder_call",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 327,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "text": "bsp->tr_data[ i ]->Serialize( &mBattleRecData->upload.body.tr_data[ i ] );"
+      },
+      {
+        "edge": "Deserialize_recorder_calls",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 735,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "text": "bsp->tr_data[ i ]->Deserialize( &mBattleRecData->upload.body.tr_data[ i ] );"
+      },
+      {
+        "edge": "Deserialize_recorder_calls",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "line": 1276,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
+        "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
+        "text": "bsp->tr_data[ i ]->Deserialize( &mBattleRecData->upload.body.tr_data[ i ] );"
+      },
+      {
         "edge": "ClearSerializeData_recorder_call",
+        "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
         "line": 331,
+        "project": "niji_project/prog/ExtSavedata/ExtSavedata.vcxproj",
         "source": "niji_project/prog/ExtSavedata/source/BattleRecorderSaveData.cpp",
         "text": "BSP_TRAINER_DATA::ClearSerializeData( &mBattleRecData->upload.body.tr_data[ i ] );"
       }
@@ -5680,6 +5981,7 @@
     "basis": [
       "The complete archived source inventory has no unclassified SetAIBit call or direct ai_bit member assignment, and records Serialize/ClearSerializeData for the intermediate serialized field.",
       "The serialized edge inventory covers Serialize, Deserialize, ClearSerializeData, their enabled network/recorder call sites, and the disabled whole-object copy alternative.",
+      "The aggregate-flow inventory covers recorder/network memcpy, file-read, download-buffer, memset, and aggregate-assignment writers of SERIALIZE_DATA::ai_bit, with zero unclassified source operations.",
       "BattleStatic::BSP_TRAINER_DATA::Deserialize is verified at .code:0x61724 as SERIALIZE_DATA +0x10 -> CORE_DATA +0x4.",
       "Battle.cro MainModule::trainerParam_StoreNPCTrainer is verified at 0x8a25c as CORE_DATA +0x4 -> TRAINER_DATA +0x1c.",
       "Battle.cro trainerParam_StoreCore is verified at 0x8a414 as TRAINER_DATA +0x1c = 0.",

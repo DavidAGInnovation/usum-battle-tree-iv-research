@@ -2,14 +2,17 @@
 
 ## Re-audit status (2026-08-25)
 
-The earlier `proved: true` result in
-[`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json)
-was generated before the recorder/network aggregate-flow inventory was added.
-The current verifier now fails closed on those additional `BATTLE_REC_DATA`,
-`BATTLE_REC_UPLOAD_DATA`, file/network-buffer, and aggregate-assignment paths.
-Until the current verifier is rerun against the exact source commit and retail
-binary/CRO inputs and the artifact is regenerated, the universal writer row
-below must be treated as provisional rather than final proof.
+The exact inputs are present under the supplied research directory and were
+rerun on 2026-08-25: the extracted `.code` has SHA-256
+`b5388f7500d91be01499a99ca007c98212068608ed7c83c43952e1d5148e9e09`,
+`Battle.cro` has SHA-256
+`334ab92012b8dd9179ba27e0faeeb6d1fd21113e13812ec065e68309dae8396c`, and the
+source checkout is commit `3f7c94593424a6afddcd9f92a293a3786c9f6425`. The
+source-only aggregate-flow pass classifies 25 recorder/network/file/buffer
+edges with zero unclassified operations; the full verifier passes the same
+aggregate inventory, all 325 executable candidates, and all 132 CROs. The
+committed whole-program artifact below is therefore regenerated from the
+exact inputs rather than carried forward from the earlier provisional run.
 
 This ledger closes the four items that were previously reported as “not yet
 proven.” It distinguishes a false proposition (which has a counterexample), an
@@ -31,7 +34,7 @@ remains a separate model boundary.
 | Strong or Expert is monotonically more capable than Basic. | **Disproved for score dominance over legal retail states; strict structural dominance is also disproved.** | Let `Q(s)` be the native-command IDs used by script `s`. The structural claim `Q(Basic) ⊆ Q(Strong)` or `Q(Basic) ⊆ Q(Expert)` is false in both cases. Define `F_s(σ,c,r)` as the returned script score and switch-enable result for legal live state `σ`, candidate `c`, and random trace `r`; the universal score theorem would require `∀σ,c,r: F_Strong ≥ F_Basic` (and analogously for Expert). The ROM-derived Ninjask records and exact AMX VM runs in [`recovered/ai-score-witnesses.json`](../recovered/ai-score-witnesses.json) provide legal witnesses with Basic `0` and Strong `−1`, and Basic `0` and Expert `−1`. Therefore both universal score-dominance claims are false. An action-dominance claim remains a separate relation because it additionally requires a utility function and the judge's tie/randomness policy. |
 | The original generated `BattleAi.gaix` bytes can be recovered from the supplied source and ROM. | **Disproved for these inputs; equivalent reconstruction proved.** | The complete archived Git object database has zero `BattleAi.gaix` objects, the source archive has no path with that name, and the retail RomFS has no generated `.gaix` file. The retail GARC, archived project ordering, archiver sort rule, and C++ index switch force the numeric map. The source-compatible header is reconstructed at [`recovered/BattleAi.gaix`](../recovered/BattleAi.gaix). It is logically equivalent, not byte-identical. A runtime `datIdx` trace would be corroboration only, not a remaining numeric-map proof obligation. |
 | Every special trainer uses one AI mask in every mode and phase. | **Disproved at source scope.** | The source has explicit alternatives: ordinary `0x107`, Royal setup `0x127` with an effective Royal selector `0x125`, special-wild `0x007`, wild Double `0x008`, intrusion `0x040`, reinforcement `0x00f`, and Battle Festival Basic-only reductions. Therefore the universal same-mask statement is false. |
-| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Pending aggregate-flow re-verification.** | The earlier source inventory has 13 `SetAIBit` hits and no unclassified call or direct `ai_bit` member assignment. It also byte-verifies `Deserialize` at `.code:0x61724`, the two `MainModule` copies/zeroing paths at `Battle.cro:0x8a25c` and `0x8a414`, the three direct `BattleInst` stores, all 132 CROs, and the residual value/type disproofs. The current verifier additionally inventories recorder/network `BATTLE_REC_DATA` and `BATTLE_REC_UPLOAD_DATA` copies, file/network ingress, buffer zeroing, setter copies, and aggregate assignment. The old committed artifact does not contain that new manifest; the universal theorem cannot be marked proved until the current verifier passes on the exact source commit and retail binary/CRO inputs and regenerates the artifact. |
+| The source-level mask-writer inventory is complete for every direct, indirect, aliased, and copied writer in the retail binary. | **Proved for the stated retail/source scope.** | The archived source inventory has 13 `SetAIBit` hits and no unclassified call or direct `ai_bit` member assignment. The aggregate-flow inventory adds 25 classified recorder/network/file/buffer/aggregate edges with zero unknowns. The verifier byte-checks `Deserialize` at `.code:0x61724`, the two `MainModule` copies/zeroing paths at `Battle.cro:0x8a25c` and `0x8a414`, the three direct `BattleInst` stores, all 132 CROs, PM_DEBUG exclusions, and the two residual value/type disproofs. The regenerated artifact records `proved: true`, zero unresolved source writers, zero unclassified binary candidates, and all 325 candidate rows classified. |
 
 The table's whole-program conclusion is independently reproduced by
 [`scripts/verify-retail-ai-writer-whole-program.py`](../scripts/verify-retail-ai-writer-whole-program.py). Its residual component is retained in [`scripts/verify-retail-ai-writer-theorem.py`](../scripts/verify-retail-ai-writer-theorem.py) and [`recovered/retail-ai-writer-theorem.json`](../recovered/retail-ai-writer-theorem.json); the earlier byte-level companion remains useful for raw instruction and relocation checks.
@@ -74,8 +77,9 @@ definition.
 The original four-item list is now fully classified: two behavior claims are
 disproved, the byte-recovery request is impossible from the supplied artifacts
 but has an exact logical reconstruction, and the direct/residual writer
-obligations are closed. The universal writer theorem remains pending the
-aggregate-flow rerun described above.
+obligations plus the universal aliased/copied-writer theorem are closed for the
+stated retail/source scope. The theorem is not a claim about arbitrary future
+builds or every possible same-displacement store in unrelated objects.
 The former “undefined” behavioral comparison is no longer undefined: it is a
 quantified score/action relation with a stated state space and tie policy. It
 is simply not proved by the present artifacts.
@@ -113,10 +117,10 @@ separate theorem:
    no longer needed to classify the two monotonicity claims. The witness
    disproves each universal score-dominance theorem, while the broader
    branch-complete execution audit remains a separate descriptive task.
-   The whole-program lift records the source/project topology, copied-field
-   fingerprints, all 132 CROs, and the residual value/type checks. It
-   deliberately does not promote every unrelated same-displacement store to an
-   AI field.
+   The whole-program lift records the source/project topology, 25 classified
+   aggregate-flow edges, copied-field fingerprints, all 132 CROs, and the
+   residual value/type checks. It deliberately does not promote every unrelated
+   same-displacement store to an AI field.
 
 The ROM and source are therefore sufficient inputs for this closure. The ROM
 supplies code bytes, CRO relocations, and runtime RTTI strings; the source
@@ -157,15 +161,15 @@ still does not provide a finite, executable definition of every legal `σ`
 (including every object graph and cross-command correlation). That broader
 value-complete execution theorem remains outside the evidence; the independent
 writer-completeness obligation is covered by the current whole-program lift,
-but its aggregate-flow extension still requires a successful rerun.
+including its passed aggregate-flow extension.
 
 The positive all-state branch theorem remains unproved. It is distinct from
 the now-disproved score dominance claims and from the relocation inventory: a
 counterexample closes a universal ordering claim, but it does not symbolically
 enumerate every other reachable path. The direct retail write-set and every
 executable mask-valued displacement row are classified in the existing
-candidate ledger; the universal source-defined writer theorem remains pending
-the aggregate-flow rerun. Raw non-mask field-offset rows remain scanner
+candidate ledger; the universal source-defined writer theorem is closed for the
+stated retail/source scope. Raw non-mask field-offset rows remain scanner
 over-approximations and are not promoted to AI fields by displacement alone.
 
 ### Contract-level score counterexample
