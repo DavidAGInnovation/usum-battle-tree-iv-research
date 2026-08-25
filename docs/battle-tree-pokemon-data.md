@@ -30,11 +30,14 @@ The first columns (`tier` through `friendship`) are the reference-style build fi
 
 The raw EV mask, form number, and National Dex ID are used internally for validation and name/form resolution but are intentionally omitted from the presentation CSV. The exported file keeps the expanded EV columns, readable form, and species name instead.
 
+The presentation values are intentionally compact so GitHub can render the file’s interactive table (GitHub’s CSV renderer supports files up to 512 KB): `31 all` means 31 IVs in every stat, `19/23 all` means the possible opponent IV values in every stat, `Not NPC` marks a tutorial-only record, and `NPC + Agency` / `Agency tutorial` are the availability labels. The full semantics remain documented below and in the provenance columns.
+
 The constructor semantics are:
 
 - **EVs:** the retail builder divides `510` by the number of selected bits and caps each selected stat at `255`. Thus the file intentionally reports `255/255` for a two-stat mask, while the public page commonly displays `252/252`.
 - **Opponent IVs:** ordinary Battle Tree construction chooses one value for all six stats from the trainer ID: `0–49 → 19`, `50–69 → 23`, `70–89 → 27`, and `90+ → 31`. IDs `190–205` are featured/Battle Legend records; `206` is the Lillie scouted-partner record; `207–208` are Battle Agency event records; and `209` selects the three tutorial sets. The partner/event constructors use `31` directly.
-- **Player/rental IVs:** Battle Agency/rental construction passes `31` for all six stats.
+- **Player/rental IVs:** `31 all` means Battle Agency/rental construction passes `31` for all six stats.
+- **Opponent IVs:** compact values such as `19 all`, `19/23 all`, or `31 all` mean the listed value(s) apply to every stat; the values are trainer-ID dependent.
 - **Ability:** the set builder selects one of the three personal-data ability slots at random for the ordinary Battle Tree constructor. `ability_slots` shows the English names in slot order, while `ability_rule` groups duplicate names into effective probabilities. For example, `Clear Body / Clear Body / Sturdy` is summarized as `Clear Body (2/3) / Sturdy (1/3)`.
 - **Gender:** the builder requests an unspecified sex, so the game derives sex from the species’ personal-data sex vector and generated PID. The CSV reports the exact vector and a readable rule (`Male-only`, `Female-only`, `Genderless`, or the species-ratio rule).
 - **Friendship:** the constructor sets `0` for a set containing Frustration and `255` otherwise. The current archive contains no Frustration set, so every row is `255`.

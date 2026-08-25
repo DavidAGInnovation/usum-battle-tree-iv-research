@@ -297,7 +297,7 @@ def ability_labels(
             raise ValueError(f"missing English name for ability ID {ability_id}") from exc
     counts = Counter(names)
     effective = " / ".join(f"{name} ({counts[name]}/3)" for name in dict.fromkeys(names))
-    return " / ".join(names), f"One of the three ability slots is selected at random; effective abilities: {effective}"
+    return " / ".join(names), effective
 
 
 def trainer_class_label(trainer_id: int) -> str:
@@ -482,15 +482,15 @@ def build_rows(
         else:
             tier_label = "No trainer reference"
         if index >= LEGAL_SET_COUNT:
-            availability = "Battle Agency tutorial only"
+            availability = "Agency tutorial"
             tier = tier_label
-            opponent_ivs = "Not an NPC trainer set"
+            opponent_ivs = "Not NPC"
         else:
-            availability = "Battle Tree NPC / Battle Agency"
+            availability = "NPC + Agency"
             tier = tier_label
             ivs = trainer_iv_values(trainer_ids)
             opponent_ivs = (
-                f"{','.join(str(value) for value in ivs)} in every stat (trainer-ID dependent)"
+                f"{','.join(str(value) for value in ivs)} all"
                 if ivs
                 else "Trainer-dependent"
             )
@@ -512,7 +512,7 @@ def build_rows(
             "nature": nature_label,
             "ev_distribution": distribution,
             **ev_fields,
-            "player_ivs": "31 in every stat (Battle Agency/rental constructor)",
+            "player_ivs": "31 all",
             "opponent_ivs": opponent_ivs,
             "ability_rule": ability_rule,
             "gender_rule": sex_rule(sex_vector),
@@ -622,7 +622,7 @@ def main() -> None:
         "csv_rows": len(rows),
         "notes": [
             "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
-            "The set record stores no IV field. NPC opponent IVs come from the selecting trainer ID; Battle Agency/rental construction uses 31 in every stat.",
+            "The set record stores no IV field. Compact player/opponent IV values in the CSV mean the listed value applies to every stat; NPC values come from the selecting trainer ID and Battle Agency/rental construction uses 31.",
             "The game has no per-set weak/strong flag. tier shows a decoded trainer name/category only for single-trainer sets; shared sets say Multiple trainers. trainer_ids and trainer_id_classes retain the complete references.",
             "ability_slots shows English names in personal-data slot order; ability_rule groups duplicate slots into their effective 1/3-based selection probabilities.",
         ],
