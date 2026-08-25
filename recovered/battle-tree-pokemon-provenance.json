@@ -1,4 +1,6 @@
 {
+  "ability_metadata_sha256": "633f813a74df5b032f841735ddc2fbd96bedd6eb4f19943c6272c21607013160",
+  "ability_metadata_source": "data/battle-tree-ability-names.json",
   "archive_set_count": 999,
   "csv_rows": 999,
   "expected_pokemon_garc_sha256": "ba5546094bdace0cd3a8bc52040b1e993c3e062c8763e58bf2ce7fce6775af75",
@@ -8,7 +10,7 @@
     "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
     "The set record stores no IV field. NPC opponent IVs come from the selecting trainer ID; Battle Agency/rental construction uses 31 in every stat.",
     "The game has no per-set weak/strong flag. tier records the decoded trainer name/category labels that reference each set; trainer_id_classes retains the trainer-ID constructor classes.",
-    "Ability slots are numeric personal-data IDs because the set record stores an ability index, not an English ability name."
+    "ability_slots shows English names in personal-data slot order; ability_rule groups duplicate slots into their effective 1/3-based selection probabilities."
   ],
   "personal_record_size": 84,
   "personal_romfs_path": "/a/0/1/7",

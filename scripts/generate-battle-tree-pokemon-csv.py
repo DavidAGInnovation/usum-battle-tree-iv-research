@@ -24,7 +24,7 @@ import json
 import re
 import struct
 import urllib.request
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Iterable
 
@@ -39,6 +39,7 @@ POKEMON_GARC_SHA256 = "ba5546094bdace0cd3a8bc52040b1e993c3e062c8763e58bf2ce7fce6
 TRAINER_GARC_SHA256 = "56e35c8f448283b17952557c500f6ee4a7e2f5cb37f8f9bcd2a0f8b90a7e90dc"
 SOURCE_SNAPSHOT_COMMIT = "3f7c94593424a6afddcd9f92a293a3786c9f6425"
 TRAINER_METADATA_DEFAULT = Path("data/battle-tree-trainer-ids.csv")
+ABILITY_METADATA_DEFAULT = Path("data/battle-tree-ability-names.json")
 LEGAL_SET_COUNT = 996
 ARCHIVE_SET_COUNT = 999
 
@@ -253,6 +254,24 @@ def load_trainer_metadata(path: Path) -> dict[int, dict[str, str]]:
     return metadata
 
 
+def load_ability_names(path: Path) -> dict[int, str]:
+    """Load the standard Gen VII internal ability-ID name table."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"ability metadata must be a JSON object: {path}")
+    names: dict[int, str] = {}
+    for key, value in payload.items():
+        ability_id = int(key)
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"invalid ability name for ID {ability_id} in {path}")
+        if ability_id in names:
+            raise ValueError(f"duplicate ability ID {ability_id} in {path}")
+        names[ability_id] = value
+    if not names:
+        raise ValueError(f"ability metadata is empty: {path}")
+    return names
+
+
 def trainer_tier_labels(
     trainer_ids: Iterable[int], metadata: dict[int, dict[str, str]]
 ) -> list[str]:
@@ -264,6 +283,21 @@ def trainer_tier_labels(
             raise ValueError(f"missing decoded metadata for trainer ID {trainer_id}") from exc
         labels.append(f"{trainer['english_name']} ({trainer['trainer_class']})")
     return labels
+
+
+def ability_labels(
+    ability_values: tuple[int, ...], ability_names: dict[int, str]
+) -> tuple[str, str]:
+    """Return slot-order names and effective random-selection probabilities."""
+    names: list[str] = []
+    for ability_id in ability_values:
+        try:
+            names.append(ability_names[ability_id])
+        except KeyError as exc:
+            raise ValueError(f"missing English name for ability ID {ability_id}") from exc
+    counts = Counter(names)
+    effective = " / ".join(f"{name} ({counts[name]}/3)" for name in dict.fromkeys(names))
+    return " / ".join(names), f"One of the three ability slots is selected at random; effective abilities: {effective}"
 
 
 def trainer_class_label(trainer_id: int) -> str:
@@ -386,6 +420,7 @@ def build_rows(
     pokemon_members: list[bytes],
     trainer_by_set: dict[int, list[int]],
     trainer_metadata: dict[int, dict[str, str]],
+    ability_names: dict[int, str],
     table_rows: list[dict[str, object]],
     personal: dict[tuple[int, int], bytes],
 ) -> list[dict[str, object]]:
@@ -456,6 +491,7 @@ def build_rows(
         personal_record = personal[(species_id, int(record["form"]))]
         sex_vector = personal_record[0x12]
         ability_values = tuple(personal_record[0x18:0x1B])
+        ability_slots, ability_rule = ability_labels(ability_values, ability_names)
         friendship = 0 if "Frustration" in move_labels else 255
         row: dict[str, object] = {
             "tier": tier,
@@ -472,16 +508,13 @@ def build_rows(
             **ev_fields,
             "player_ivs": "31 in every stat (Battle Agency/rental constructor)",
             "opponent_ivs": opponent_ivs,
-            "ability_rule": (
-                "Random ability index 0/1/2 "
-                f"(personal slots {ability_values[0]}/{ability_values[1]}/{ability_values[2]})"
-            ),
+            "ability_rule": ability_rule,
             "gender_rule": sex_rule(sex_vector),
             "friendship": friendship,
             "availability": availability,
             "trainer_ids": ",".join(str(trainer_id) for trainer_id in trainer_ids),
             "trainer_id_classes": "; ".join(class_labels),
-            "ability_slots": "/".join(str(value) for value in ability_values),
+            "ability_slots": ability_slots,
             "sex_vector": sex_vector,
         }
         output.append(row)
@@ -499,6 +532,12 @@ def main() -> None:
         type=Path,
         default=TRAINER_METADATA_DEFAULT,
         help="decoded retail trainer names/categories CSV",
+    )
+    parser.add_argument(
+        "--ability-metadata",
+        type=Path,
+        default=ABILITY_METADATA_DEFAULT,
+        help="Gen VII internal ability-ID name mapping JSON",
     )
     parser.add_argument(
         "--output",
@@ -536,7 +575,15 @@ def main() -> None:
     personal = personal_data(args.rom, records)
     trainer_by_set = parse_trainer_members(trainer_members)
     trainer_metadata = load_trainer_metadata(args.trainer_metadata)
-    rows = build_rows(pokemon_members, trainer_by_set, trainer_metadata, table_rows, personal)
+    ability_names = load_ability_names(args.ability_metadata)
+    rows = build_rows(
+        pokemon_members,
+        trainer_by_set,
+        trainer_metadata,
+        ability_names,
+        table_rows,
+        personal,
+    )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", newline="", encoding="utf-8") as handle:
@@ -555,6 +602,8 @@ def main() -> None:
         "expected_trainer_garc_sha256": TRAINER_GARC_SHA256,
         "trainer_metadata_source": str(args.trainer_metadata),
         "trainer_metadata_sha256": sha256(args.trainer_metadata.read_bytes()),
+        "ability_metadata_source": str(args.ability_metadata),
+        "ability_metadata_sha256": sha256(args.ability_metadata.read_bytes()),
         "personal_romfs_path": "/a/0/1/7",
         "personal_record_size": 84,
         "personal_species_record_count": 976,
@@ -569,7 +618,7 @@ def main() -> None:
             "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
             "The set record stores no IV field. NPC opponent IVs come from the selecting trainer ID; Battle Agency/rental construction uses 31 in every stat.",
             "The game has no per-set weak/strong flag. tier records the decoded trainer name/category labels that reference each set; trainer_id_classes retains the trainer-ID constructor classes.",
-            "Ability slots are numeric personal-data IDs because the set record stores an ability index, not an English ability name.",
+            "ability_slots shows English names in personal-data slot order; ability_rule groups duplicate slots into their effective 1/3-based selection probabilities.",
         ],
     }
     args.provenance.parent.mkdir(parents=True, exist_ok=True)
