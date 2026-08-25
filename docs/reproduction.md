@@ -183,6 +183,24 @@ exclusions, and the two residual value/type proofs. It also rescans and
 classifies all 325 executable mask-valued candidates. Its committed result is recorded in
 [`recovered/retail-ai-writer-whole-program.json`](../recovered/retail-ai-writer-whole-program.json).
 
+The source-side alias/copy lift can be run independently while recovering or
+auditing the external ROM inputs. It checks the recorder/network aggregate
+operations (full-record copies, file/network ingress, buffer zeroing, setter
+copies, and aggregate assignments) and fails closed on a new matching source
+operation:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-retail-ai-writer-whole-program.py \
+  --source-only \
+  --source-root /path/to/extracted-source \
+  --output /tmp/retail-ai-writer-source-only.json
+```
+
+This source-only report is a prerequisite, not the full theorem: it does not
+claim that every listed translation unit is present in the stripped retail
+image. The full command above must still pass its code/CRO fingerprints and
+candidate ledger before the binary theorem can be marked proved.
+
 The section-aware pass also leaves one real Thumb same-offset collision at
 `.code:0x688`. Verify its surrounding object behavior with:
 

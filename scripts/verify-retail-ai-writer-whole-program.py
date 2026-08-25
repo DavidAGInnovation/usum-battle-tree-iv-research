@@ -204,6 +204,18 @@ def line_hits(path: Path, pattern: str) -> list[dict[str, object]]:
     return rows
 
 
+def project_contains(source: Path, project: Path) -> None:
+    """Require a source file to be compiled by the named archived project."""
+    if not source.exists():
+        raise FileNotFoundError(source)
+    if not project.exists():
+        raise FileNotFoundError(project)
+    project_text = project.read_text(encoding="utf-8-sig", errors="replace")
+    source_rel = source.relative_to(project.parent).as_posix().replace("/", "\\")
+    if source_rel not in project_text:
+        raise ValueError(f"{source_rel} is not listed in {project}")
+
+
 def source_inventory(source_root: Path) -> dict[str, object]:
     """Inventory every source ``ai_bit`` writer and tie it to a project."""
     prog = source_root / "niji_project/prog"
@@ -340,14 +352,8 @@ def source_inventory(source_root: Path) -> dict[str, object]:
 
     rows = []
     for name, (source, project, module, pattern, debug_only) in required.items():
-        if not source.exists():
-            raise FileNotFoundError(source)
-        if not project.exists():
-            raise FileNotFoundError(project)
+        project_contains(source, project)
         project_text = project.read_text(encoding="utf-8-sig", errors="replace")
-        source_rel = source.relative_to(project.parent).as_posix().replace("/", "\\")
-        if source_rel not in project_text:
-            raise ValueError(f"{source_rel} is not listed in {project}")
         hits = line_hits(source, pattern)
         for hit in hits:
             hit["file"] = source.relative_to(source_root).as_posix()
@@ -491,52 +497,85 @@ def source_type_flow(source_root: Path) -> dict[str, object]:
     serialized_edge_checks = {
         "Serialize_definition": (
             prog / "Battle/source/battle_SetupTrainer.cpp",
+            prog / "Battle/BattleStatic.vcxproj",
             r"void BSP_TRAINER_DATA::Serialize\(",
+            1,
         ),
         "Serialize_network_call": (
             prog / "Battle/source/btl_net.cpp",
+            prog / "Battle/Battle.vcxproj",
             r"trData->Serialize\(\s*&sendData->base_data",
+            1,
         ),
         "Deserialize_definition": (
             prog / "Battle/source/battle_SetupTrainer.cpp",
+            prog / "Battle/BattleStatic.vcxproj",
             r"void BSP_TRAINER_DATA::Deserialize\(",
+            1,
         ),
         "Deserialize_network_call": (
             prog / "Battle/source/btl_mainmodule.cpp",
+            prog / "Battle/Battle.vcxproj",
             r"trData->Deserialize\(\s*&trSendData->base_data",
+            1,
         ),
         "ClearSerializeData_definition": (
             prog / "Battle/source/battle_SetupTrainer.cpp",
+            prog / "Battle/BattleStatic.vcxproj",
             r"void BSP_TRAINER_DATA::ClearSerializeData\(",
+            1,
+        ),
+        "Serialize_recorder_call": (
+            prog / "ExtSavedata/source/BattleRecorderSaveData.cpp",
+            prog / "ExtSavedata/ExtSavedata.vcxproj",
+            r"bsp->tr_data\[ i \]->Serialize\(\s*&mBattleRecData->upload.body.tr_data\[ i \]",
+            1,
+        ),
+        "Deserialize_recorder_calls": (
+            prog / "ExtSavedata/source/BattleRecorderSaveData.cpp",
+            prog / "ExtSavedata/ExtSavedata.vcxproj",
+            r"bsp->tr_data\[ i \]->Deserialize\(\s*&mBattleRecData->upload.body.tr_data\[ i \]",
+            2,
         ),
         "ClearSerializeData_recorder_call": (
             prog / "ExtSavedata/source/BattleRecorderSaveData.cpp",
+            prog / "ExtSavedata/ExtSavedata.vcxproj",
             r"BSP_TRAINER_DATA::ClearSerializeData\(",
+            1,
         ),
     }
     serialized_edges = []
-    for label, (path, pattern) in serialized_edge_checks.items():
-        if not path.exists():
-            raise FileNotFoundError(path)
+    for label, (path, project, pattern, expected_count) in serialized_edge_checks.items():
+        project_contains(path, project)
         hits = line_hits(path, pattern)
-        if len(hits) != 1:
-            raise ValueError(f"expected one {label} source edge, found {len(hits)}")
-        serialized_edges.append(
-            {
-                "edge": label,
-                "source": path.relative_to(source_root).as_posix(),
-                "line": hits[0]["line"],
-                "text": hits[0]["text"],
-            }
-        )
+        if len(hits) != expected_count:
+            raise ValueError(f"expected {expected_count} {label} source edge(s), found {len(hits)}")
+        for hit in hits:
+            serialized_edges.append(
+                {
+                    "edge": label,
+                    "source": path.relative_to(source_root).as_posix(),
+                    "project": project.relative_to(source_root).as_posix(),
+                    "line": hit["line"],
+                    "text": hit["text"],
+                    "effect": "writes or clears BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+                }
+            )
 
     main_project = prog / "Main/project/niji.vcxproj"
     main_text = main_project.read_text(encoding="utf-8-sig", errors="replace")
     required_refs = {
+        "Battle": r"..\..\Battle\Battle.vcxproj",
         "BattleStatic": r"..\..\Battle\BattleStatic.vcxproj",
         "FieldStatic": r"..\..\Field\FieldStatic\FieldStatic.vcxproj",
         "Trainer": r"..\..\Trainer\Trainer\Trainer.vcxproj",
         "ExtSavedata": r"..\..\ExtSavedata\ExtSavedata.vcxproj",
+        "BattleSpot": r"..\..\NetApp\BattleSpot\BattleSpot.vcxproj",
+        "BattleVideoPlayer": r"..\..\NetApp\BattleVideoPlayer\BattleVideoPlayer.vcxproj",
+        "BattleVideoRecording": r"..\..\NetApp\BattleVideoRecording\BattleVideoRecording.vcxproj",
+        "NetAppLib": r"..\..\NetStatic\NetAppLib\NetAppLib.vcxproj",
+        "NetEvent": r"..\..\NetStatic\NetEvent\NetEvent.vcxproj",
+        "NetLib": r"..\..\NetStatic\NetLib\NetLib.vcxproj",
     }
     for label, ref in required_refs.items():
         if ref not in main_text:
@@ -548,6 +587,14 @@ def source_type_flow(source_root: Path) -> dict[str, object]:
         "FieldStatic": prog / "Field/FieldStatic",
         "Trainer": prog / "Trainer/Trainer",
     }
+    alias_roots = {
+        "BattleSpot": prog / "NetApp/BattleSpot",
+        "BattleVideoPlayer": prog / "NetApp/BattleVideoPlayer",
+        "BattleVideoRecording": prog / "NetApp/BattleVideoRecording",
+        "NetAppLib": prog / "NetStatic/NetAppLib",
+        "NetEvent": prog / "NetStatic/NetEvent",
+        "NetLib": prog / "NetStatic/NetLib",
+    }
     type_files = []
     for root in canonical_roots.values():
         for path in sorted(root.rglob("*")):
@@ -556,6 +603,20 @@ def source_type_flow(source_root: Path) -> dict[str, object]:
             text = path.read_text(encoding="utf-8-sig", errors="replace")
             if re.search(r"BSP_TRAINER_DATA|MainModule::TRAINER_DATA|SetAIBit|\bai_bit\b|\baibit\b", text):
                 type_files.append(path.relative_to(source_root).as_posix())
+
+    alias_files = []
+    for root in alias_roots.values():
+        for path in sorted(root.rglob("*")):
+            if path.suffix.lower() not in {".cpp", ".h", ".hpp", ".inl"}:
+                continue
+            text = path.read_text(encoding="utf-8-sig", errors="replace")
+            if re.search(
+                r"BATTLE_REC_DATA|BATTLE_REC_UPLOAD_DATA|GetBattleRecDataDirect|"
+                r"SetBattleRecUploadData|GetDownloadBufferPtr|mBattleRecData|"
+                r"tr_data\s*\[",
+                text,
+            ):
+                alias_files.append(path.relative_to(source_root).as_posix())
 
     return {
         "copy_assignment_guard": True,
@@ -570,6 +631,210 @@ def source_type_flow(source_root: Path) -> dict[str, object]:
         "main_project_references": sorted(required_refs),
         "canonical_type_roots": sorted(canonical_roots),
         "canonical_type_source_files": type_files,
+        "alias_flow_roots": sorted(alias_roots),
+        "alias_flow_source_files": alias_files,
+    }
+
+
+def source_aggregate_flow(source_root: Path) -> dict[str, object]:
+    """Inventory raw aggregate/network writers of ``SERIALIZE_DATA::ai_bit``.
+
+    The serialized trainer records live inside ``BATTLE_REC_BODY``.  A source
+    grep limited to ``ai_bit`` member syntax therefore misses recorder
+    ``memcpy``/file-read paths, network download buffers, and aggregate
+    assignment.  This manifest checks every such writer in the retail-linked
+    recorder/network projects and fails closed on a new matching operation.
+    """
+    prog = source_root / "niji_project/prog"
+
+    # path, project, regex, expected count, semantic effect
+    checks = {
+        "serialized_buffer_zeroing": (
+            prog / "Battle/source/battle_SetupTrainer.cpp",
+            prog / "Battle/BattleStatic.vcxproj",
+            r"gfl2::std::MemClear\(\s*serializedData,\s*sizeof\(BSP_TRAINER_DATA::SERIALIZE_DATA\)\s*\)",
+            1,
+            "zeroes the complete SERIALIZE_DATA aggregate, including ai_bit (+0x10)",
+        ),
+        "recorder_full_record_memcpy": (
+            prog / "ExtSavedata/source/BattleRecorderSaveData.cpp",
+            prog / "ExtSavedata/ExtSavedata.vcxproj",
+            r"::std::memcpy\([^;]*(?:recDataTemp|mBattleRecData)[^;]*sizeof\(\s*BATTLE_REC_DATA\s*\)",
+            7,
+            "copies BATTLE_REC_DATA, whose upload.body.tr_data[] contains SERIALIZE_DATA::ai_bit (+0x10)",
+        ),
+        "recorder_upload_memcpy": (
+            prog / "ExtSavedata/source/BattleRecorderSaveData.cpp",
+            prog / "ExtSavedata/ExtSavedata.vcxproj",
+            r"::std::memcpy\(\s*&mBattleRecData->upload\s*,\s*upload\s*,\s*sizeof\(\s*BATTLE_REC_UPLOAD_DATA\s*\)\s*\)",
+            1,
+            "copies BATTLE_REC_UPLOAD_DATA, including serialized trainer records",
+        ),
+        "recorder_file_read": (
+            prog / "ExtSavedata/source/BattleRecorderSaveData.cpp",
+            prog / "ExtSavedata/ExtSavedata.vcxproj",
+            r"xess->ReadFile\(\s*EXTID_BATTLEVIDEO,\s*index,\s*mBattleRecData,\s*sizeof\(\s*BATTLE_REC_DATA\s*\)\s*\)",
+            2,
+            "external file read writes the complete BATTLE_REC_DATA aggregate",
+        ),
+        "upload_request_full_record_memcpy": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoUploadRequestSequence.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"std::memcpy\( m_requestParam\.pBattleRecorderSaveData->GetBattleRecDataDirect\(\) [^;]*BATTLE_REC_DATA\)",
+            2,
+            "network upload response copies a complete BATTLE_REC_DATA into the recorder object",
+        ),
+        "delete_request_full_record_memcpy": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDeleteRequestSequence.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"std::memcpy\( m_requestParam\.pBattleRecorderSaveData->GetBattleRecDataDirect\(\) [^;]*BATTLE_REC_DATA\)",
+            1,
+            "delete/cancel response copies a complete BATTLE_REC_DATA into the recorder object",
+        ),
+        "sync_request_full_record_memcpy": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoSyncRequestSequence.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"std::memcpy\( m_requestParam\.pBattleRecorderSaveData->GetBattleRecDataDirect\(\) [^;]*BATTLE_REC_DATA\)",
+            1,
+            "video-sync response copies a complete BATTLE_REC_DATA into the recorder object",
+        ),
+        "event_set_upload_copy": (
+            prog / "NetStatic/NetEvent/source/BattleVideoPlayerEvent.cpp",
+            prog / "NetStatic/NetEvent/NetEvent.vcxproj",
+            r"pSaveData->SetBattleRecUploadData\( &m_appParam\.out\.pActiveVideoData->sdCardData\.upload \)",
+            1,
+            "copies an upload aggregate containing serialized trainer records",
+        ),
+        "upload_set_upload_copy": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoUploadRequestSequence.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"m_requestParam\.pBattleRecorderSaveData->SetBattleRecUploadData\( &m_requestParam\.pUploadData->upload \)",
+            2,
+            "copies an upload aggregate containing serialized trainer records",
+        ),
+        "delete_set_upload_copy": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDeleteRequestSequence.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"m_requestParam\.pBattleRecorderSaveData->SetBattleRecUploadData\( &m_requestParam\.pCancelData->upload \)",
+            1,
+            "copies an upload aggregate containing serialized trainer records",
+        ),
+        "sync_set_upload_copy": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoSyncRequestSequence.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"m_requestParam\.pBattleRecorderSaveData->SetBattleRecUploadData\( &pSaveVideoData->sdCardData\.upload \)",
+            1,
+            "copies an upload aggregate containing serialized trainer records",
+        ),
+        "video_upload_assignment": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/BattleVideoPlayerVideoDataManager.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"pOutputVideoData->sdCardData\.upload\s*=\s*\*pUploadData",
+            1,
+            "aggregate assignment copies serialized trainer records into VIDEO_DATA",
+        ),
+        "request_client_download_buffer_zero": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoRequestClient.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"std::memset\( m_pDownloadBuffer , 0 , sizeof\(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA\)",
+            1,
+            "zero-initializes the upload buffer, including serialized trainer ai_bit",
+        ),
+        "download_buffer_zero": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDownloadRequestSequence.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"::std::memset\( m_requestParam\.pClient->GetDownloadBufferPtr\(\) , 0 , sizeof\(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA\)",
+            1,
+            "zero-initializes the downloaded upload buffer, including serialized trainer ai_bit",
+        ),
+        "download_buffer_external_fill": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/RequestSequence/BattleVideoDownloadRequestSequence.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"dataStoreClient->DownloadData\( dataId, m_requestParam\.pClient->GetDownloadBufferPtr\(\) , sizeof\(ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA\)",
+            1,
+            "external network download writes the upload buffer, including serialized trainer ai_bit",
+        ),
+        "video_static_dummy_zero": (
+            prog / "NetStatic/NetAppLib/source/BattleVideoPlayer/BattleVideoPlayerVideoDataManager.cpp",
+            prog / "NetStatic/NetAppLib/NetAppLib.vcxproj",
+            r"static ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA aDummyData\[ 10 \];",
+            1,
+            "static-duration aggregate is zero-initialized, including serialized trainer ai_bit",
+        ),
+    }
+
+    rows = []
+    for label, (source, project, pattern, expected_count, effect) in checks.items():
+        project_contains(source, project)
+        hits = line_hits(source, pattern)
+        if len(hits) != expected_count:
+            raise ValueError(f"expected {expected_count} {label} edge(s), found {len(hits)}")
+        for hit in hits:
+            rows.append(
+                {
+                    "edge": label,
+                    "source": source.relative_to(source_root).as_posix(),
+                    "project": project.relative_to(source_root).as_posix(),
+                    "line": hit["line"],
+                    "text": hit["text"],
+                    "effect": effect,
+                    "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+                }
+            )
+
+    # Scan every raw operation that can write an aggregate or serialized field.
+    # Declarations, const reads, and file/network exports are intentionally
+    # absent; a new operation touching these types fails closed for review.
+    candidate_patterns = [
+        r"(?:(?:::)?std::)?(?:memcpy|memmove)\([^;]*\b(?:BSP_TRAINER_DATA|SERIALIZE_DATA|BATTLE_REC_DATA|BATTLE_REC_UPLOAD_DATA)\b",
+        r"(?:(?:::)?std::)?(?:memset|MemClear)\([^;]*\b(?:BSP_TRAINER_DATA|SERIALIZE_DATA|BATTLE_REC_DATA|BATTLE_REC_UPLOAD_DATA)\b",
+        r"\b(?:ReadFile|DownloadData)\([^;]*\b(?:BSP_TRAINER_DATA|SERIALIZE_DATA|BATTLE_REC_DATA|BATTLE_REC_UPLOAD_DATA)\b",
+        r"(?:(?:::)?std::)?(?:memcpy|memmove)\([^;]*(?:GetBattleRecDataDirect|sizeof\([^)]*BATTLE_REC_DATA\))",
+        r"(?:(?:::)?std::)?(?:memcpy|memmove)\(\s*&mBattleRecData->upload\s*,\s*upload\s*,\s*sizeof\(\s*BATTLE_REC_UPLOAD_DATA\s*\)",
+        r"\bReadFile\([^;]*mBattleRecData[^;]*BATTLE_REC_DATA",
+        r"\bDownloadData\([^;]*GetDownloadBufferPtr\([^;]*BATTLE_REC_UPLOAD_DATA",
+        r"(?:(?:::)?std::)?(?:memset|MemClear)\([^;]*(?:m_pDownloadBuffer|GetDownloadBufferPtr\(\))[^;]*BATTLE_REC_UPLOAD_DATA",
+        r"(?:(?:::)?std::)?(?:memset|MemClear)\([^;]*mBattleRecData[^;]*(?:BATTLE_REC_DATA|BATTLE_REC_UPLOAD_DATA)",
+        r"(?:->|\.)SetBattleRecUploadData\s*\(",
+        r"\.upload\s*=\s*\*pUploadData",
+        r"static ExtSavedata::BattleRecorderSaveData::BATTLE_REC_UPLOAD_DATA aDummyData",
+    ]
+    candidate_hits = []
+    for path in prog.rglob("*"):
+        if path.suffix.lower() not in {".cpp", ".h", ".hpp", ".inl"}:
+            continue
+        text = path.read_text(encoding="utf-8-sig", errors="replace")
+        relative = path.relative_to(source_root).as_posix()
+        seen = set()
+        for pattern in candidate_patterns:
+            for match in re.finditer(pattern, text):
+                line_number = text.count("\n", 0, match.start()) + 1
+                key = (relative, line_number)
+                if key in seen:
+                    continue
+                seen.add(key)
+                end = text.find(";", match.start())
+                statement = text[match.start() : (end + 1 if end >= 0 else len(text))]
+                candidate_hits.append(
+                    {
+                        "source": relative,
+                        "line": line_number,
+                        "text": " ".join(statement.split()),
+                    }
+                )
+    known = {(row["source"], row["line"]) for row in rows}
+    unknown = [row for row in candidate_hits if (row["source"], row["line"]) not in known]
+    if unknown:
+        raise ValueError(f"unclassified serialized aggregate writer(s): {unknown}")
+    if len(candidate_hits) != len(rows):
+        raise ValueError("serialized aggregate writer manifest does not cover the source scan")
+
+    return {
+        "target_field": "BSP_TRAINER_DATA::SERIALIZE_DATA::ai_bit (+0x10)",
+        "edges": rows,
+        "edge_count": len(rows),
+        "unclassified_edges": unknown,
+        "all_source_aggregate_writers_classified": True,
     }
 
 
@@ -754,14 +1019,48 @@ def verify_cro_modules(cro_dir: Path) -> dict[str, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("code", type=Path)
-    parser.add_argument("cro_dir", type=Path)
+    parser.add_argument("code", type=Path, nargs="?")
+    parser.add_argument("cro_dir", type=Path, nargs="?")
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--source-only",
+        action="store_true",
+        help="run the source/type/aggregate lift without retail code and CRO inputs",
+    )
     args = parser.parse_args()
 
+    if not args.source_only and (args.code is None or args.cro_dir is None):
+        parser.error("code and cro_dir are required unless --source-only is set")
     source = source_inventory(args.source_root)
     type_flow = source_type_flow(args.source_root)
+    aggregate_flow = source_aggregate_flow(args.source_root)
+    if args.source_only:
+        result = {
+            "artifact": "source-complete alias/copy lift for retail ai_bit writers",
+            "inputs": {
+                "source_root": "<source-root>",
+                "source_commit": source["source_commit"],
+            },
+            "source_inventory": source,
+            "source_type_flow": type_flow,
+            "source_aggregate_flow": aggregate_flow,
+            "theorem": {
+                "source_writer_completeness": True,
+                "binary_inclusion_proved": False,
+                "scope": "source topology and aggregate field flow only; retail binary fingerprints are not run",
+                "all_source_aggregate_writers_classified": aggregate_flow[
+                    "all_source_aggregate_writers_classified"
+                ],
+                "unresolved_source_writers": [],
+            },
+        }
+        encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
+        if args.output:
+            args.output.write_text(encoded)
+        else:
+            print(encoded, end="")
+        return
     main_fingerprint = verify_deserialize(args.code.read_bytes())
     battle_fingerprint = verify_battle_functions(args.cro_dir / "Battle.cro")
     # Reuse the independently maintained residual proof rather than weakening
@@ -793,6 +1092,7 @@ def main() -> None:
         },
         "source_inventory": source,
         "source_type_flow": type_flow,
+        "source_aggregate_flow": aggregate_flow,
         "binary_fingerprints": {
             "deserialize": main_fingerprint,
             "battle_cro_trainer_paths": battle_fingerprint,
@@ -814,6 +1114,7 @@ def main() -> None:
             "basis": [
                 "The complete archived source inventory has no unclassified SetAIBit call or direct ai_bit member assignment, and records Serialize/ClearSerializeData for the intermediate serialized field.",
                 "The serialized edge inventory covers Serialize, Deserialize, ClearSerializeData, their enabled network/recorder call sites, and the disabled whole-object copy alternative.",
+                "The aggregate-flow inventory covers recorder/network memcpy, file-read, download-buffer, memset, and aggregate-assignment writers of SERIALIZE_DATA::ai_bit, with zero unclassified source operations.",
                 "BattleStatic::BSP_TRAINER_DATA::Deserialize is verified at .code:0x61724 as SERIALIZE_DATA +0x10 -> CORE_DATA +0x4.",
                 "Battle.cro MainModule::trainerParam_StoreNPCTrainer is verified at 0x8a25c as CORE_DATA +0x4 -> TRAINER_DATA +0x1c.",
                 "Battle.cro trainerParam_StoreCore is verified at 0x8a414 as TRAINER_DATA +0x1c = 0.",
