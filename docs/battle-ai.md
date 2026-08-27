@@ -5,6 +5,16 @@ about the Battle Tree battle AI. It separates the engine behavior that is
 directly visible in C++ from the tactical rules stored in the retail Pawn/AMX
 programs.
 
+The companion [full source-level specification](battle-ai-full-spec.md) now
+contains normalized derived listings for every recovered Pawn function, the
+exact retail-only Intrude and Royal AMX listings, the shared Pawn score contract,
+and the complete 124-command native handler index.
+The companion [score-rule index](battle-ai-score-rules.md) indexes the complete
+`main`-reachable score-influence closure for every active script: direct score
+writers, dispatchers, callers, and non-scoring predicates/helpers. Each entry
+retains its complete guarded body, making the conditions for each adjustment
+easier to follow without changing the authoritative normalized listings.
+
 ## Bottom line
 
 For the ordinary Battle Tree trainer path, the constructor-side base mask is:

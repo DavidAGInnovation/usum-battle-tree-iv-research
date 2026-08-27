@@ -28,3 +28,5 @@
 .DS_Store
 .idea/
 .vscode/
+# Python bytecode generated while running repository verification scripts.
+scripts/__pycache__/
