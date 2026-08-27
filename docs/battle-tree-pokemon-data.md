@@ -5,8 +5,6 @@ The machine-readable catalogue is [data/battle-tree-pokemon-builds.csv](../data/
 - records `0–995`: the 996 standard USUM/shared Battle Tree configurations;
 - records `996–998`: three Battle Agency tutorial configurations that are present in the retail archive but omitted from the public Battle Tree list.
 
-The public reference layout is the same compact build shape used by the [BW2 PWT rental-build CSV](https://raw.githubusercontent.com/DavidAGInnovation/bw2-pwt-research/main/data/rental-pokemon-builds.csv): tier, species, form, item, four moves, nature, EV spread, and IV context. The tournament column is intentionally omitted. The USUM file adds provenance and constructor fields so that the game rules are not lost in a presentation-oriented table.
-
 ## What is authoritative
 
 The set rows come from retail RomFS `/a/2/8/1`, the Battle Tree Pokémon GARC. The source declaration is `BINST_POKEMON_ROM_DATA` in `BattleInstData.h`: species, four move IDs, an EV bit mask, nature ID, item ID, and form number. It has no IV field, ability field, gender field, or friendship field. The source cross-check uses snapshot commit `3f7c94593424a6afddcd9f92a293a3786c9f6425`; the exact source paths and archive hashes are recorded in the provenance JSON.
