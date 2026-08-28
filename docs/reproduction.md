@@ -2,6 +2,34 @@
 
 This guide uses external ROM, executable, and source paths as inputs. Do not copy the ROM, the extracted executable, or the source archive into the repository.
 
+## Environment and quick verification
+
+Install the pinned Python dependencies before running the scripts:
+
+```sh
+python3 -m pip install -r requirements.txt
+```
+
+For linting as well, install `requirements-dev.txt` and run `ruff check scripts`.
+
+The repository-only check validates the committed catalogue, metadata,
+derived documents, JSON artifacts, and local links:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-repository.py
+```
+
+With the ROM, it also extracts the retail inputs and runs the binary proof
+checks:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-repository.py \
+  --rom "/path/to/Pokemon Ultra Sun (USA) Decrypted.3ds"
+```
+
+Install radare2 separately if you want interactive disassembly; it is not a
+Python dependency.
+
 ## Inputs
 
 Set these shell variables to local copies of the required files:
@@ -144,6 +172,18 @@ the three direct source-mapped writers in the retail `.code` (`0x58260`,
 `0x582d4`, and `0x59370`). The source-complete verifier then lifts all
 aliased/copied writers and PM_DEBUG exclusions. The committed summary of
 the full retail run is [`recovered/retail-ai-mask-provenance.json`](../recovered/retail-ai-mask-provenance.json).
+
+Refresh that reviewed summary from the raw scanner output with:
+
+```sh
+python3 scripts/generate-retail-ai-mask-provenance.py \
+  --audit /tmp/usum-ai-mask-writers.json \
+  --output recovered/retail-ai-mask-provenance.json
+```
+
+The refresh preserves the reviewed source/type closure metadata and replaces
+the scanner-derived counts, hashes, and relocation totals, so the committed
+summary has an explicit regeneration path.
 
 The final disposition of the former proof-boundary items is recorded in
 [proof-closure.md](proof-closure.md).

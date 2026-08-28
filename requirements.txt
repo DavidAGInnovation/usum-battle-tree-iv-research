@@ -1,0 +1,4 @@
+# Runtime dependencies for the repository's Python scripts.
+beautifulsoup4==4.14.2
+capstone==5.0.9
+pyctr==0.7.6

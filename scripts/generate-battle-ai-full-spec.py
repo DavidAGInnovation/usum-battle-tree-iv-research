@@ -404,7 +404,6 @@ def render_script(row: dict[str, object], source_dir: Path) -> list[str]:
     filename = str(row["file"])
     path = source_dir / filename
     functions = parse_functions(path)
-    all_names = {function.name for function in functions}
     out = [f"## {row['role']} (`{filename}`)", ""]
     out.append(f"Judge: **{row['judge']}**. Mask bit: `{row['mask_bit']}`.")
     out.append(f"Source SHA-256: `{row['sha256']}`; {row['line_count']} lines; {row['function_count']} functions.")

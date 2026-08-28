@@ -85,6 +85,14 @@ The range rule itself is:
 
 Read [docs/reproduction.md](docs/reproduction.md) for the address map, raw offsets, and commands that operate on an external extracted `.code` file. Large/proprietary artifacts are intentionally kept out of Git; `.gitignore` blocks common ROM, executable, and archive extensions.
 
+The pinned Python runtime dependencies are in [requirements.txt](requirements.txt). The repository-only consistency check is:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/verify-repository.py
+```
+
+Pass `--rom "/path/to/Pokemon Ultra Sun (USA) Decrypted.3ds"` to that command to include retail extraction and binary proof checks.
+
 The battle-AI architecture and the current retail AMX evidence are documented
 in [docs/battle-ai.md](docs/battle-ai.md). That note distinguishes the proven
 score-selection engine from the static per-script AMX command and score audit,

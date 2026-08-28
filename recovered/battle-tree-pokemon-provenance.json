@@ -5,6 +5,7 @@
   "csv_rows": 999,
   "expected_pokemon_garc_sha256": "ba5546094bdace0cd3a8bc52040b1e993c3e062c8763e58bf2ce7fce6775af75",
   "expected_trainer_garc_sha256": "56e35c8f448283b17952557c500f6ee4a7e2f5cb37f8f9bcd2a0f8b90a7e90dc",
+  "expected_personal_garc_sha256": "463069f2eb69ef77d613c67be6eb7585b0533e5cb32b73dd406fec92960181b6",
   "legal_set_count": 996,
   "notes": [
     "The retail set record stores a six-stat EV bit mask, not six EV integers; the CSV expands the constructor result (510/count, capped at 255).",
@@ -13,6 +14,7 @@
     "ability_slots shows English names in personal-data slot order; ability_rule groups duplicate slots into their effective 1/3-based selection probabilities."
   ],
   "personal_record_size": 84,
+  "personal_garc_sha256": "463069f2eb69ef77d613c67be6eb7585b0533e5cb32b73dd406fec92960181b6",
   "personal_romfs_path": "/a/0/1/7",
   "personal_species_record_count": 976,
   "pokemon_garc_sha256": "ba5546094bdace0cd3a8bc52040b1e993c3e062c8763e58bf2ce7fce6775af75",

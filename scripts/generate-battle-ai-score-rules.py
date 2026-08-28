@@ -89,8 +89,6 @@ COMMAND_TOPICS = {
     "CMD_IFN_HAVE_WAZA": "available moves",
     "CMD_IFN_HAVE_WAZA_SEQNO": "available move sequences",
     "CMD_IFN_POKESICK": "status conditions",
-    "CMD_IFN_SIDEEFF": "side effects",
-    "CMD_IFN_WAZASICK": "move lock/status state",
 }
 
 DESCRIPTIONS = {

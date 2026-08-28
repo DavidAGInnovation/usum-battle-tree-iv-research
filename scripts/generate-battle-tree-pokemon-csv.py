@@ -10,7 +10,8 @@ discarding them.
 
 The ROM and the page HTML are external inputs.  Nothing proprietary is copied
 into the repository.  Either pass ``--rom`` (a decrypted 3DS image) or pass
-already extracted GARC files with ``--pokemon-garc`` and ``--trainer-garc``.
+already extracted GARC files with ``--pokemon-garc``, ``--trainer-garc``, and
+``--personal-garc``.
 The ROM path is normally the most reproducible route for this project.
 """
 
@@ -37,6 +38,7 @@ POKEMON_ROMFS_PATH = "/a/2/8/1"
 TRAINER_ROMFS_PATH = "/a/2/8/2"
 POKEMON_GARC_SHA256 = "ba5546094bdace0cd3a8bc52040b1e993c3e062c8763e58bf2ce7fce6775af75"
 TRAINER_GARC_SHA256 = "56e35c8f448283b17952557c500f6ee4a7e2f5cb37f8f9bcd2a0f8b90a7e90dc"
+PERSONAL_GARC_SHA256 = "463069f2eb69ef77d613c67be6eb7585b0533e5cb32b73dd406fec92960181b6"
 SOURCE_SNAPSHOT_COMMIT = "3f7c94593424a6afddcd9f92a293a3786c9f6425"
 TRAINER_METADATA_DEFAULT = Path("data/battle-tree-trainer-ids.csv")
 ABILITY_METADATA_DEFAULT = Path("data/battle-tree-ability-names.json")
@@ -136,9 +138,27 @@ def read_romfs_path(rom: Path, path: str) -> bytes:
         handle.close()
 
 
+def verify_hash(payload: bytes, expected: str, label: str) -> str:
+    actual = sha256(payload)
+    if actual != expected:
+        raise ValueError(
+            f"unexpected {label} SHA-256: {actual} (expected {expected})"
+        )
+    return actual
+
+
 def load_table_html(path: Path | None) -> tuple[bytes, str]:
     if path is None:
-        with urllib.request.urlopen(POKEMON_TABLE_URL, timeout=60) as response:
+        request = urllib.request.Request(
+            POKEMON_TABLE_URL,
+            headers={
+                "User-Agent": (
+                    "Mozilla/5.0 (compatible; USUM-Battle-Tree-Research/1.0; "
+                    "+https://github.com/)"
+                )
+            },
+        )
+        with urllib.request.urlopen(request, timeout=60) as response:
             payload = response.read()
         return payload, POKEMON_TABLE_URL
     payload = path.read_bytes()
@@ -373,9 +393,10 @@ def sex_rule(sex_vector: int) -> str:
     return f"PID-derived species ratio (sex_vector={sex_vector})"
 
 
-def personal_data(rom: Path, records: list[dict[str, int | tuple[int, ...]]]) -> dict[tuple[int, int], bytes]:
+def personal_data(
+    payload: bytes, records: list[dict[str, int | tuple[int, ...]]]
+) -> dict[tuple[int, int], bytes]:
     """Read the aggregate 84-byte Gen VII personal-data member."""
-    payload = read_romfs_path(rom, "/a/0/1/7")
     members = parse_garc_members(payload)
     if len(members) != 977 or len(members[-1]) != 976 * 84:
         raise ValueError("unexpected USUM personal-data archive layout")
@@ -532,6 +553,11 @@ def main() -> None:
     parser.add_argument("--rom", type=Path, help="decrypted US retail .3ds image")
     parser.add_argument("--pokemon-garc", type=Path, help="extracted battle_tree_poke GARC")
     parser.add_argument("--trainer-garc", type=Path, help="extracted battle_tree_trainer GARC")
+    parser.add_argument(
+        "--personal-garc",
+        type=Path,
+        help="extracted personal-data GARC (required with the other GARC inputs)",
+    )
     parser.add_argument("--pokemon-html", type=Path, help="saved Bulbapedia Pokémon table HTML")
     parser.add_argument(
         "--trainer-metadata",
@@ -556,8 +582,13 @@ def main() -> None:
         default=Path("recovered/battle-tree-pokemon-provenance.json"),
     )
     args = parser.parse_args()
-    if args.rom is None and (args.pokemon_garc is None or args.trainer_garc is None):
-        parser.error("pass --rom, or pass both --pokemon-garc and --trainer-garc")
+    garc_args = (args.pokemon_garc, args.trainer_garc, args.personal_garc)
+    if args.rom is None and any(path is None for path in garc_args):
+        parser.error(
+            "pass --rom, or pass --pokemon-garc, --trainer-garc, and --personal-garc"
+        )
+    if args.rom is not None and any(path is not None for path in garc_args):
+        parser.error("--rom cannot be combined with extracted GARC inputs")
 
     table_payload, table_source = load_table_html(args.pokemon_html)
     table_rows = parse_pokemon_table(table_payload)
@@ -565,20 +596,23 @@ def main() -> None:
     if args.rom is not None:
         pokemon_payload = read_romfs_path(args.rom, POKEMON_ROMFS_PATH)
         trainer_payload = read_romfs_path(args.rom, TRAINER_ROMFS_PATH)
+        personal_payload = read_romfs_path(args.rom, "/a/0/1/7")
     else:
         pokemon_payload = args.pokemon_garc.read_bytes()
         trainer_payload = args.trainer_garc.read_bytes()
+        personal_payload = args.personal_garc.read_bytes()
+    verify_hash(pokemon_payload, POKEMON_GARC_SHA256, "Battle Tree Pokémon GARC")
+    verify_hash(trainer_payload, TRAINER_GARC_SHA256, "Battle Tree trainer GARC")
+    verify_hash(personal_payload, PERSONAL_GARC_SHA256, "personal-data GARC")
     pokemon_members = parse_garc_members(pokemon_payload)
     trainer_members = parse_garc_members(trainer_payload)
     if len(pokemon_members) != ARCHIVE_SET_COUNT:
         raise ValueError(f"expected {ARCHIVE_SET_COUNT} Battle Tree Pokémon members")
     if len(trainer_members) != 210:
-        raise ValueError(f"expected 210 Battle Tree trainer members")
+        raise ValueError("expected 210 Battle Tree trainer members")
 
     records = [decode_pokemon_record(member) for member in pokemon_members]
-    if args.rom is None:
-        raise ValueError("--rom is required to read the exact personal-data archive")
-    personal = personal_data(args.rom, records)
+    personal = personal_data(personal_payload, records)
     trainer_by_set = parse_trainer_members(trainer_members)
     trainer_metadata = load_trainer_metadata(args.trainer_metadata)
     ability_names = load_ability_names(args.ability_metadata)
@@ -611,6 +645,8 @@ def main() -> None:
         "ability_metadata_source": str(args.ability_metadata),
         "ability_metadata_sha256": sha256(args.ability_metadata.read_bytes()),
         "personal_romfs_path": "/a/0/1/7",
+        "personal_garc_sha256": sha256(personal_payload),
+        "expected_personal_garc_sha256": PERSONAL_GARC_SHA256,
         "personal_record_size": 84,
         "personal_species_record_count": 976,
         "source_snapshot_commit": SOURCE_SNAPSHOT_COMMIT,
